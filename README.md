@@ -41,6 +41,7 @@ Documentation content is in `src/content/docs/docs/`, served under
 `/docs/`. See `CLAUDE.md` for the full project structure and content style
 rules.
 
-## Deployment
+## Deploy
 
-Cloudflare Pages, see `docs/deploy.md` (coming).
+The site deploys to Cloudflare Pages. See [`docs/deploy.md`](docs/deploy.md)
+for the full setup, including custom domains and security headers.
