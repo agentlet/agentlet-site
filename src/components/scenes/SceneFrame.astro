@@ -26,6 +26,8 @@ interface Props {
 	panelHidden?: boolean;
 	/** Extra class on the scene root, for a scene's own unique keyframes. */
 	class?: string;
+	/** CSS aspect-ratio value; defaults to the shared 16 / 10 (see scenes.css). */
+	aspectRatio?: string;
 }
 
 const {
@@ -35,11 +37,16 @@ const {
 	chrome = false,
 	panelHidden = false,
 	class: className,
+	aspectRatio,
 } = Astro.props;
+
+const style = [`--scene-duration:${duration}ms`, aspectRatio && `aspect-ratio:${aspectRatio}`]
+	.filter(Boolean)
+	.join(';');
 ---
 
 <div class="scene-wrap">
-	<div class:list={['scene', className]} style={`--scene-duration:${duration}ms`} aria-hidden="true">
+	<div class:list={['scene', className]} style={style} aria-hidden="true">
 		{
 			chrome && (
 				<div class="scene-chrome">
