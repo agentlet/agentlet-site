@@ -1,3 +1,19 @@
+---
+import FillFormScene from '../scenes/FillFormScene.astro';
+import ExportTableScene from '../scenes/ExportTableScene.astro';
+import CaptureAiScene from '../scenes/CaptureAiScene.astro';
+import PdfToFormScene from '../scenes/PdfToFormScene.astro';
+import DialogScene from '../scenes/DialogScene.astro';
+
+const slides = [
+	{ id: 'hero-slide-0', label: 'Fill a form', Scene: FillFormScene },
+	{ id: 'hero-slide-1', label: 'Export a table', Scene: ExportTableScene },
+	{ id: 'hero-slide-2', label: 'Ask about the screen', Scene: CaptureAiScene },
+	{ id: 'hero-slide-3', label: 'Read a PDF', Scene: PdfToFormScene },
+	{ id: 'hero-slide-4', label: 'Ask the user', Scene: DialogScene },
+];
+---
+
 <section class="hero">
 	<div class="wrap">
 		<div class="hero-surface">
@@ -16,23 +32,51 @@
 				</div>
 				<p class="badge">Live demo, coming soon</p>
 			</div>
-			<div class="hero-illustration" aria-hidden="true">
-				<div class="hero-app">
-					<div class="hero-app-url">your-internal-tool.app</div>
-					<div class="bar bar-60"></div>
-					<div class="field"></div>
-					<div class="field"></div>
-					<div class="bar bar-40"></div>
-					<div class="field"></div>
+			<div
+				class="hero-scene-carousel"
+				data-scene-carousel
+				role="region"
+				aria-roledescription="carousel"
+				aria-label="Feature preview"
+			>
+				<div class="hero-scene-viewport" aria-live="off">
+					{
+						slides.map(({ id, Scene }, i) => (
+							<div class="hero-scene-slide" id={id} data-slide hidden={i !== 0}>
+								<Scene />
+							</div>
+						))
+					}
 				</div>
-				<div class="hero-panel">
-					<div class="hero-panel-brand">
-						<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
-						<span>agentlet</span>
+				<div class="hero-carousel-controls">
+					<div class="hero-carousel-tabs" role="tablist" aria-label="Choose a feature to preview">
+						{
+							slides.map((slide, i) => (
+								<button
+									type="button"
+									role="tab"
+									id={`hero-tab-${i}`}
+									aria-controls={slide.id}
+									aria-selected={i === 0 ? 'true' : 'false'}
+									tabindex={i === 0 ? 0 : -1}
+								>
+									<span class="hero-tab-label">{slide.label}</span>
+									<span class="hero-progress" aria-hidden="true">
+										<span class="hero-progress-fill" />
+									</span>
+								</button>
+							))
+						}
 					</div>
-					<div class="hero-action hero-action-primary">Fill this form</div>
-					<div class="hero-action">Extract table</div>
-					<div class="hero-action">Analyze page</div>
+					<button type="button" class="hero-carousel-toggle" data-carousel-toggle aria-label="Pause animation">
+						<svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<rect x="6" y="5" width="4" height="14" rx="1"></rect>
+							<rect x="14" y="5" width="4" height="14" rx="1"></rect>
+						</svg>
+						<svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d="M7 5v14l12-7z"></path>
+						</svg>
+					</button>
 				</div>
 			</div>
 		</div>
