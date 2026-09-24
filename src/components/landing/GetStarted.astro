@@ -4,30 +4,40 @@ const commands = [
 	'cd agentlet-core',
 	'npm install',
 	'npm run demo',
-].join('\n');
+];
+const commandsRaw = commands.join('\n');
 ---
 
 <section>
 	<div class="wrap">
 		<h2 class="section-title">Get started</h2>
 		<p class="section-intro">Clone the core library and run the built-in demo.</p>
-		<div class="code-block">
+		<div class="code-block" id="get-started-commands" data-commands={commandsRaw}>
 			<div class="code-block-header">
-				<span class="code-block-label">Terminal</span>
+				<span class="code-block-label">terminal</span>
 				<button type="button" class="copy-button" id="copy-commands" aria-live="polite">Copy</button>
 			</div>
-			<pre id="get-started-commands"><code>{commands}</code></pre>
+			<pre>{
+				commands.map((command) => (
+					<div>
+						<span class="prompt" aria-hidden="true">
+							$
+						</span>
+						{command}
+					</div>
+				))
+			}</pre>
 		</div>
 		<p class="get-started-link"><a href="/docs/getting-started/">Read the getting started guide</a></p>
 	</div>
 </section>
 
 <script>
+	const container = document.getElementById('get-started-commands');
 	const button = document.getElementById('copy-commands');
-	const commandsEl = document.getElementById('get-started-commands');
 
 	button?.addEventListener('click', async () => {
-		const text = commandsEl?.textContent ?? '';
+		const text = container?.dataset.commands ?? '';
 		try {
 			await navigator.clipboard.writeText(text);
 			const original = button.textContent;

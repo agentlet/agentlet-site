@@ -5,13 +5,16 @@ import ThemeToggle from './ThemeToggle.astro';
 <header class="site-header">
 	<div class="wrap">
 		<a class="brand" href="/">
-			<img src="/img/agentlet-logo.png" width="32" height="32" alt="" />
-			agentlet
+			<img class="brand-logo-light" src="/brand/agentlet-lockup-light.svg" width="128" height="32" alt="agentlet" />
+			<img class="brand-logo-dark" src="/brand/agentlet-lockup-dark.svg" width="128" height="32" alt="agentlet" />
 		</a>
 		<nav class="primary-nav" aria-label="Primary">
-			<a href="/docs/">Docs</a>
-			<a href="https://github.com/agentlet/agentlet-core">GitHub</a>
+			<div class="primary-nav-links">
+				<a href="/docs/">Docs</a>
+				<a href="https://github.com/agentlet/agentlet-core">GitHub</a>
+			</div>
 			<ThemeToggle />
+			<a class="button button-primary button-sm" href="/docs/getting-started/">Get started</a>
 		</nav>
 	</div>
 </header>

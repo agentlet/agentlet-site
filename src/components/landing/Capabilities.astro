@@ -1,36 +1,47 @@
 ---
+// Mono labels are real calls from agentlet-core's public API (see
+// CLAUDE.md "API Quick Reference" and src/types/public-api.d.ts), never
+// invented. A capability without a clear matching call has no label.
 const capabilities = [
 	{
 		title: 'Forms',
 		text: 'Extract form structure and fill forms programmatically, with AI-friendly data formats.',
+		api: 'forms.fill()',
 	},
 	{
 		title: 'Tables to Excel',
 		text: 'Extract table data with optional export to Excel, with user-controlled pagination.',
+		api: 'tables.extractAndDownload()',
 	},
 	{
 		title: 'Screenshots',
 		text: 'Capture web elements as images for AI-powered visual analysis.',
+		api: 'utils.ScreenCapture.captureAsDataURL()',
 	},
 	{
 		title: 'AI, text, images, PDF',
 		text: 'Direct AI integration with support for text, images, and PDF documents.',
+		api: 'ai.sendPrompt()',
 	},
 	{
 		title: 'Dialogs and notifications',
 		text: 'Essential dialogs for user interaction, input collection, and progress display.',
+		api: 'utils.Dialog.info()',
 	},
 	{
 		title: 'Authentication',
 		text: 'Optional popup-based authentication for OAuth and OIDC flows.',
+		api: 'auth.startAuthentication()',
 	},
 	{
 		title: 'Shadow DOM isolation',
 		text: 'The side panel and its styles are isolated from the host page by Shadow DOM.',
+		api: null,
 	},
 	{
 		title: 'Mount API',
 		text: 'A simple API to mount and unmount the panel from the host application.',
+		api: 'mount(container, context)',
 	},
 ];
 ---
@@ -42,6 +53,7 @@ const capabilities = [
 			{
 				capabilities.map((capability) => (
 					<div class="capability-card">
+						{capability.api && <span class="capability-label">{capability.api}</span>}
 						<h3>{capability.title}</h3>
 						<p>{capability.text}</p>
 					</div>
