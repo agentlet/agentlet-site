@@ -39,11 +39,58 @@ export default defineConfig({
       ],
       plugins: [starlightLinksValidator()],
       sidebar: [
+        { label: 'Introduction', slug: 'docs' },
         {
-          label: 'Docs',
+          label: 'Getting started',
           items: [
-            { label: 'Introduction', slug: 'docs' },
-            { label: 'Getting started', slug: 'docs/getting-started' },
+            { label: 'Install', slug: 'docs/getting-started/install' },
+            { label: 'Quick demo', slug: 'docs/getting-started/quick-demo' },
+            { label: 'Scaffold an agentlet', slug: 'docs/getting-started/scaffold' },
+            { label: 'Manual setup', slug: 'docs/getting-started/manual-setup' },
+          ],
+        },
+        {
+          label: 'Concepts',
+          items: [
+            { label: 'The agentlet approach', slug: 'docs/concepts/approach' },
+            { label: 'Architecture', slug: 'docs/concepts/architecture' },
+            { label: 'Deployment modes', slug: 'docs/concepts/deployment-modes' },
+            { label: 'Security', slug: 'docs/concepts/security' },
+          ],
+        },
+        {
+          label: 'Guides',
+          items: [
+            {
+              label: 'Forms',
+              items: [
+                { label: 'Extraction', slug: 'docs/guides/forms-extraction' },
+                { label: 'Filling', slug: 'docs/guides/forms-filling' },
+                { label: 'AI-ready forms', slug: 'docs/guides/forms-ai-ready' },
+                { label: 'Select options', slug: 'docs/guides/forms-select-options' },
+              ],
+            },
+            { label: 'Tables and Excel', slug: 'docs/guides/tables-and-excel' },
+            { label: 'AI', slug: 'docs/guides/ai' },
+            { label: 'Authentication', slug: 'docs/guides/authentication' },
+            { label: 'Environment variables', slug: 'docs/guides/environment-variables' },
+            { label: 'Dialogs and shortcuts', slug: 'docs/guides/dialogs-and-shortcuts' },
+            { label: 'Shadow DOM', slug: 'docs/guides/shadow-dom' },
+            { label: 'Mount API', slug: 'docs/guides/mount-api' },
+            { label: 'TypeScript', slug: 'docs/guides/typescript' },
+            { label: 'Script injection and registry', slug: 'docs/guides/script-injection' },
+            { label: 'Layering and z-index', slug: 'docs/guides/z-index' },
+          ],
+        },
+        {
+          label: 'Reference',
+          items: [{ label: 'Public API', slug: 'docs/reference/public-api' }],
+        },
+        {
+          label: 'Contributing',
+          items: [
+            { label: 'Commit rules', slug: 'docs/contributing/commit-rules' },
+            { label: 'Documentation style', slug: 'docs/contributing/documentation-style' },
           ],
         },
       ],
