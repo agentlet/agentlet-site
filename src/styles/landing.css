@@ -528,13 +528,38 @@ section.alt {
 
 /* Definition */
 
+.definition-section {
+	padding-block-start: 0;
+}
+
 .definition {
+	position: relative;
 	border: 1px solid var(--color-surface-border);
-	border-left: 3px solid var(--color-accent);
 	border-radius: var(--radius-card);
 	background: var(--color-surface);
-	padding: 1.5rem 1.75rem;
+	padding: 2rem clamp(1.25rem, 6vw, 5.5rem) 3.25rem clamp(3rem, 9vw, 5.5rem);
 	max-width: 42rem;
+}
+
+/* Large decorative quote marks, hidden from assistive technology. */
+.definition .quote {
+	position: absolute;
+	font-size: clamp(5rem, 12vw, 7.5rem);
+	font-weight: 600;
+	line-height: 1;
+	color: var(--color-accent);
+	pointer-events: none;
+	user-select: none;
+}
+
+.definition .quote-open {
+	top: 0.4rem;
+	left: clamp(0.5rem, 2vw, 1rem);
+}
+
+.definition .quote-close {
+	bottom: -2.4rem;
+	right: clamp(0.5rem, 2vw, 1rem);
 }
 
 .definition .term {
