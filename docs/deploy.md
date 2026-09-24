@@ -118,9 +118,8 @@ Headers applied to `/*`:
 - `X-Frame-Options: DENY`. Stops any site from embedding this site in an
   iframe. Kept alongside `frame-ancestors 'none'` in the CSP for browsers
   that do not read the CSP directive.
-- `Permissions-Policy: camera=(), microphone=(), geolocation=(),
-  interest-cohort=()`. Turns off browser features this site does not use,
-  and opts out of the FLoC cohort tracking trial.
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()`. Turns
+  off camera, microphone, and geolocation, which the site does not use.
 - `Strict-Transport-Security: max-age=31536000`. Tells returning browsers
   to only use HTTPS for this origin for a year. `preload` and
   `includeSubDomains` are left out for now. They can be added later, once
