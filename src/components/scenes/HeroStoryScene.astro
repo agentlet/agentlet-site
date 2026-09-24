@@ -220,8 +220,12 @@ import SceneFrame from './SceneFrame.astro';
 		opacity: 1;
 	}
 
-	/* --- The panel: hidden for steps 1-2, in place from step 3. --- */
+	/* --- The panel: hidden for steps 1-2, in place from step 3. Slightly
+	   tighter than the shared 1.4cqi gap, so its content (brand, three
+	   actions, one result artifact) has margin to spare against the
+	   frame at every step, not just barely fit. --- */
 	.scene-herostory .scene-panel {
+		gap: 1.1cqi;
 		opacity: 0;
 		transform: translateX(6cqi);
 		transition:
@@ -234,8 +238,11 @@ import SceneFrame from './SceneFrame.astro';
 		transform: translateX(0);
 	}
 
-	/* Briefly highlight whichever action was just clicked. */
+	/* Briefly highlight whichever action was just clicked. Tighter than
+	   the shared 1.8cqi/2cqi padding, for the same margin-to-spare reason
+	   as the panel gap above. */
 	.scene-herostory .story-action {
+		padding: 1.4cqi 1.8cqi;
 		transition:
 			background 0.3s ease,
 			border-color 0.3s ease,
@@ -520,8 +527,7 @@ import SceneFrame from './SceneFrame.astro';
 		.scene-herostory .scene-field-value,
 		.scene-herostory .story-ai-block,
 		.scene-herostory .story-ai-question,
-		.scene-herostory .story-ai-answer,
-		.scene-herostory .story-xlsx-chip {
+		.scene-herostory .story-ai-answer {
 			opacity: 1 !important;
 			transform: none !important;
 			clip-path: inset(0 0 0 0) !important;
@@ -536,26 +542,30 @@ import SceneFrame from './SceneFrame.astro';
 			border-color: var(--color-accent) !important;
 		}
 
+		/* Stacking every result artifact the animated version ever shows
+		   one at a time (receipt card, receipt chip, xlsx chip, AI
+		   block) does not fit the frame at every size with margin to
+		   spare. Keep only the AI block, in normal flow instead of its
+		   normal absolute positioning (the result slot's four
+		   candidates are otherwise mutually exclusive absolutely
+		   positioned states of the same spot, so showing two at once
+		   would overlap them); drop the rest, including the xlsx chip,
+		   since the numbered step list below already states the export
+		   in words ("It exports the table to Excel."). */
 		.scene-herostory .story-receipt-card,
-		.scene-herostory .story-receipt-chip {
+		.scene-herostory .story-receipt-chip,
+		.scene-herostory .story-xlsx-chip {
 			display: none !important;
 		}
 
-		/* The xlsx chip and the AI block are normally two mutually
-		   exclusive absolutely-positioned states of the same result
-		   slot; showing both at once here (per the brief) needs them
-		   back in normal flow, stacked, instead of overlapping. */
 		.scene-herostory .story-result {
 			min-height: 0 !important;
 		}
 
-		.scene-herostory .story-xlsx-chip,
 		.scene-herostory .story-ai-block {
 			position: static !important;
-		}
-
-		.scene-herostory .story-ai-block {
-			margin-top: 0.8cqi;
+			margin-top: 0.5cqi;
+			gap: 0.5cqi;
 		}
 	}
 </style>
