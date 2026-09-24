@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightLinksValidator from 'starlight-links-validator';
 
 export default defineConfig({
   site: 'https://agentlet.io',
@@ -36,6 +37,7 @@ export default defineConfig({
           attrs: { name: 'twitter:image', content: 'https://agentlet.io/brand/agentlet-social-1280x640.png' },
         },
       ],
+      plugins: [starlightLinksValidator()],
       sidebar: [
         {
           label: 'Docs',
