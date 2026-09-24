@@ -6,7 +6,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'agentlet',
-      description: 'Augment your web applications without friction.',
+      description: 'Augment your web apps, without touching the backend.',
       logo: {
         light: './src/assets/brand/agentlet-lockup-light.svg',
         dark: './src/assets/brand/agentlet-lockup-dark.svg',
