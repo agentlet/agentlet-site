@@ -7,8 +7,6 @@ const options = ['Travel', 'Office', 'Client'];
 <SceneFrame
 	class="scene-dialog-scene"
 	caption="An export dialog asking Cost center, with three options. The cursor picks Travel, the dialog closes, and a toast confirms 12 rows exported before fading."
-	cursorStart={{ x: '20cqi', y: '80cqi' }}
-	cursorTarget={{ x: '18cqi', y: '46cqi' }}
 >
 	<Fragment slot="app">
 		<div class="scene-app-url">invoices.app/list</div>
@@ -19,7 +17,22 @@ const options = ['Travel', 'Office', 'Client'];
 			<div class="scene-dialog">
 				<p class="scene-dialog-title">Cost center?</p>
 				<div class="scene-dialog-options">
-					{options.map((option) => <span class="scene-dialog-option">{option}</span>)}
+					{
+						options.map((option, i) =>
+							i === 0 ? (
+								<span
+									class="scene-dialog-option scene-click-target"
+									style="--cursor-offset-x:13cqi;--cursor-offset-y:9cqi"
+								>
+									{option}
+									<span class="scene-cursor"></span>
+									<span class="scene-click-pulse"></span>
+								</span>
+							) : (
+								<span class="scene-dialog-option">{option}</span>
+							),
+						)
+					}
 				</div>
 			</div>
 		</div>
@@ -53,14 +66,14 @@ const options = ['Travel', 'Office', 'Client'];
 
 	@keyframes scene-dialog-visible {
 		0%,
-		30% {
+		16% {
 			opacity: 0;
 		}
-		34%,
-		62% {
+		22%,
+		42% {
 			opacity: 1;
 		}
-		68%,
+		48%,
 		100% {
 			opacity: 0;
 		}
@@ -106,16 +119,22 @@ const options = ['Travel', 'Office', 'Client'];
 
 	@keyframes scene-dialog-pick {
 		0%,
-		37% {
+		27% {
 			background: var(--color-bg);
 			border-color: var(--color-surface-border);
 			color: var(--color-text);
 		}
-		42%,
-		62% {
+		30%,
+		42% {
 			background: var(--color-primary-bg);
 			border-color: var(--color-primary-bg);
 			color: var(--color-primary-text);
+		}
+		48%,
+		100% {
+			background: var(--color-bg);
+			border-color: var(--color-surface-border);
+			color: var(--color-text);
 		}
 	}
 
@@ -138,15 +157,16 @@ const options = ['Travel', 'Office', 'Client'];
 
 	@keyframes scene-dialog-toast {
 		0%,
-		66% {
+		44% {
 			opacity: 0;
 			transform: translate(-50%, 3cqi);
 		}
-		72%,
-		92% {
+		50%,
+		90% {
 			opacity: 1;
 			transform: translate(-50%, 0);
 		}
+		97%,
 		100% {
 			opacity: 0;
 			transform: translate(-50%, 0);

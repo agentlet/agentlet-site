@@ -5,8 +5,6 @@ import SceneFrame from './SceneFrame.astro';
 <SceneFrame
 	class="scene-fillform"
 	caption="An expense form filling in automatically: vendor, date, amount and cost center, then the submit button gets a highlighted outline for the user to review, not submitted automatically."
-	cursorStart={{ x: '78cqi', y: '80cqi' }}
-	cursorTarget={{ x: '82cqi', y: '28cqi' }}
 >
 	<Fragment slot="app">
 		<div class="scene-app-url">expenses.internal.app</div>
@@ -15,13 +13,13 @@ import SceneFrame from './SceneFrame.astro';
 			<span class="scene-field-value" style="animation-delay:0ms">Northwind Supply Co.</span>
 		</div>
 		<div class="scene-field">
-			<span class="scene-field-value" style="animation-delay:260ms">2024-03-12</span>
+			<span class="scene-field-value" style="animation-delay:220ms">2024-03-12</span>
 		</div>
 		<div class="scene-field">
-			<span class="scene-field-value" style="animation-delay:520ms">$412.00</span>
+			<span class="scene-field-value" style="animation-delay:440ms">$412.00</span>
 		</div>
 		<div class="scene-field">
-			<span class="scene-field-value" style="animation-delay:780ms">Travel</span>
+			<span class="scene-field-value" style="animation-delay:660ms">Travel</span>
 		</div>
 		<div class="scene-submit scene-submit-highlight">Submit</div>
 	</Fragment>
@@ -30,9 +28,13 @@ import SceneFrame from './SceneFrame.astro';
 			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
 			<span>agentlet</span>
 		</div>
-		<div class="scene-action scene-action-primary">Fill this form</div>
+		<div class="scene-action scene-action-primary scene-click-target" style="--cursor-offset-x:14cqi;--cursor-offset-y:12cqi">
+			Fill this form
+			<span class="scene-cursor"></span>
+			<span class="scene-click-pulse"></span>
+		</div>
 		<div class="scene-action">Extract table</div>
 		<div class="scene-action">Analyze page</div>
-		<p class="scene-note" style="animation-delay:1100ms">Review, then submit</p>
+		<p class="scene-note" style="animation-delay:900ms">Review, then submit</p>
 	</Fragment>
 </SceneFrame>

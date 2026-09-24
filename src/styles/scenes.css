@@ -6,9 +6,10 @@
    Playback model: a scene's descendants all declare `animation-name` but
    stay paused until the scene root carries `.is-playing` (added by
    src/scripts/scenes.ts via IntersectionObserver). Every animation shares
-   one timeline, 0-100% of `--scene-duration`, roughly: idle (0-14%),
-   cursor moves in (14-32%), click (32-38%), effect plays (38-72%), final
-   state held (72-100%). */
+   one timeline, 0-100% of `--scene-duration` (8s by default): idle
+   (0-~13%), cursor moves in (~13-28%), click (~28-38%), effect settles
+   (~30-40%), final state held (~40-95%), quick reset back to idle
+   (95-100%, matching the loop's own 0% so the restart is seamless). */
 
 .scene-wrap {
 	display: flex;
@@ -17,11 +18,7 @@
 }
 
 .scene {
-	--scene-duration: 7000ms;
-	--cursor-x0: 8cqi;
-	--cursor-y0: 70cqi;
-	--cursor-x1: 50cqi;
-	--cursor-y1: 50cqi;
+	--scene-duration: 8000ms;
 
 	position: relative;
 	aspect-ratio: 16 / 10;
@@ -45,8 +42,31 @@
 	animation-play-state: running;
 }
 
+/* The caption is the scene's accessible description. By default it is
+   visually hidden (the hero carousel and capability explorer already show
+   the same information as visible text); SceneFrame's captionVisible prop
+   switches it back to visible small muted text for the three deployment
+   mode cards, which have no other caption of their own. */
 .scene-caption {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.scene-caption--visible {
+	position: static;
+	width: auto;
+	height: auto;
 	margin: 0;
+	overflow: visible;
+	clip: auto;
+	white-space: normal;
 	color: var(--color-text-muted);
 	font-size: 0.85rem;
 }
@@ -150,7 +170,7 @@
 	padding: 3cqi;
 	display: flex;
 	flex-direction: column;
-	gap: 1.6cqi;
+	gap: 1.4cqi;
 	min-width: 0;
 }
 
@@ -281,86 +301,119 @@
 
 @keyframes scene-code-highlight {
 	0%,
-	30% {
+	26% {
 		background: transparent;
 		color: var(--color-code-text);
 	}
-	36%,
-	100% {
+	32%,
+	95% {
 		background: var(--color-code-header-bg);
 		color: var(--color-code-accent);
 	}
+	100% {
+		background: transparent;
+		color: var(--color-code-text);
+	}
 }
 
-/* Fake cursor: a flat arrow that moves to a target and pulses on "click". */
+/* Fake cursor: a flat arrow, positioned as a child of whichever element
+   it clicks (that element carries .scene-click-target, giving the cursor
+   a `position: relative` anchor). It animates from an offset transform,
+   set per instance via --cursor-offset-x/y, to translate(0, 0): the
+   resting position is always pinned to that element's corner, so it can
+   never drift from its target regardless of scene scale. */
+
+.scene-click-target {
+	position: relative;
+}
 
 .scene-cursor {
 	position: absolute;
-	top: 0;
-	left: 0;
+	right: -1.6cqi;
+	bottom: -1.6cqi;
 	width: 3.6cqi;
 	height: 3.6cqi;
-	color: var(--color-heading);
+	/* A white fill with a dark outline (faked with stacked drop-shadows,
+	   since clip-path shapes can't take a stroke): the cursor lands on
+	   surfaces of very different colors across scenes (navy or orange
+	   primary buttons, light chips, plain panel background, ...), and
+	   this combination stays legible on all of them regardless of theme,
+	   the same way OS pointers do. */
+	color: #ffffff;
 	clip-path: polygon(0 0, 0 78%, 28% 60%, 46% 100%, 62% 92%, 44% 56%, 100% 52%);
 	background: currentColor;
+	filter:
+		drop-shadow(0.15cqi 0 0 #0f3350) drop-shadow(-0.15cqi 0 0 #0f3350) drop-shadow(0 0.15cqi 0 #0f3350)
+		drop-shadow(0 -0.15cqi 0 #0f3350);
 	opacity: 0;
 	transform-origin: 15% 10%;
+	transform: translate(var(--cursor-offset-x, 16cqi), var(--cursor-offset-y, 16cqi));
 	animation-name: scene-cursor-move;
 	animation-timing-function: linear;
 	animation-duration: var(--scene-duration);
 	animation-iteration-count: infinite;
-	z-index: 2;
+	pointer-events: none;
+	z-index: 5;
 }
 
 .scene-click-pulse {
 	position: absolute;
+	right: -1.6cqi;
+	bottom: -1.6cqi;
 	width: 7cqi;
 	height: 7cqi;
-	margin: -3.5cqi;
+	margin: -1.7cqi;
 	border-radius: 999px;
-	border: 1.5px solid var(--color-accent);
+	/* Same white-plus-dark-outline logic as the cursor: a plain accent
+	   ring would vanish on the dark theme's orange primary buttons. */
+	border: 1.5px solid #ffffff;
+	box-shadow: 0 0 0 1px #0f3350;
 	opacity: 0;
-	left: var(--cursor-x1);
-	top: var(--cursor-y1);
 	animation-name: scene-click-pulse;
 	animation-timing-function: linear;
 	animation-duration: var(--scene-duration);
 	animation-iteration-count: infinite;
-	z-index: 2;
+	pointer-events: none;
+	z-index: 4;
 }
 
 /* Shared keyframes ------------------------------------------------- */
 
-/* Cursor glides from its resting point to the target, then stays. */
+/* Cursor glides in from its offset, "clicks", stays through the hold,
+   then jumps back to its offset for the next loop. */
 @keyframes scene-cursor-move {
 	0%,
 	9% {
 		opacity: 0;
-		transform: translate(var(--cursor-x0), var(--cursor-y0));
+		transform: translate(var(--cursor-offset-x, 16cqi), var(--cursor-offset-y, 16cqi));
 	}
-	14% {
+	13% {
 		opacity: 1;
-		transform: translate(var(--cursor-x0), var(--cursor-y0));
+		transform: translate(var(--cursor-offset-x, 16cqi), var(--cursor-offset-y, 16cqi));
 	}
-	32%,
+	28%,
+	95% {
+		opacity: 1;
+		transform: translate(0, 0);
+	}
 	100% {
-		opacity: 1;
-		transform: translate(var(--cursor-x1), var(--cursor-y1));
+		opacity: 0;
+		transform: translate(var(--cursor-offset-x, 16cqi), var(--cursor-offset-y, 16cqi));
 	}
 }
 
-/* A short ring pulse at the click point. */
+/* A short ring pulse right as the cursor "clicks". */
 @keyframes scene-click-pulse {
 	0%,
-	31% {
+	27% {
 		opacity: 0;
 		transform: scale(0.3);
 	}
-	33% {
+	29% {
 		opacity: 0.6;
 		transform: scale(0.4);
 	}
-	42% {
+	38% {
 		opacity: 0;
 		transform: scale(1.7);
 	}
@@ -373,63 +426,78 @@
 /* A value or line "typing" in: revealed left to right by clip-path. */
 @keyframes scene-reveal {
 	0%,
-	38% {
+	30% {
 		clip-path: inset(0 100% 0 0);
 	}
-	72%,
-	100% {
+	40%,
+	95% {
 		clip-path: inset(0 0 0 0);
+	}
+	100% {
+		clip-path: inset(0 100% 0 0);
 	}
 }
 
 /* Simple opacity fade for notes, pills, and disabled-to-enabled swaps. */
 @keyframes scene-fade-in {
 	0%,
-	38% {
+	30% {
 		opacity: 0;
 	}
-	52%,
-	100% {
+	40%,
+	95% {
 		opacity: 1;
+	}
+	100% {
+		opacity: 0;
 	}
 }
 
 /* A chip or row rising slightly into place. */
 @keyframes scene-slide-up {
 	0%,
-	46% {
+	30% {
 		opacity: 0;
 		transform: translateY(3cqi);
 	}
-	60%,
-	100% {
+	40%,
+	95% {
 		opacity: 1;
 		transform: translateY(0);
 	}
-}
-
-/* The panel sliding in from the right (bookmarklet/extension/auth). */
-@keyframes scene-slide-left {
-	0%,
-	36% {
-		opacity: 0;
-		transform: translateX(6cqi);
-	}
-	50%,
 	100% {
-		opacity: 1;
-		transform: translateX(0);
-	}
-}
-
-/* A toast: in, held, then fades before the loop restarts. */
-@keyframes scene-toast {
-	0%,
-	54% {
 		opacity: 0;
 		transform: translateY(3cqi);
 	}
-	64%,
+}
+
+/* The panel sliding in from the right (bookmarklet/extension/native). */
+@keyframes scene-slide-left {
+	0%,
+	28% {
+		opacity: 0;
+		transform: translateX(6cqi);
+	}
+	40%,
+	95% {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(6cqi);
+	}
+}
+
+/* A toast: in, held through most of the loop, then fades before it
+   restarts. */
+@keyframes scene-toast {
+	0%,
+	40% {
+		opacity: 0;
+		transform: translateY(3cqi);
+	}
+	48%,
 	88% {
 		opacity: 1;
 		transform: translateY(0);
@@ -443,19 +511,24 @@
 /* The submit button's highlight outline, appearing with the last field. */
 @keyframes scene-outline-pulse {
 	0%,
-	62% {
+	34% {
 		box-shadow: 0 0 0 0 transparent;
 		border-color: var(--color-surface-border);
 	}
-	72%,
-	100% {
+	44%,
+	95% {
 		box-shadow: 0 0 0 2px var(--color-accent);
 		border-color: var(--color-accent);
 	}
+	100% {
+		box-shadow: 0 0 0 0 transparent;
+		border-color: var(--color-surface-border);
+	}
 }
 
-/* A slow pulse used for the shadow-root boundary and the extension icon's
-   badge dot. */
+/* A slow, continuous pulse (the shadow-root boundary, the extension
+   icon's badge dot): not a one-time reveal, so it is not part of the
+   idle/hold timeline above. */
 @keyframes scene-pulse {
 	0%,
 	100% {

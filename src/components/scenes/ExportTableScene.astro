@@ -12,8 +12,6 @@ const rows = [
 <SceneFrame
 	class="scene-exporttable"
 	caption="A paginated invoice table exporting to Excel: rows highlight, the page counter advances through all three pages, then a file, invoices.xlsx, 42 rows, appears in the panel."
-	cursorStart={{ x: '78cqi', y: '80cqi' }}
-	cursorTarget={{ x: '82cqi', y: '28cqi' }}
 >
 	<Fragment slot="app">
 		<div class="scene-app-url">invoices.app/list</div>
@@ -23,7 +21,7 @@ const rows = [
 			</div>
 			{
 				rows.map((row, i) => (
-					<div class="scene-row" style={`animation-delay:${i * 220}ms`}>
+					<div class="scene-row" style={`animation-delay:${i * 160}ms`}>
 						<span>{row[0]}</span>
 						<span>{row[1]}</span>
 						<span>{row[2]}</span>
@@ -34,9 +32,9 @@ const rows = [
 		<div class="scene-pager">
 			<span>Page</span>
 			<span class="scene-pager-count">
-				<span class="scene-pager-digit" style="animation-delay:0ms">1</span>
-				<span class="scene-pager-digit" style="animation-delay:900ms">2</span>
-				<span class="scene-pager-digit" style="animation-delay:1800ms">3</span>
+				<span class="scene-pager-digit scene-pager-digit-rest">1</span>
+				<span class="scene-pager-digit scene-pager-digit-mid">2</span>
+				<span class="scene-pager-digit scene-pager-digit-final">3</span>
 			</span>
 			<span>of 3</span>
 		</div>
@@ -46,10 +44,17 @@ const rows = [
 			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
 			<span>agentlet</span>
 		</div>
-		<div class="scene-action scene-action-primary">Export table</div>
+		<div
+			class="scene-action scene-action-primary scene-click-target"
+			style="--cursor-offset-x:14cqi;--cursor-offset-y:12cqi"
+		>
+			Export table
+			<span class="scene-cursor"></span>
+			<span class="scene-click-pulse"></span>
+		</div>
 		<div class="scene-action">Fill this form</div>
 		<div class="scene-action">Analyze page</div>
-		<span class="scene-chip" style="animation-delay:2200ms">invoices.xlsx, 42 rows</span>
+		<span class="scene-chip" style="animation-delay:700ms">invoices.xlsx, 42 rows</span>
 	</Fragment>
 </SceneFrame>
 
@@ -88,30 +93,21 @@ const rows = [
 		animation-iteration-count: infinite;
 	}
 
-	/* A quick background flash sweeping down the rows, one by one. */
+	/* A quick background flash sweeping down the rows, one by one, right
+	   as the click lands. */
 	@keyframes scene-row-highlight {
 		0%,
-		38% {
+		28% {
 			background: var(--color-bg);
 		}
-		42%,
-		50% {
+		32%,
+		40% {
 			background: var(--color-badge-bg);
 		}
-		58%,
+		48%,
 		100% {
 			background: var(--color-bg);
 		}
-	}
-
-	.scene-exporttable .scene-pager {
-		display: flex;
-		align-items: center;
-		gap: 0.8cqi;
-		margin-top: 1cqi;
-		font-family: var(--font-mono);
-		font-size: 2.3cqi;
-		color: var(--color-text-muted);
 	}
 
 	.scene-exporttable .scene-pager-count {
@@ -126,43 +122,63 @@ const rows = [
 		opacity: 0;
 		color: var(--color-heading);
 		font-weight: 600;
-		animation-name: scene-pager-digit;
 		animation-timing-function: steps(1, end);
 		animation-duration: var(--scene-duration);
 		animation-iteration-count: infinite;
 	}
 
-	/* Each digit holds visible for its slice of the effect window, in
-	   sequence: 1, then 2, then 3 (delays stagger the same keyframe). */
-	@keyframes scene-pager-digit {
+	/* The counter reads 1 at rest (before the click), briefly passes
+	   through 2 as the export runs, then holds on 3 for the rest of the
+	   loop before resetting to 1 for the next pass. */
+	.scene-exporttable .scene-pager-digit-rest {
+		animation-name: scene-pager-digit-rest;
+	}
+
+	@keyframes scene-pager-digit-rest {
 		0%,
-		39% {
-			opacity: 0;
-		}
-		42%,
-		68% {
+		26% {
 			opacity: 1;
 		}
-		72%,
+		34%,
 		100% {
 			opacity: 0;
 		}
 	}
 
-	/* The final digit (3) should stay visible through the held end state,
-	   not fade back out like the intermediate ones. */
-	.scene-exporttable .scene-pager-digit:last-child {
+	.scene-exporttable .scene-pager-digit-mid {
+		animation-name: scene-pager-digit-mid;
+	}
+
+	@keyframes scene-pager-digit-mid {
+		0%,
+		28% {
+			opacity: 0;
+		}
+		34%,
+		40% {
+			opacity: 1;
+		}
+		46%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	.scene-exporttable .scene-pager-digit-final {
 		animation-name: scene-pager-digit-final;
 	}
 
 	@keyframes scene-pager-digit-final {
 		0%,
-		39% {
+		40% {
 			opacity: 0;
 		}
-		42%,
-		100% {
+		46%,
+		95% {
 			opacity: 1;
+		}
+		100% {
+			opacity: 0;
 		}
 	}
 
@@ -171,11 +187,12 @@ const rows = [
 			background: var(--color-bg) !important;
 		}
 
-		.scene-exporttable .scene-pager-digit {
+		.scene-exporttable .scene-pager-digit-rest,
+		.scene-exporttable .scene-pager-digit-mid {
 			opacity: 0 !important;
 		}
 
-		.scene-exporttable .scene-pager-digit:last-child {
+		.scene-exporttable .scene-pager-digit-final {
 			opacity: 1 !important;
 		}
 	}

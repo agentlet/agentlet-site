@@ -5,8 +5,6 @@ import SceneFrame from './SceneFrame.astro';
 <SceneFrame
 	class="scene-shadowdom"
 	caption="A host page with aggressive red, uppercase, heavy-border buttons. A pulse shows that styling reaching the dashed shadow root boundary around the panel and stopping there: the panel keeps its own clean style."
-	cursorStart={{ x: '50cqi', y: '90cqi' }}
-	cursorTarget={{ x: '50cqi', y: '90cqi' }}
 >
 	<Fragment slot="app">
 		<div class="scene-app-url">legacy-crm.internal</div>
@@ -30,14 +28,8 @@ import SceneFrame from './SceneFrame.astro';
 </SceneFrame>
 
 <style is:global>
-	/* This scene has no click to point at: the story is the boundary
-	   itself holding, not an interaction, so the fake cursor stays out of
-	   the way entirely. */
-	.scene-shadowdom .scene-cursor,
-	.scene-shadowdom .scene-click-pulse {
-		display: none;
-	}
-
+	/* This scene has no click to point at (no cursor is rendered): the
+	   story is the boundary itself holding, not an interaction. */
 	.scene-shadowdom .scene-hostile-heading {
 		margin: 0;
 		font-size: 2.8cqi;

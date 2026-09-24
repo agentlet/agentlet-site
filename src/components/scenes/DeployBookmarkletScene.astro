@@ -1,18 +1,21 @@
 ---
 import SceneFrame from './SceneFrame.astro';
+
+interface Props {
+	captionVisible?: boolean;
+}
+
+const { captionVisible } = Astro.props;
 ---
 
-<SceneFrame
-	class="scene-deploy-bookmarklet"
-	caption="Injected at runtime, nothing to install"
-	chrome
-	panelHidden
-	cursorStart={{ x: '50cqi', y: '60cqi' }}
-	cursorTarget={{ x: '30cqi', y: '5.5cqi' }}
->
+<SceneFrame class="scene-deploy-bookmarklet" caption="Injected at runtime, nothing to install" captionVisible={captionVisible} chrome panelHidden>
 	<Fragment slot="chrome">
 		<span class="scene-bookmark">Inbox</span>
-		<span class="scene-bookmark scene-bookmark-active">agentlet</span>
+		<span class="scene-bookmark scene-bookmark-active scene-click-target" style="--cursor-offset-x:2cqi;--cursor-offset-y:11cqi">
+			agentlet
+			<span class="scene-cursor"></span>
+			<span class="scene-click-pulse"></span>
+		</span>
 		<span class="scene-bookmark">Docs</span>
 	</Fragment>
 	<Fragment slot="app">

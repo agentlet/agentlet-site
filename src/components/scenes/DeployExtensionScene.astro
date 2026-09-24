@@ -1,14 +1,19 @@
 ---
 import SceneFrame from './SceneFrame.astro';
+
+interface Props {
+	captionVisible?: boolean;
+}
+
+const { captionVisible } = Astro.props;
 ---
 
 <SceneFrame
 	class="scene-deploy-extension"
 	caption="Injected on the sites you choose"
+	captionVisible={captionVisible}
 	chrome
 	panelHidden
-	cursorStart={{ x: '50cqi', y: '60cqi' }}
-	cursorTarget={{ x: '50cqi', y: '60cqi' }}
 >
 	<Fragment slot="chrome">
 		<span class="scene-url-stack">
@@ -39,11 +44,8 @@ import SceneFrame from './SceneFrame.astro';
 </SceneFrame>
 
 <style is:global>
-	.scene-deploy-extension .scene-cursor,
-	.scene-deploy-extension .scene-click-pulse {
-		display: none;
-	}
-
+	/* No click to point at (no cursor is rendered): the URL change and
+	   panel appearance happen on their own. */
 	.scene-deploy-extension .scene-url-stack {
 		position: relative;
 		flex: 1;

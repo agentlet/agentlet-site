@@ -11,20 +11,18 @@ const fields = [
 <SceneFrame
 	class="scene-pdftoform"
 	caption="A file, invoice.pdf, drops onto the panel. It lists the extracted vendor, date and amount, then those values flow into the expense form on the page."
-	cursorStart={{ x: '20cqi', y: '18cqi' }}
-	cursorTarget={{ x: '80cqi', y: '30cqi' }}
 >
 	<Fragment slot="app">
 		<div class="scene-app-url">expenses.internal.app</div>
 		<div class="scene-pdf-source">invoice.pdf</div>
 		<div class="scene-field">
-			<span class="scene-field-value" style="animation-delay:2600ms">Cedar &amp; Co</span>
+			<span class="scene-field-value" style="animation-delay:1000ms">Cedar &amp; Co</span>
 		</div>
 		<div class="scene-field">
-			<span class="scene-field-value" style="animation-delay:2860ms">2024-03-18</span>
+			<span class="scene-field-value" style="animation-delay:1250ms">2024-03-18</span>
 		</div>
 		<div class="scene-field">
-			<span class="scene-field-value" style="animation-delay:3120ms">$935.00</span>
+			<span class="scene-field-value" style="animation-delay:1500ms">$935.00</span>
 		</div>
 	</Fragment>
 	<Fragment slot="panel">
@@ -32,11 +30,15 @@ const fields = [
 			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
 			<span>agentlet</span>
 		</div>
-		<div class="scene-pdf-card">invoice.pdf</div>
+		<div class="scene-pdf-card scene-click-target" style="--cursor-offset-x:-15cqi;--cursor-offset-y:-13cqi">
+			invoice.pdf
+			<span class="scene-cursor"></span>
+			<span class="scene-click-pulse"></span>
+		</div>
 		<div class="scene-extracted">
 			{
 				fields.map((field, i) => (
-					<div class="scene-extracted-row" style={`animation-delay:${1400 + i * 260}ms`}>
+					<div class="scene-extracted-row" style={`animation-delay:${200 + i * 250}ms`}>
 						<span>{field.label}</span>
 						<span>{field.value}</span>
 					</div>
@@ -75,14 +77,18 @@ const fields = [
 
 	@keyframes scene-pdf-drop {
 		0%,
-		32% {
+		26% {
 			opacity: 0;
 			transform: translateY(-4cqi);
 		}
-		42%,
-		100% {
+		34%,
+		95% {
 			opacity: 1;
 			transform: translateY(0);
+		}
+		100% {
+			opacity: 0;
+			transform: translateY(-4cqi);
 		}
 	}
 

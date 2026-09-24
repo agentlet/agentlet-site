@@ -1,10 +1,23 @@
 ---
 // Shared frame for animated product scenes. Purely decorative: the whole
-// animated subtree is aria-hidden, and the real accessible description is
-// the visible caption rendered as a sibling, not inside the hidden root.
+// animated subtree is aria-hidden. The caption is the real accessible
+// description, rendered as a sibling (not inside the hidden root); by
+// default it is visually hidden (sr-only), since the hero carousel and
+// the capability explorer already show the same information as visible
+// tab/panel text. Pass captionVisible for a scene shown on its own with
+// no surrounding text (the three deployment mode cards).
+//
+// The fake cursor is NOT positioned here: each scene places <span
+// class="scene-cursor"> and <span class="scene-click-pulse"> as children
+// of whichever element it clicks (marked .scene-click-target), animating
+// from an offset transform to translate(0, 0). That element is the
+// cursor's positioning anchor, so it can never drift from its target
+// regardless of scene scale. See scenes.css.
 interface Props {
-	/** Sentence describing what the scene shows, doubles as a visible caption. */
+	/** Sentence describing what the scene shows; the accessible description. */
 	caption: string;
+	/** Show the caption as visible text under the scene (deploy mode cards). */
+	captionVisible?: boolean;
 	/** Loop length in ms; drives every child animation via --scene-duration. */
 	duration?: number;
 	/** Show the top browser-chrome bar (deploy scenes). */
@@ -13,41 +26,20 @@ interface Props {
 	panelHidden?: boolean;
 	/** Extra class on the scene root, for a scene's own unique keyframes. */
 	class?: string;
-	id?: string;
-	/** Where the fake cursor rests before it moves in, in cqi units. */
-	cursorStart?: { x: string; y: string };
-	/** Where the fake cursor moves to and "clicks", in cqi units. */
-	cursorTarget?: { x: string; y: string };
 }
 
 const {
 	caption,
-	duration = 7000,
+	captionVisible = false,
+	duration = 8000,
 	chrome = false,
 	panelHidden = false,
 	class: className,
-	id,
-	cursorStart,
-	cursorTarget,
 } = Astro.props;
-
-const cursorVars = [
-	cursorStart && `--cursor-x0:${cursorStart.x}`,
-	cursorStart && `--cursor-y0:${cursorStart.y}`,
-	cursorTarget && `--cursor-x1:${cursorTarget.x}`,
-	cursorTarget && `--cursor-y1:${cursorTarget.y}`,
-]
-	.filter(Boolean)
-	.join(';');
 ---
 
 <div class="scene-wrap">
-	<div
-		id={id}
-		class:list={['scene', className]}
-		style={`--scene-duration:${duration}ms;${cursorVars}`}
-		aria-hidden="true"
-	>
+	<div class:list={['scene', className]} style={`--scene-duration:${duration}ms`} aria-hidden="true">
 		{
 			chrome && (
 				<div class="scene-chrome">
@@ -63,8 +55,6 @@ const cursorVars = [
 				<slot name="panel" />
 			</div>
 		</div>
-		<span class="scene-cursor"></span>
-		<span class="scene-click-pulse"></span>
 	</div>
-	<p class="scene-caption">{caption}</p>
+	<p class:list={['scene-caption', { 'scene-caption--visible': captionVisible }]}>{caption}</p>
 </div>

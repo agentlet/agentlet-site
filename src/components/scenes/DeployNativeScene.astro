@@ -1,14 +1,14 @@
 ---
 import SceneFrame from './SceneFrame.astro';
+
+interface Props {
+	captionVisible?: boolean;
+}
+
+const { captionVisible } = Astro.props;
 ---
 
-<SceneFrame
-	class="scene-deploy-native"
-	caption="Shipped by the host application"
-	panelHidden
-	cursorStart={{ x: '50cqi', y: '90cqi' }}
-	cursorTarget={{ x: '50cqi', y: '90cqi' }}
->
+<SceneFrame class="scene-deploy-native" caption="Shipped by the host application" captionVisible={captionVisible} panelHidden>
 	<Fragment slot="app">
 		<div class="scene-native-stack">
 			<div class="scene-code-card scene-native-code">
@@ -38,11 +38,8 @@ import SceneFrame from './SceneFrame.astro';
 </SceneFrame>
 
 <style is:global>
-	.scene-deploy-native .scene-cursor,
-	.scene-deploy-native .scene-click-pulse {
-		display: none;
-	}
-
+	/* No click to point at (no cursor is rendered): the code runs on its
+	   own as the host page loads. */
 	.scene-deploy-native .scene-native-stack {
 		position: relative;
 		flex: 1;
