@@ -13,29 +13,35 @@ open points, and the lessons learned.
   - #1 `build: scaffold astro and starlight site`, merged.
   - #2 `feat: add landing page`, merged.
   - #3 `ci: prepare cloudflare pages deployment`, merged.
-  - #4 `docs: migrate the agentlet-core documentation to starlight`, open
-    and ready for review when this recap was written, CI green. Check its
-    state before relying on the docs being on `main`.
-- CI: `.github/workflows/build.yml` runs `npm ci`, lint, check, build and
-  the typography check on `dist/`, on every push and pull request. All runs
+  - #4 `docs: migrate the agentlet-core documentation to starlight`, merged.
+  - #5 `docs: add phase b handoff recap` (this file), merged.
+  - A follow-up adds `wrangler.jsonc`, `public/_redirects` and an internal
+    link check, after the first Cloudflare build failed (see below).
+- CI: `.github/workflows/build.yml` runs `npm ci`, lint, check, build, the
+  typography check and the internal link check on `dist/`, on every push
+  and pull request. All runs
   since the Node 22 fix are green. The three failed runs of 2026-09-24 at
   21:36 UTC predate that fix and are expected.
-- Deployment: **not live yet.** Everything the repository needs is on
-  `main` (see `docs/deploy.md`), but the Cloudflare dashboard steps are the
-  user's to perform: create the Pages project with the Git integration,
-  attach `agentlet.io` and `www.agentlet.io`, add the www to apex redirect
-  rule, set SSL/TLS to Full (strict). Nothing is served on agentlet.io
-  until then.
+- Deployment: **not live yet.** The user created the Cloudflare project as
+  a Worker built from Git (the dashboard default), not as a Pages project.
+  Its first build failed: with no wrangler config in the repository,
+  `npx wrangler deploy` auto-configured the site as a server-rendered
+  Astro app and that build broke. `wrangler.jsonc` now declares a static
+  assets Worker serving `dist/`. The remaining dashboard steps are the
+  user's: redeploy, attach `agentlet.io` and `www.agentlet.io`, add the www
+  to apex redirect rule, set SSL/TLS to Full (strict). Nothing is served
+  on agentlet.io until then. See `docs/deploy.md`.
 - Domain: agentlet.io was transferred to Cloudflare on 2026-09-24.
   Registrar and DNS are both Cloudflare (nameservers
   `rafe.ns.cloudflare.com`, `dakota.ns.cloudflare.com`). The apex can point
-  to Pages directly; the old Route53 constraint no longer applies.
+  to the Worker directly; the old Route53 constraint no longer applies.
 - Branch protection: not configured. GitHub refuses it on this private
   repository with the organisation's current plan (HTTP 403, "Upgrade to
   GitHub Pro or make this repository public"). Merges go through pull
   requests by convention only.
 - Merged remote branches still present: `build/astro-skeleton`,
-  `feat/landing`, `ci/cloudflare-pages`. Safe to delete once #4 is merged.
+  `feat/landing`, `ci/cloudflare-pages`, `feat/docs-migration`,
+  `docs/phase-b-handoff`. Safe to delete.
 
 ## What was delivered
 
@@ -45,7 +51,7 @@ open points, and the lessons learned.
   `site: 'https://agentlet.io'`. Docs under `/docs/`, custom home page at
   `/`.
 - Node 22.12 or later (Astro 7 refuses Node 20). The major version is
-  pinned in `.node-version`, read by CI and by Cloudflare Pages.
+  pinned in `.node-version`, read by CI and by the Cloudflare build.
 - TypeScript 6.0, because typescript-eslint does not support TypeScript 7
   yet.
 - ESLint (typescript-eslint, eslint-plugin-astro), husky with a
@@ -112,8 +118,9 @@ open points, and the lessons learned.
 
 ### Deployment preparation (`docs/deploy.md`, `public/_headers`)
 
-- Recommended path: Cloudflare Pages Git integration, with no secrets and
-  preview deployments per pull request. A GitHub Actions and wrangler
+- Recommended path: a Worker with static assets built from Git
+  (`wrangler.jsonc`), with no secrets and preview URLs for other branches.
+  Pages works too with the same files. A GitHub Actions and wrangler
   alternative is documented, not installed.
 - `public/_headers`: nosniff, Referrer-Policy, X-Frame-Options,
   Permissions-Policy (camera, microphone, geolocation), HSTS without
@@ -125,8 +132,10 @@ open points, and the lessons learned.
 
 ## Decisions taken with the user
 
-- Hosting on Cloudflare Pages. The repository is private.
-- DNS and registrar on Cloudflare, so the apex is served by Pages directly.
+- Hosting on Cloudflare, as a Worker serving static assets. The repository
+  is private.
+- DNS and registrar on Cloudflare, so the apex is served by the Worker
+  directly.
 - Content rules: English, sentence case, no emoji in titles, no puffery,
   short sentences, **no em dash, en dash or middle dot** anywhere (they
   "read as AI-written").
@@ -143,7 +152,7 @@ open points, and the lessons learned.
 ## Open points
 
 1. **Cloudflare setup, by the user.** Follow `docs/deploy.md`. After the
-   first deploy, run its verification checklist on the `*.pages.dev` URL,
+   first deploy, run its verification checklist on the `*.workers.dev` URL,
    then again on agentlet.io.
 2. **Pull request #4 (docs)** to merge.
 3. **agentlet-core docs.** Out of scope for phase B, to do in agentlet-core:
@@ -214,5 +223,11 @@ open points, and the lessons learned.
 - **Buttons do not inherit the page font.** Set `font: inherit`.
 - **Starlight components do not work in `.md`.** Use `:::note` asides, or
   rename the page to `.mdx`.
+- **Keep `wrangler.jsonc`.** Without it, `npx wrangler deploy` in a Cloudflare
+  build turns the static site into a server-rendered Astro app and fails.
+- **The docs links validator only covers the docs.** Moving
+  `/docs/getting-started/` broke the landing's Get started links.
+  `scripts/check-links.mjs` now checks every built page, and
+  `public/_redirects` keeps old URLs working.
 - **Old agentlet-core docs are not a reliable API source.** Check against
   `src/types/public-api.d.ts` and the implementation.
