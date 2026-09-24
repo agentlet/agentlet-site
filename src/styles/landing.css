@@ -431,99 +431,124 @@ section.alt {
 	gap: 1rem;
 }
 
-/* Hero illustration: a decorative mock, hidden from assistive tech. */
+/* Hero scene carousel */
 
-.hero-illustration {
-	background: var(--color-bg);
-	border: 1px solid var(--color-surface-border);
-	border-radius: var(--radius-card);
-	overflow: hidden;
-	display: grid;
-	grid-template-columns: minmax(0, 1fr) 190px;
-	min-height: 280px;
-}
-
-@media (max-width: 480px) {
-	.hero-illustration {
-		grid-template-columns: minmax(0, 1fr) 130px;
-		min-height: 220px;
-	}
-}
-
-.hero-app {
-	padding: 20px;
+.hero-scene-carousel {
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 0.85rem;
+	min-width: 0;
 }
 
-.hero-app-url {
-	font-family: var(--font-mono);
-	font-size: 11px;
-	color: var(--color-text-muted);
+.hero-scene-viewport {
+	position: relative;
 }
 
-.hero-app .bar {
-	height: 10px;
-	background: var(--color-surface-border);
-	border-radius: 4px;
+.hero-scene-slide[hidden] {
+	display: none;
 }
 
-.hero-app .bar-60 {
-	width: 60%;
-}
-
-.hero-app .bar-40 {
-	width: 40%;
-	margin-top: 8px;
-}
-
-.hero-app .field {
-	height: 30px;
-	background: var(--color-surface);
-	border: 1px solid var(--color-surface-border);
-	border-radius: 6px;
-}
-
-.hero-panel {
-	border-left: 1px solid var(--color-surface-border);
-	background: var(--color-surface);
-	padding: 14px;
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-}
-
-.hero-panel-brand {
+.hero-carousel-controls {
 	display: flex;
 	align-items: center;
-	gap: 8px;
-	padding-bottom: 10px;
-	border-bottom: 1px solid var(--color-surface-border);
-	font-size: 13px;
-	font-weight: 600;
-	color: var(--color-heading);
+	gap: 0.75rem;
 }
 
-.hero-panel-brand img {
-	width: 16px;
-	height: 16px;
+.hero-carousel-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	flex: 1;
+	min-width: 0;
 }
 
-.hero-action {
-	font-size: 13px;
+.hero-carousel-tabs [role='tab'] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 0.3rem 0.1rem 0;
+	background: none;
+	border: none;
+	color: var(--color-text-muted);
+	font-family: var(--font-sans);
+	font-size: 0.72rem;
 	font-weight: 500;
-	padding: 9px 10px;
-	border-radius: 6px;
-	background: var(--color-bg);
-	border: 1px solid var(--color-surface-border);
+	cursor: pointer;
+	flex: 1 1 0;
+	min-width: 3.5rem;
+	text-align: left;
+}
+
+.hero-carousel-tabs [role='tab'][aria-selected='true'] {
 	color: var(--color-heading);
 }
 
-.hero-action-primary {
-	background: var(--color-primary-bg);
-	border-color: var(--color-primary-bg);
-	color: var(--color-primary-text);
+.hero-tab-label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.hero-progress {
+	display: block;
+	height: 2px;
+	background: var(--color-surface-border);
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.hero-progress-fill {
+	display: block;
+	height: 100%;
+	width: 100%;
+	background: var(--color-accent);
+	transform: scaleX(0);
+	transform-origin: left;
+	transition: transform linear;
+}
+
+.hero-carousel-toggle {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	border-radius: var(--radius-button);
+	border: 1px solid var(--color-surface-border);
+	background: var(--color-bg);
+	color: var(--color-text);
+	cursor: pointer;
+}
+
+.hero-carousel-toggle:hover {
+	border-color: var(--color-accent);
+}
+
+.hero-carousel-toggle svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.hero-carousel-toggle .icon-play {
+	display: none;
+}
+
+.hero-carousel-toggle.is-paused .icon-pause {
+	display: none;
+}
+
+.hero-carousel-toggle.is-paused .icon-play {
+	display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	/* No autoplay to pause, and no progress to show; the tabs themselves
+	   stay, switching between each scene's static final state. */
+	.hero-carousel-toggle,
+	.hero-progress {
+		display: none;
+	}
 }
 
 /* Definition */
@@ -626,55 +651,131 @@ figure.demo-figure figcaption {
 	margin: 0 0 1rem;
 }
 
-.mode-card .diagram-card {
-	background: #ffffff;
-	border: 1px solid var(--color-surface-border);
-	border-radius: var(--radius-card);
-	padding: 0.75rem;
-}
+/* Capabilities: an ARIA tabs explorer. Vertical list + panel from 900px,
+   a horizontally scrollable chip row above the panel below that. Without
+   JS every panel stays visible (stacked); scenes.ts adds .is-enhanced and
+   hides the inactive ones once tab behaviour is wired up. */
 
-.mode-card .diagram-card img {
-	width: 100%;
-	height: auto;
-}
-
-/* Capabilities */
-
-.capabilities-grid {
-	display: grid;
-	gap: 1.25rem;
-	grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+.capability-explorer {
 	margin-top: 2rem;
-}
-
-.capability-card {
-	border: 1px solid var(--color-surface-border);
-	border-radius: var(--radius-card);
-	padding: 24px;
-	background: var(--color-bg);
 	display: flex;
 	flex-direction: column;
-	gap: 10px;
+	gap: 1.5rem;
 }
 
-.capability-label {
+.capability-tablist {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.capability-tablist [role='tab'] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	align-items: flex-start;
+	text-align: left;
+	padding: 0.75rem 0.9rem;
+	border: 1px solid transparent;
+	border-radius: var(--radius-button);
+	background: none;
+	cursor: pointer;
+	color: var(--color-text);
+}
+
+.capability-tablist [role='tab'][aria-selected='true'] {
+	background: var(--color-bg);
+	border-color: var(--color-surface-border);
+}
+
+.capability-tablist .capability-label {
 	font-family: var(--font-mono);
-	font-size: 13px;
+	font-size: 0.72rem;
 	color: var(--color-accent-text);
 	overflow-wrap: anywhere;
 }
 
-.capability-card h3 {
-	font-size: 20px;
-	margin: 0;
+.capability-tablist .capability-tab-title {
+	font-size: 0.92rem;
+	font-weight: 500;
+	color: var(--color-heading);
 }
 
-.capability-card p {
-	margin: 0;
+.capability-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	border: 1px solid var(--color-surface-border);
+	border-radius: var(--radius-card);
+	padding: 24px;
+	background: var(--color-bg);
+}
+
+.capability-panel[hidden] {
+	display: none;
+}
+
+.capability-panel-copy h3 {
+	font-size: 20px;
+	margin: 0 0 0.6rem;
+}
+
+.capability-panel-copy p {
+	margin: 0 0 0.5rem;
 	color: var(--color-text);
 	font-size: 15px;
 	line-height: 1.55;
 }
+
+.capability-code {
+	display: block;
+	margin-top: 0.75rem;
+	padding: 0.6rem 0.85rem;
+	border-radius: 6px;
+	background: var(--color-code-bg);
+	color: var(--color-code-text);
+	font-family: var(--font-mono);
+	font-size: 0.82rem;
+	overflow-x: auto;
+	white-space: pre;
+}
+
+@media (min-width: 900px) {
+	.capability-explorer {
+		flex-direction: row;
+		align-items: flex-start;
+		gap: 2rem;
+	}
+
+	.capability-tablist {
+		width: 15rem;
+		flex-shrink: 0;
+		position: sticky;
+		top: 1.5rem;
+	}
+
+	.capability-panels {
+		flex: 1;
+		min-width: 0;
+	}
+}
+
+@media (max-width: 899px) {
+	.capability-tablist {
+		flex-direction: row;
+		gap: 0.5rem;
+		overflow-x: auto;
+		padding-bottom: 0.25rem;
+	}
+
+	.capability-tablist [role='tab'] {
+		flex-shrink: 0;
+	}
+}
+
+/* Without JS, the tabs do nothing (no click handler ever attaches); see
+   the <noscript> block in Capabilities.astro, which un-hides every panel
+   so they stay visible and stacked instead of only the first. */
 
 /* Principles */
 

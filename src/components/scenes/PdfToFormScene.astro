@@ -1,0 +1,124 @@
+---
+import SceneFrame from './SceneFrame.astro';
+
+const fields = [
+	{ label: 'Vendor', value: 'Cedar & Co' },
+	{ label: 'Date', value: '2024-03-18' },
+	{ label: 'Amount', value: '$935.00' },
+];
+---
+
+<SceneFrame
+	class="scene-pdftoform"
+	caption="A file, invoice.pdf, drops onto the panel. It lists the extracted vendor, date and amount, then those values flow into the expense form on the page."
+	cursorStart={{ x: '20cqi', y: '18cqi' }}
+	cursorTarget={{ x: '80cqi', y: '30cqi' }}
+>
+	<Fragment slot="app">
+		<div class="scene-app-url">expenses.internal.app</div>
+		<div class="scene-pdf-source">invoice.pdf</div>
+		<div class="scene-field">
+			<span class="scene-field-value" style="animation-delay:2600ms">Cedar &amp; Co</span>
+		</div>
+		<div class="scene-field">
+			<span class="scene-field-value" style="animation-delay:2860ms">2024-03-18</span>
+		</div>
+		<div class="scene-field">
+			<span class="scene-field-value" style="animation-delay:3120ms">$935.00</span>
+		</div>
+	</Fragment>
+	<Fragment slot="panel">
+		<div class="scene-panel-brand">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div class="scene-pdf-card">invoice.pdf</div>
+		<div class="scene-extracted">
+			{
+				fields.map((field, i) => (
+					<div class="scene-extracted-row" style={`animation-delay:${1400 + i * 260}ms`}>
+						<span>{field.label}</span>
+						<span>{field.value}</span>
+					</div>
+				))
+			}
+		</div>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	.scene-pdftoform .scene-pdf-source {
+		align-self: flex-start;
+		font-family: var(--font-mono);
+		font-size: 2.3cqi;
+		padding: 1cqi 1.8cqi;
+		border: 1px dashed var(--color-surface-border);
+		border-radius: 4px;
+		color: var(--color-text-muted);
+	}
+
+	.scene-pdftoform .scene-pdf-card {
+		align-self: flex-start;
+		font-family: var(--font-mono);
+		font-size: 2.3cqi;
+		padding: 1.4cqi 2cqi;
+		border-radius: 6px;
+		background: var(--color-badge-bg);
+		color: var(--color-badge-text);
+		opacity: 0;
+		transform: translateY(-4cqi);
+		animation-name: scene-pdf-drop;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes scene-pdf-drop {
+		0%,
+		32% {
+			opacity: 0;
+			transform: translateY(-4cqi);
+		}
+		42%,
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.scene-pdftoform .scene-extracted {
+		display: flex;
+		flex-direction: column;
+		gap: 1cqi;
+	}
+
+	.scene-pdftoform .scene-extracted-row {
+		display: flex;
+		justify-content: space-between;
+		gap: 1cqi;
+		font-size: 2.2cqi;
+		opacity: 0;
+		transform: translateY(2cqi);
+		animation-name: scene-slide-up;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	.scene-pdftoform .scene-extracted-row span:first-child {
+		color: var(--color-text-muted);
+	}
+
+	.scene-pdftoform .scene-extracted-row span:last-child {
+		color: var(--color-heading);
+		font-weight: 500;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.scene-pdftoform .scene-pdf-card,
+		.scene-pdftoform .scene-extracted-row {
+			opacity: 1 !important;
+			transform: none !important;
+		}
+	}
+</style>

@@ -1,0 +1,182 @@
+---
+import SceneFrame from './SceneFrame.astro';
+
+const rows = [
+	['INV-2291', 'Northwind Supply', '$412.00'],
+	['INV-2292', 'Acme Logistics', '$1,208.50'],
+	['INV-2293', 'Blue Harbor Ltd', '$76.20'],
+	['INV-2294', 'Cedar & Co', '$935.00'],
+];
+---
+
+<SceneFrame
+	class="scene-exporttable"
+	caption="A paginated invoice table exporting to Excel: rows highlight, the page counter advances through all three pages, then a file, invoices.xlsx, 42 rows, appears in the panel."
+	cursorStart={{ x: '78cqi', y: '80cqi' }}
+	cursorTarget={{ x: '82cqi', y: '28cqi' }}
+>
+	<Fragment slot="app">
+		<div class="scene-app-url">invoices.app/list</div>
+		<div class="scene-table">
+			<div class="scene-row scene-row-head">
+				<span>Invoice</span><span>Vendor</span><span>Amount</span>
+			</div>
+			{
+				rows.map((row, i) => (
+					<div class="scene-row" style={`animation-delay:${i * 220}ms`}>
+						<span>{row[0]}</span>
+						<span>{row[1]}</span>
+						<span>{row[2]}</span>
+					</div>
+				))
+			}
+		</div>
+		<div class="scene-pager">
+			<span>Page</span>
+			<span class="scene-pager-count">
+				<span class="scene-pager-digit" style="animation-delay:0ms">1</span>
+				<span class="scene-pager-digit" style="animation-delay:900ms">2</span>
+				<span class="scene-pager-digit" style="animation-delay:1800ms">3</span>
+			</span>
+			<span>of 3</span>
+		</div>
+	</Fragment>
+	<Fragment slot="panel">
+		<div class="scene-panel-brand">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div class="scene-action scene-action-primary">Export table</div>
+		<div class="scene-action">Fill this form</div>
+		<div class="scene-action">Analyze page</div>
+		<span class="scene-chip" style="animation-delay:2200ms">invoices.xlsx, 42 rows</span>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	/* Table rows and the paginated counter are unique to this scene, so
+	   their keyframes live here rather than in the shared scenes.css. */
+	.scene-exporttable .scene-table {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6cqi;
+		border: 1px solid var(--color-surface-border);
+		border-radius: 6px;
+		overflow: hidden;
+	}
+
+	.scene-exporttable .scene-row {
+		display: grid;
+		grid-template-columns: 1.1fr 1.3fr 0.9fr;
+		gap: 1cqi;
+		padding: 1.4cqi 1.6cqi;
+		font-size: 2.3cqi;
+		color: var(--color-text);
+		background: var(--color-bg);
+	}
+
+	.scene-exporttable .scene-row-head {
+		font-weight: 600;
+		color: var(--color-heading);
+		background: var(--color-surface);
+	}
+
+	.scene-exporttable .scene-row:not(.scene-row-head) {
+		animation-name: scene-row-highlight;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	/* A quick background flash sweeping down the rows, one by one. */
+	@keyframes scene-row-highlight {
+		0%,
+		38% {
+			background: var(--color-bg);
+		}
+		42%,
+		50% {
+			background: var(--color-badge-bg);
+		}
+		58%,
+		100% {
+			background: var(--color-bg);
+		}
+	}
+
+	.scene-exporttable .scene-pager {
+		display: flex;
+		align-items: center;
+		gap: 0.8cqi;
+		margin-top: 1cqi;
+		font-family: var(--font-mono);
+		font-size: 2.3cqi;
+		color: var(--color-text-muted);
+	}
+
+	.scene-exporttable .scene-pager-count {
+		position: relative;
+		width: 2.5cqi;
+		height: 3cqi;
+	}
+
+	.scene-exporttable .scene-pager-digit {
+		position: absolute;
+		inset: 0;
+		opacity: 0;
+		color: var(--color-heading);
+		font-weight: 600;
+		animation-name: scene-pager-digit;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	/* Each digit holds visible for its slice of the effect window, in
+	   sequence: 1, then 2, then 3 (delays stagger the same keyframe). */
+	@keyframes scene-pager-digit {
+		0%,
+		39% {
+			opacity: 0;
+		}
+		42%,
+		68% {
+			opacity: 1;
+		}
+		72%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	/* The final digit (3) should stay visible through the held end state,
+	   not fade back out like the intermediate ones. */
+	.scene-exporttable .scene-pager-digit:last-child {
+		animation-name: scene-pager-digit-final;
+	}
+
+	@keyframes scene-pager-digit-final {
+		0%,
+		39% {
+			opacity: 0;
+		}
+		42%,
+		100% {
+			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.scene-exporttable .scene-row:not(.scene-row-head) {
+			background: var(--color-bg) !important;
+		}
+
+		.scene-exporttable .scene-pager-digit {
+			opacity: 0 !important;
+		}
+
+		.scene-exporttable .scene-pager-digit:last-child {
+			opacity: 1 !important;
+		}
+	}
+</style>

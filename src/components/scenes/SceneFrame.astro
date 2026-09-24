@@ -1,0 +1,70 @@
+---
+// Shared frame for animated product scenes. Purely decorative: the whole
+// animated subtree is aria-hidden, and the real accessible description is
+// the visible caption rendered as a sibling, not inside the hidden root.
+interface Props {
+	/** Sentence describing what the scene shows, doubles as a visible caption. */
+	caption: string;
+	/** Loop length in ms; drives every child animation via --scene-duration. */
+	duration?: number;
+	/** Show the top browser-chrome bar (deploy scenes). */
+	chrome?: boolean;
+	/** Panel starts hidden and slides in during the timeline. */
+	panelHidden?: boolean;
+	/** Extra class on the scene root, for a scene's own unique keyframes. */
+	class?: string;
+	id?: string;
+	/** Where the fake cursor rests before it moves in, in cqi units. */
+	cursorStart?: { x: string; y: string };
+	/** Where the fake cursor moves to and "clicks", in cqi units. */
+	cursorTarget?: { x: string; y: string };
+}
+
+const {
+	caption,
+	duration = 7000,
+	chrome = false,
+	panelHidden = false,
+	class: className,
+	id,
+	cursorStart,
+	cursorTarget,
+} = Astro.props;
+
+const cursorVars = [
+	cursorStart && `--cursor-x0:${cursorStart.x}`,
+	cursorStart && `--cursor-y0:${cursorStart.y}`,
+	cursorTarget && `--cursor-x1:${cursorTarget.x}`,
+	cursorTarget && `--cursor-y1:${cursorTarget.y}`,
+]
+	.filter(Boolean)
+	.join(';');
+---
+
+<div class="scene-wrap">
+	<div
+		id={id}
+		class:list={['scene', className]}
+		style={`--scene-duration:${duration}ms;${cursorVars}`}
+		aria-hidden="true"
+	>
+		{
+			chrome && (
+				<div class="scene-chrome">
+					<slot name="chrome" />
+				</div>
+			)
+		}
+		<div class="scene-body">
+			<div class="scene-app">
+				<slot name="app" />
+			</div>
+			<div class:list={['scene-panel', { 'scene-panel--hidden': panelHidden }]}>
+				<slot name="panel" />
+			</div>
+		</div>
+		<span class="scene-cursor"></span>
+		<span class="scene-click-pulse"></span>
+	</div>
+	<p class="scene-caption">{caption}</p>
+</div>

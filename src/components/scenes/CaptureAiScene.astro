@@ -1,0 +1,123 @@
+---
+import SceneFrame from './SceneFrame.astro';
+
+const bars = [40, 65, 50, 82, 58];
+---
+
+<SceneFrame
+	class="scene-captureai"
+	caption="A bar chart being selected with a dashed rectangle, then a thumbnail of it slides into the panel and an answer types out: March is 18 percent above plan, travel drives most of the gap."
+	cursorStart={{ x: '78cqi', y: '80cqi' }}
+	cursorTarget={{ x: '82cqi', y: '28cqi' }}
+>
+	<Fragment slot="app">
+		<div class="scene-app-url">dashboard.app</div>
+		<div class="scene-chart">
+			{bars.map((h) => <div class="scene-chart-bar" style={`height:${h}%`} />)}
+			<div class="scene-selection"></div>
+		</div>
+	</Fragment>
+	<Fragment slot="panel">
+		<div class="scene-panel-brand">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div class="scene-action scene-action-primary">Ask about the screen</div>
+		<div class="scene-action">Fill this form</div>
+		<div class="scene-action">Export table</div>
+		<div class="scene-thumbnail" style="animation-delay:2400ms"></div>
+		<p class="scene-answer-line" style="animation-delay:3000ms">March is 18% above plan.</p>
+		<p class="scene-answer-line" style="animation-delay:3600ms">Travel drives most of the gap.</p>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	.scene-captureai .scene-chart {
+		position: relative;
+		flex: 1;
+		min-height: 30cqi;
+		display: flex;
+		align-items: flex-end;
+		gap: 2cqi;
+		padding: 2cqi;
+		border: 1px solid var(--color-surface-border);
+		border-radius: 6px;
+		background: var(--color-surface);
+	}
+
+	.scene-captureai .scene-chart-bar {
+		flex: 1;
+		background: var(--color-surface-border);
+		border-radius: 3px 3px 0 0;
+	}
+
+	/* A dashed rectangle scaling up from the chart's center to cover it. */
+	.scene-captureai .scene-selection {
+		position: absolute;
+		inset: 10%;
+		border: 1.5px dashed var(--color-accent);
+		border-radius: 4px;
+		opacity: 0;
+		transform: scale(0.4);
+		transform-origin: center;
+		animation-name: scene-select-chart;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes scene-select-chart {
+		0%,
+		38% {
+			opacity: 0;
+			transform: scale(0.4);
+		}
+		46%,
+		58% {
+			opacity: 1;
+			transform: scale(1);
+		}
+		64%,
+		100% {
+			opacity: 0;
+			transform: scale(1);
+		}
+	}
+
+	.scene-captureai .scene-thumbnail {
+		width: 9cqi;
+		height: 6cqi;
+		border-radius: 4px;
+		background: var(--color-surface-border);
+		opacity: 0;
+		transform: translateY(3cqi);
+		animation-name: scene-slide-up;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	.scene-captureai .scene-answer-line {
+		margin: 0;
+		font-size: 2.3cqi;
+		color: var(--color-text);
+		clip-path: inset(0 100% 0 0);
+		animation-name: scene-reveal;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.scene-captureai .scene-selection {
+			display: none !important;
+		}
+
+		.scene-captureai .scene-thumbnail,
+		.scene-captureai .scene-answer-line {
+			opacity: 1 !important;
+			transform: none !important;
+			clip-path: inset(0 0 0 0) !important;
+		}
+	}
+</style>

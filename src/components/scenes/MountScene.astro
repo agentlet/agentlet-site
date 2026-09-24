@@ -1,0 +1,55 @@
+---
+import SceneFrame from './SceneFrame.astro';
+---
+
+<SceneFrame
+	class="scene-mount"
+	caption="A code card defines mount, container, context, a real BaseModule lifecycle method. That line highlights, then the panel, empty until then, renders its brand and three actions in, one row at a time."
+	cursorStart={{ x: '50cqi', y: '90cqi' }}
+	cursorTarget={{ x: '50cqi', y: '90cqi' }}
+>
+	<Fragment slot="app">
+		<div class="scene-app-url">my-agentlet/index.ts</div>
+		<div class="scene-code-card">
+			<div class="scene-code-line">class MyAgentlet extends Module {'{'}</div>
+			<div class="scene-code-line scene-code-highlight">async mount(container, context) {'{'}</div>
+			<div class="scene-code-line scene-code-indent">container.innerHTML = this.getContent();</div>
+			<div class="scene-code-line">{'}'}</div>
+		</div>
+	</Fragment>
+	<Fragment slot="panel">
+		<div class="scene-panel-brand scene-mount-row" style="animation-delay:2600ms">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div class="scene-action scene-action-primary scene-mount-row" style="animation-delay:2900ms">
+			Fill this form
+		</div>
+		<div class="scene-action scene-mount-row" style="animation-delay:3200ms">Export table</div>
+		<div class="scene-action scene-mount-row" style="animation-delay:3500ms">Analyze page</div>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	.scene-mount .scene-cursor,
+	.scene-mount .scene-click-pulse {
+		display: none;
+	}
+
+	/* Panel rows render in one at a time, as if mount() were building them. */
+	.scene-mount .scene-mount-row {
+		opacity: 0;
+		transform: translateY(2.4cqi);
+		animation-name: scene-slide-up;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.scene-mount .scene-mount-row {
+			opacity: 1 !important;
+			transform: none !important;
+		}
+	}
+</style>
