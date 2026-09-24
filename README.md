@@ -13,6 +13,9 @@ documentation under `/docs/`.
 
 ## Develop
 
+Requires Node.js 22.12 or later (Astro 7 requirement). The pinned major
+version is in `.node-version`, used by CI and by Cloudflare Pages.
+
 ```bash
 npm ci
 npm run dev
