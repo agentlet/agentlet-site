@@ -27,15 +27,15 @@ To apply this approach responsibly, agentlet development follows some key techni
 
 - **Stay lightweight and leverage APIs**: keep agentlet code minimal. If it becomes too heavy or complex, rethink whether it still fits within the agentlet approach. When more advanced logic or data operations are needed, rely on existing backend APIs or services. This avoids overloading the front end with complex responsibilities, improves maintainability, and enables sophisticated augmentations without compromising performance or stability.
 
-## Comparison with robotic process automation
+## Comparison with robots
 
-While agentlets can in some ways be seen as lightweight local RPA (robotic process automation) tools, they are not true bots: they fully depend on the context of the user's active tab and cannot autonomously operate or control the browser as a whole. They enhance, but do not replace, the user's interaction.
+While agentlets can in some ways be seen as lightweight local robots, the kind used in RPA (robotic process automation), they are not true bots: they fully depend on the context of the user's active tab and cannot autonomously operate or control the browser as a whole. They enhance, but do not replace, the user's interaction.
 
 **Installation and deployment**
 
 | Variant | Rating |
 |---|---|
-| RPA | Heavy: desktop and backend install |
+| Robot | Heavy: desktop and backend install |
 | Agentlet (bookmarklet) | Lightweight: bookmarklet injection |
 | Agentlet extension | Lightweight: browser extension |
 | Agentlet native | Lightweight: served by host app, no user install |
@@ -44,7 +44,7 @@ While agentlets can in some ways be seen as lightweight local RPA (robotic proce
 
 | Variant | Rating |
 |---|---|
-| RPA | Fully autonomous, no user needed |
+| Robot | Fully autonomous, no user needed |
 | Agentlet (bookmarklet) | User action required: active tab, click |
 | Agentlet extension | Semi-autonomous: limited to browser and user context |
 | Agentlet native | Semi-autonomous: runs in page, still user context |
@@ -53,7 +53,7 @@ While agentlets can in some ways be seen as lightweight local RPA (robotic proce
 
 | Variant | Rating |
 |---|---|
-| RPA | Full access: OS, files, apps |
+| Robot | Full access: OS, files, apps |
 | Agentlet (bookmarklet) | Sandboxed: no external access, browser only |
 | Agentlet extension | Extended permissions via extension APIs, browser limited |
 | Agentlet native | Sandboxed inside app, no external access |
@@ -62,7 +62,7 @@ While agentlets can in some ways be seen as lightweight local RPA (robotic proce
 
 | Variant | Rating |
 |---|---|
-| RPA | Fragile: UI changes often break it |
+| Robot | Fragile: UI changes often break it |
 | Agentlet (bookmarklet) | Can be robust with good selectors and JS |
 | Agentlet extension | Same as bookmarklet |
 | Agentlet native | Very robust: tight to app code, controlled env |
@@ -71,7 +71,7 @@ While agentlets can in some ways be seen as lightweight local RPA (robotic proce
 
 | Variant | Rating |
 |---|---|
-| RPA | Often slow: simulates human actions |
+| Robot | Often slow: simulates human actions |
 | Agentlet (bookmarklet) | Instant: direct DOM manipulation |
 | Agentlet extension | Same as bookmarklet |
 | Agentlet native | Same as bookmarklet |
@@ -80,7 +80,7 @@ While agentlets can in some ways be seen as lightweight local RPA (robotic proce
 
 | Variant | Rating |
 |---|---|
-| RPA | Yes |
+| Robot | Yes |
 | Agentlet (bookmarklet) | Yes |
 | Agentlet extension | Yes |
 | Agentlet native | Yes |
@@ -89,7 +89,7 @@ While agentlets can in some ways be seen as lightweight local RPA (robotic proce
 
 | Variant | Rating |
 |---|---|
-| RPA | Yes |
+| Robot | Yes |
 | Agentlet (bookmarklet) | Yes |
 | Agentlet extension | Yes |
 | Agentlet native | Yes |
@@ -98,7 +98,7 @@ While agentlets can in some ways be seen as lightweight local RPA (robotic proce
 
 | Variant | Rating |
 |---|---|
-| RPA | Yes |
+| Robot | Yes |
 | Agentlet (bookmarklet) | No, only within the single page app |
 | Agentlet extension | Yes, cross-page within the browser |
 | Agentlet native | No, only within the app or page context |
@@ -107,7 +107,7 @@ While agentlets can in some ways be seen as lightweight local RPA (robotic proce
 
 | Variant | Rating |
 |---|---|
-| RPA | Yes, system-wide |
+| Robot | Yes, system-wide |
 | Agentlet (bookmarklet) | No |
 | Agentlet extension | No |
 | Agentlet native | No |
@@ -116,7 +116,7 @@ While agentlets can in some ways be seen as lightweight local RPA (robotic proce
 
 | Variant | Rating |
 |---|---|
-| RPA | Limited: surface level only |
+| Robot | Limited: surface level only |
 | Agentlet (bookmarklet) | Deep: full DOM access and manipulation |
 | Agentlet extension | Deep: same, with extension APIs |
 | Agentlet native | Deep: full access to app DOM |
