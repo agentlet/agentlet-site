@@ -3,8 +3,6 @@ title: Install
 description: Clone agentlet-core and build it, or install the future npm package.
 ---
 
-import { Aside } from '@astrojs/starlight/components';
-
 agentlet-core is not yet published to npm. Today, install it by cloning the repository and building it locally.
 
 ## Clone and build
@@ -24,10 +22,10 @@ This creates:
 - `dist/bookmarklet.js`: bookmarklet version
 - `dist/bookmarklet.html`: installation page
 
-<Aside type="note">
-  The `agentlet-core` npm package is not published yet. Once it is,
-  `npm install agentlet-core` will work as described below.
-</Aside>
+:::note
+The `agentlet-core` npm package is not published yet. Once it is,
+`npm install agentlet-core` will work as described below.
+:::
 
 ## Future: install as a package dependency
 
