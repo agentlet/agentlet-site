@@ -1,47 +1,98 @@
 ---
-// Mono labels are real calls from agentlet-core's public API (see
-// CLAUDE.md "API Quick Reference" and src/types/public-api.d.ts), never
-// invented. A capability without a clear matching call has no label.
+import FillFormScene from '../scenes/FillFormScene.astro';
+import ExportTableScene from '../scenes/ExportTableScene.astro';
+import CaptureAiScene from '../scenes/CaptureAiScene.astro';
+import PdfToFormScene from '../scenes/PdfToFormScene.astro';
+import DialogScene from '../scenes/DialogScene.astro';
+import AuthScene from '../scenes/AuthScene.astro';
+import ShadowDomScene from '../scenes/ShadowDomScene.astro';
+import MountScene from '../scenes/MountScene.astro';
+
+// Mono labels and code snippets are real calls from agentlet-core's public
+// API (see CLAUDE.md "API Quick Reference" and src/types/public-api.d.ts),
+// never invented. A capability without a clear matching call has neither.
+// Sentences are facts from the core README and agentlet-core/docs/.
 const capabilities = [
 	{
 		title: 'Forms',
-		text: 'Extract form structure and fill forms programmatically, with AI-friendly data formats.',
 		api: 'forms.fill()',
+		code: "window.agentlet.forms.fill(form, { '#email': value })",
+		sentences: [
+			'Extract form structure and fill forms programmatically, with AI-friendly data formats.',
+			'Filling triggers the same JavaScript events a real user would, so the host page reacts normally.',
+			'The user reviews and submits; agentlet never submits a form on its own.',
+		],
+		Scene: FillFormScene,
 	},
 	{
 		title: 'Tables to Excel',
-		text: 'Extract table data with optional export to Excel, with user-controlled pagination.',
 		api: 'tables.extractAndDownload()',
+		code: 'window.agentlet.tables.extractAndDownload(table)',
+		sentences: [
+			'Extract table data with optional export to Excel, using SheetJS.',
+			'Pagination is supported once you give it the next-button selector, so multi-page tables export in one pass.',
+		],
+		Scene: ExportTableScene,
 	},
 	{
 		title: 'Screenshots',
-		text: 'Capture web elements as images for AI-powered visual analysis.',
 		api: 'utils.ScreenCapture.captureAsDataURL()',
+		code: 'window.agentlet.utils.ScreenCapture.captureAsDataURL()',
+		sentences: [
+			'Capture web elements as images with HTML2Canvas, for AI-powered visual analysis.',
+			'Capture to a data URL, a blob, a direct download, or straight to the clipboard.',
+		],
+		Scene: CaptureAiScene,
 	},
 	{
 		title: 'AI, text, images, PDF',
-		text: 'Direct AI integration with support for text, images, and PDF documents.',
 		api: 'ai.sendPrompt()',
+		code: "window.agentlet.ai.sendPrompt('Summarize this page')",
+		sentences: [
+			'Direct integration with AI providers, currently OpenAI, with multimodal support for text, images, and PDFs.',
+			'PDF pages convert to images automatically before analysis.',
+		],
+		Scene: PdfToFormScene,
 	},
 	{
 		title: 'Dialogs and notifications',
-		text: 'Essential dialogs for user interaction, input collection, and progress display.',
 		api: 'utils.Dialog.info()',
+		code: "window.agentlet.utils.Dialog.info('Export complete')",
+		sentences: [
+			'A unified dialog system for info, input, wait, and progress, plus toast-style message bubbles for status updates.',
+			'Both are the building blocks agentlets use to ask the user something or confirm an action completed.',
+		],
+		Scene: DialogScene,
 	},
 	{
 		title: 'Authentication',
-		text: 'Optional popup-based authentication for OAuth and OIDC flows.',
 		api: 'auth.startAuthentication()',
+		code: 'window.agentlet.auth.startAuthentication()',
+		sentences: [
+			'Optional popup-based authentication for OIDC, OAuth2, SAML, and custom identity providers, with configurable token extraction.',
+			'The popup and its origin are validated before any token is accepted; the host page session is untouched.',
+		],
+		Scene: AuthScene,
 	},
 	{
 		title: 'Shadow DOM isolation',
-		text: 'The side panel and its styles are isolated from the host page by Shadow DOM.',
 		api: null,
+		code: null,
+		sentences: [
+			'The panel, dialogs, and toasts mount inside an open shadow root by default, isolating their CSS from the host page in both directions.',
+			"A host page's resets and global element styles no longer reach into the panel, and the panel's own styles never leak back out.",
+		],
+		Scene: ShadowDomScene,
 	},
 	{
 		title: 'Mount API',
-		text: 'A simple API to mount and unmount the panel from the host application.',
 		api: 'mount(container, context)',
+		code: 'async mount(container, context) { /* attach a UI framework root */ }',
+		sentences: [
+			'mount(container, context) and unmount(container) give module authors an explicit place to attach a UI framework root, instead of only returning an HTML string.',
+			'The default implementation covers plain HTML; overriding it is only needed to host React, Vue, Lit, or a similar framework.',
+		],
+		Scene: MountScene,
 	},
 ];
 ---
@@ -49,16 +100,54 @@ const capabilities = [
 <section class="alt">
 	<div class="wrap">
 		<h2 class="section-title">What it brings to your application</h2>
-		<div class="capabilities-grid">
-			{
-				capabilities.map((capability) => (
-					<div class="capability-card">
-						{capability.api && <span class="capability-label">{capability.api}</span>}
-						<h3>{capability.title}</h3>
-						<p>{capability.text}</p>
-					</div>
-				))
-			}
+		<div class="capability-explorer" data-capability-explorer>
+			<div class="capability-tablist" role="tablist" aria-label="Capabilities" aria-orientation="vertical">
+				{
+					capabilities.map((capability, i) => (
+						<button
+							type="button"
+							role="tab"
+							id={`cap-tab-${i}`}
+							aria-controls={`cap-panel-${i}`}
+							aria-selected={i === 0 ? 'true' : 'false'}
+							aria-label={capability.title}
+							tabindex={i === 0 ? 0 : -1}
+						>
+							{capability.api && <span class="capability-label">{capability.api}</span>}
+							<span class="capability-tab-title">{capability.title}</span>
+						</button>
+					))
+				}
+			</div>
+			<div class="capability-panels">
+				{
+					capabilities.map((capability, i) => (
+						<div
+							class="capability-panel"
+							role="tabpanel"
+							id={`cap-panel-${i}`}
+							aria-labelledby={`cap-tab-${i}`}
+							hidden={i !== 0}
+						>
+							<capability.Scene />
+							<div class="capability-panel-copy">
+								<h3>{capability.title}</h3>
+								{capability.sentences.map((sentence) => (
+									<p>{sentence}</p>
+								))}
+								{capability.code && <code class="capability-code">{capability.code}</code>}
+							</div>
+						</div>
+					))
+				}
+			</div>
+			<noscript>
+				<style>
+					.capability-panel[hidden] {
+						display: flex !important;
+					}
+				</style>
+			</noscript>
 		</div>
 	</div>
 </section>
