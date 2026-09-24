@@ -52,9 +52,12 @@
 	--sl-color-gray-7: #f9fafb;
 	--sl-color-black: #ffffff;
 
-	--sl-color-accent-low: #fde8d7;
-	--sl-color-accent: #f4a261;
-	--sl-color-accent-high: #a8531c;
+	/* Starlight uses the accent as a text and active-item colour in light
+	   mode, and the kit forbids orange text on white, so the light accent is
+	   navy. Orange stays as the link underline, see the rules below. */
+	--sl-color-accent-low: #eef2f6;
+	--sl-color-accent: #0f3350;
+	--sl-color-accent-high: #0f3350;
 
 	--sl-color-blue-low: #eef2f6;
 	--sl-color-blue: #3d4f5e;
@@ -90,4 +93,16 @@
 :root:not([data-theme='light']) .starlight-aside--danger,
 :root[data-theme='dark'] .starlight-aside--danger {
 	color: #e7c4c4;
+}
+
+/* Links in doc content follow the kit: navy text, 2px orange underline,
+   orange-text on hover in light mode. */
+.sl-markdown-content a:not(:where(.not-content *)) {
+	text-decoration-color: #f4a261;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 4px;
+}
+
+:root[data-theme='light'] .sl-markdown-content a:not(:where(.not-content *)):hover {
+	color: #a8531c;
 }
