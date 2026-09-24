@@ -12,8 +12,11 @@ const commands = [
 		<h2 class="section-title">Get started</h2>
 		<p class="section-intro">Clone the core library and run the built-in demo.</p>
 		<div class="code-block">
-			<pre id="get-started-commands">{commands}</pre>
-			<button type="button" class="copy-button" id="copy-commands">Copy</button>
+			<div class="code-block-header">
+				<span class="code-block-label">Terminal</span>
+				<button type="button" class="copy-button" id="copy-commands" aria-live="polite">Copy</button>
+			</div>
+			<pre id="get-started-commands"><code>{commands}</code></pre>
 		</div>
 		<p class="get-started-link"><a href="/docs/getting-started/">Read the getting started guide</a></p>
 	</div>

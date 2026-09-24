@@ -453,11 +453,32 @@ figure.demo-figure figcaption {
 
 /* Comparison table */
 
+.table-scroll-hint {
+	margin: 1rem 0 0;
+	color: var(--color-text-muted);
+	font-size: 0.85rem;
+}
+
 .table-scroll {
+	position: relative;
 	overflow-x: auto;
-	margin-top: 2rem;
+	margin-top: 0.5rem;
+	background: var(--color-surface);
 	border: 1px solid var(--color-surface-border);
 	border-radius: var(--radius);
+}
+
+/* Fade hint on the right edge, only shown while the table still scrolls
+   (below the 760px breakpoint where it is made to fit instead). */
+.table-scroll::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 2rem;
+	background: linear-gradient(to right, transparent, var(--color-surface) 85%);
+	pointer-events: none;
 }
 
 .comparison-table {
@@ -497,28 +518,74 @@ figure.demo-figure figcaption {
 	border-bottom: none;
 }
 
+/* From 760px up, make the table fit its container instead of scrolling:
+   fixed layout with a narrower first column, tighter padding, smaller
+   font, and wrapping allowed on every cell. */
+@media (min-width: 760px) {
+	.table-scroll-hint,
+	.table-scroll::after {
+		display: none;
+	}
+
+	.comparison-table {
+		table-layout: fixed;
+		min-width: 0;
+		font-size: 0.82rem;
+	}
+
+	.comparison-table th,
+	.comparison-table td {
+		padding: 0.55rem 0.65rem;
+	}
+
+	.comparison-table thead th:first-child,
+	.comparison-table tbody th {
+		width: 22%;
+		white-space: normal;
+	}
+
+	.comparison-table thead th:not(:first-child) {
+		white-space: normal;
+	}
+}
+
 /* Get started */
 
 .code-block {
-	position: relative;
 	background: var(--color-code-bg);
 	color: var(--color-code-text);
 	border-radius: var(--radius);
-	padding: 1.25rem 1.25rem 1.25rem 1.5rem;
 	margin-top: 2rem;
 	max-width: 42rem;
-	overflow-x: auto;
+	overflow: hidden;
+}
+
+.code-block-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.5rem 0.75rem 0.5rem 1.5rem;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.code-block-label {
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--color-code-text);
+	opacity: 0.6;
 }
 
 .code-block pre {
 	margin: 0;
+	padding: 1.25rem 1.5rem;
 	white-space: pre;
+	overflow-x: auto;
 }
 
 .copy-button {
-	position: absolute;
-	top: 0.65rem;
-	right: 0.65rem;
+	flex-shrink: 0;
 	background: transparent;
 	color: var(--color-code-text);
 	border: 1px solid rgba(255, 255, 255, 0.25);

@@ -2,10 +2,10 @@
 const rows = [
 	{
 		aspect: 'Installation',
-		rpa: 'Heavy: desktop and backend install',
-		bookmarklet: 'Light: bookmarklet injection',
+		rpa: 'Heavy: desktop and backend',
+		bookmarklet: 'Light: bookmarklet',
 		extension: 'Light: browser extension',
-		native: 'Light: served by the host app',
+		native: 'Light: served by host app',
 	},
 	{
 		aspect: 'Autonomy',
@@ -15,25 +15,60 @@ const rows = [
 		native: 'Semi-autonomous',
 	},
 	{
-		aspect: 'Security scope',
+		aspect: 'Security, scope of action',
 		rpa: 'Full access: OS, files, apps',
 		bookmarklet: 'Sandboxed, browser only',
-		extension: 'Extended, via extension APIs',
-		native: 'Sandboxed, inside the app',
+		extension: 'Extended: extension APIs',
+		native: 'Sandboxed, inside app',
 	},
 	{
 		aspect: 'Robustness to UI changes',
 		rpa: 'Fragile',
-		bookmarklet: 'Can be robust with good selectors',
+		bookmarklet: 'Robust with good selectors',
 		extension: 'Same as bookmarklet',
 		native: 'Very robust: tied to app code',
 	},
 	{
 		aspect: 'Performance',
-		rpa: 'Often slow: simulates human actions',
-		bookmarklet: 'Instant: direct DOM manipulation',
-		extension: 'Same as bookmarklet',
-		native: 'Same as bookmarklet',
+		rpa: 'Often slow',
+		bookmarklet: 'Instant',
+		extension: 'Instant',
+		native: 'Instant',
+	},
+	{
+		aspect: 'Relies on user context',
+		rpa: 'Yes',
+		bookmarklet: 'Yes',
+		extension: 'Yes',
+		native: 'Yes',
+	},
+	{
+		aspect: 'Interacts with page like a user',
+		rpa: 'Yes',
+		bookmarklet: 'Yes',
+		extension: 'Yes',
+		native: 'Yes',
+	},
+	{
+		aspect: 'Goes beyond current page',
+		rpa: 'Yes',
+		bookmarklet: 'No: single page app only',
+		extension: 'Yes: across browser tabs',
+		native: 'No: single app context',
+	},
+	{
+		aspect: 'Goes beyond browser',
+		rpa: 'Yes: system-wide',
+		bookmarklet: 'No',
+		extension: 'No',
+		native: 'No',
+	},
+	{
+		aspect: 'Interacts with embedded elements',
+		rpa: 'Limited: surface only',
+		bookmarklet: 'Deep: full DOM access',
+		extension: 'Deep: same, plus APIs',
+		native: 'Deep: full access to app DOM',
 	},
 ];
 ---
@@ -45,6 +80,7 @@ const rows = [
 			Agentlets can look like lightweight, local RPA. They are not true bots: they depend on the
 			context of the user's active tab and enhance, rather than replace, the user's interaction.
 		</p>
+		<p class="table-scroll-hint">Scroll for more</p>
 		<div class="table-scroll">
 			<table class="comparison-table">
 				<caption>
