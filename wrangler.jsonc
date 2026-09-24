@@ -1,0 +1,14 @@
+// Cloudflare Workers configuration for agentlet.io.
+// The site is fully static: Workers only serves the files Astro builds into
+// dist/, with no Worker script. Having this file stops `wrangler deploy` from
+// auto-configuring the project as a server-rendered Astro app.
+// See docs/deploy.md.
+{
+  "name": "agentlet-site",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  }
+}

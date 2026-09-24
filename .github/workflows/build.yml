@@ -31,3 +31,6 @@ jobs:
 
       - name: Check built pages for forbidden characters
         run: node scripts/check-typography.mjs dist
+
+      - name: Check internal links in built pages
+        run: node scripts/check-links.mjs dist

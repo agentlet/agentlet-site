@@ -14,7 +14,7 @@ documentation under `/docs/`.
 ## Develop
 
 Requires Node.js 22.12 or later (Astro 7 requirement). The pinned major
-version is in `.node-version`, used by CI and by Cloudflare Pages.
+version is in `.node-version`, used by CI and by the Cloudflare build.
 
 ```bash
 npm ci
@@ -43,5 +43,6 @@ rules.
 
 ## Deploy
 
-The site deploys to Cloudflare Pages. See [`docs/deploy.md`](docs/deploy.md)
+The site deploys to Cloudflare, as a Worker serving static assets
+(`wrangler.jsonc`). See [`docs/deploy.md`](docs/deploy.md)
 for the full setup, including custom domains and security headers.
