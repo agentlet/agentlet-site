@@ -1,8 +1,8 @@
 // Playback controller for the animated product scenes (src/components/
 // scenes/). Scenes animate purely via CSS; this module only (a) toggles
-// play state as scenes enter/leave the viewport, and (b) drives the hero
-// carousel and the capability explorer's tabs. No animation logic lives
-// here, no library, kept deliberately small.
+// play state as scenes enter/leave the viewport, (b) drives the hero
+// story's step timer, and (c) drives the capability explorer's tabs. No
+// animation logic lives here, no library, kept deliberately small.
 
 const prefersReducedMotion =
 	typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -33,76 +33,117 @@ function observeScenes(root: ParentNode): void {
 	scenes.forEach((scene) => observer.observe(scene));
 }
 
-/** Read --scene-duration (set per scene in ms) off an element. */
-function sceneDurationMs(scene: Element): number {
-	const raw = getComputedStyle(scene).getPropertyValue('--scene-duration').trim();
-	const ms = raw.endsWith('ms') ? parseFloat(raw) : parseFloat(raw) * 1000;
-	return Number.isFinite(ms) && ms > 0 ? ms : 7000;
-}
-
 /**
- * The hero's autoplaying scene carousel: a row of tabs, one active scene at
- * a time, a progress bar on the active tab, and a play/pause toggle.
+ * The hero's single story animation (see HeroStoryScene.astro): a step
+ * timer sets data-step="1".."N" on the scene root, updates the (aria
+ * hidden) subtitle text from the accessible step list, and fills a
+ * segmented progress bar, one segment per step. Autoplay pauses while
+ * the hero is offscreen or the tab is hidden and resumes when back,
+ * unless the user paused; it does not pause on hover. Reduced motion
+ * skips all of this and shows the last step's text with no timer
+ * (HeroStoryScene's own CSS renders the matching static final state).
  */
-class SceneCarousel {
-	private slides: HTMLElement[];
-	private tabs: HTMLButtonElement[];
+class StoryController {
+	private scene: HTMLElement | null;
+	private subtitle: HTMLElement | null;
+	private stepTexts: string[];
+	private segments: HTMLElement[];
+	private durations: number[];
 	private toggle: HTMLButtonElement | null;
+	private replay: HTMLButtonElement | null;
 	private index = 0;
 	private timer: number | null = null;
-	private playing = !prefersReducedMotion;
-	private stoppedForGood = false;
+	private userPaused = false;
+	private offscreen = true;
+	/** Time left in the current step; the full duration on a fresh step,
+	 * reduced by however long it already ran each time it is paused. */
+	private remainingMs = 0;
+	/** When the current run of the timer started, for computing the above. */
+	private runningSince = 0;
 
 	constructor(root: HTMLElement) {
-		this.slides = Array.from(root.querySelectorAll<HTMLElement>('[data-slide]'));
-		this.tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
-		this.toggle = root.querySelector<HTMLButtonElement>('[data-carousel-toggle]');
+		this.scene = root.querySelector<HTMLElement>('.scene');
+		this.subtitle = root.querySelector<HTMLElement>('[data-story-subtitle]');
+		this.stepTexts = Array.from(root.querySelectorAll('.story-steps li')).map((li) => li.textContent ?? '');
+		this.segments = Array.from(root.querySelectorAll<HTMLElement>('[data-story-segment]'));
+		this.durations = this.segments.map((segment) => Number(segment.dataset.duration) || 3000);
+		this.toggle = root.querySelector<HTMLButtonElement>('[data-story-toggle]');
+		this.replay = root.querySelector<HTMLButtonElement>('[data-story-replay]');
 
-		this.tabs.forEach((tab, i) => {
-			tab.addEventListener('click', () => this.select(i, { userInitiated: true }));
-		});
-		initRovingTabs(this.tabs, (i) => this.select(i, { userInitiated: true }));
+		this.toggle?.addEventListener('click', () => this.toggleUserPause());
+		this.replay?.addEventListener('click', () => this.restart());
 
-		this.toggle?.addEventListener('click', () => this.toggleAutoplay());
-		root.addEventListener('mouseenter', () => this.pauseTimer());
-		root.addEventListener('mouseleave', () => this.resumeTimer());
-		root.addEventListener('focusin', () => this.pauseTimer());
-		root.addEventListener('focusout', () => this.resumeTimer());
+		if (prefersReducedMotion || !this.stepTexts.length) {
+			// Static final state; HeroStoryScene's reduced-motion CSS does
+			// the actual rendering, this just sets a matching data-step.
+			this.scene?.setAttribute('data-step', String(this.stepTexts.length || 1));
+			return;
+		}
 
-		this.select(0, { userInitiated: false, restart: false });
-		if (this.playing) this.armTimer();
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) this.offscreen = !entry.isIntersecting;
+				this.applyRunState();
+			},
+			{ threshold: 0.3 },
+		);
+		observer.observe(root);
+		document.addEventListener('visibilitychange', () => this.applyRunState());
+
+		this.goToStep(0);
 		this.updateToggleLabel();
 	}
 
-	private select(i: number, { userInitiated, restart = true }: { userInitiated: boolean; restart?: boolean }) {
-		this.index = i;
-		this.slides.forEach((slide, si) => slide.toggleAttribute('hidden', si !== i));
-		this.tabs.forEach((tab, ti) => {
-			const active = ti === i;
-			tab.setAttribute('aria-selected', String(active));
-			tab.tabIndex = active ? 0 : -1;
-		});
-		const activeSlide = this.slides[i];
-		if (restart && activeSlide) restartScene(activeSlide.querySelector('.scene'));
-		if (userInitiated) {
-			this.stoppedForGood = true;
-			this.clearTimer();
-			this.setProgress(this.tabs[i], false);
-		} else if (this.playing) {
-			this.armTimer();
-		}
+	private get shouldRun(): boolean {
+		return !this.userPaused && !this.offscreen && document.visibilityState === 'visible';
 	}
 
-	private armTimer() {
-		if (this.stoppedForGood || !this.playing) return;
+	/** Advance to a fresh step: full duration, every segment reset. */
+	private goToStep(i: number) {
+		this.index = i;
+		this.scene?.setAttribute('data-step', String(i + 1));
+		if (this.subtitle) this.subtitle.textContent = this.stepTexts[i] ?? '';
+		this.remainingMs = this.durations[i] ?? 3000;
+		this.segments.forEach((segment, si) => {
+			const fill = segment.querySelector<HTMLElement>('.story-segment-fill');
+			if (!fill) return;
+			fill.style.transitionDuration = '0ms';
+			fill.style.transform = si < i ? 'scaleX(1)' : 'scaleX(0)';
+		});
+		this.applyRunState();
+	}
+
+	/**
+	 * Re-evaluate whether the timer should be running, after any change
+	 * to pause, offscreen, or tab-visibility state, or a fresh step: does
+	 * not lose progress within the current step either way. Starting
+	 * (re)arms the timeout and the active segment's fill for whatever is
+	 * left of remainingMs; stopping computes how much of that just
+	 * elapsed and freezes the fill in place.
+	 */
+	private applyRunState() {
+		const wasRunning = this.timer !== null;
 		this.clearTimer();
-		const activeSlide = this.slides[this.index];
-		const scene = activeSlide?.querySelector('.scene');
-		const duration = scene ? sceneDurationMs(scene) : 7000;
-		this.setProgress(this.tabs[this.index], true, duration);
-		this.timer = window.setTimeout(() => {
-			this.select((this.index + 1) % this.slides.length, { userInitiated: false });
-		}, duration);
+		if (this.shouldRun) {
+			this.runningSince = Date.now();
+			const fill = this.segments[this.index]?.querySelector<HTMLElement>('.story-segment-fill');
+			if (fill) {
+				// Flush the reset in goToStep (or the freeze below) before
+				// animating, so the browser doesn't collapse the two
+				// transform changes into one and skip the transition.
+				void fill.offsetWidth;
+				fill.style.transitionDuration = `${this.remainingMs}ms`;
+				fill.style.transform = 'scaleX(1)';
+			}
+			this.timer = window.setTimeout(() => {
+				this.timer = null;
+				this.goToStep((this.index + 1) % this.stepTexts.length);
+			}, this.remainingMs);
+		} else if (wasRunning) {
+			const elapsed = Date.now() - this.runningSince;
+			this.remainingMs = Math.max(50, this.remainingMs - elapsed);
+			this.freezeActiveSegment();
+		}
 	}
 
 	private clearTimer() {
@@ -110,42 +151,34 @@ class SceneCarousel {
 			window.clearTimeout(this.timer);
 			this.timer = null;
 		}
-		this.tabs.forEach((tab) => this.setProgress(tab, false));
 	}
 
-	private pauseTimer() {
-		if (!this.playing || this.stoppedForGood) return;
-		this.clearTimer();
+	/** Pin the active segment's fill exactly where its transition is,
+	 * instead of leaving it running while the step timer is paused. */
+	private freezeActiveSegment() {
+		const fill = this.segments[this.index]?.querySelector<HTMLElement>('.story-segment-fill');
+		if (!fill) return;
+		const current = getComputedStyle(fill).transform;
+		fill.style.transitionDuration = '0ms';
+		fill.style.transform = current;
 	}
 
-	private resumeTimer() {
-		if (!this.playing || this.stoppedForGood) return;
-		this.armTimer();
-	}
-
-	private setProgress(tab: HTMLButtonElement | undefined, running: boolean, duration?: number) {
-		const bar = tab?.querySelector<HTMLElement>('.hero-progress-fill');
-		if (!bar) return;
-		bar.style.transitionDuration = running && duration ? `${duration}ms` : '0ms';
-		bar.style.transform = running ? 'scaleX(1)' : 'scaleX(0)';
-	}
-
-	private toggleAutoplay() {
-		this.playing = !this.playing;
-		this.stoppedForGood = !this.playing;
-		if (this.playing) {
-			this.stoppedForGood = false;
-			this.armTimer();
-		} else {
-			this.clearTimer();
-		}
+	private toggleUserPause() {
+		this.userPaused = !this.userPaused;
 		this.updateToggleLabel();
+		this.applyRunState();
+	}
+
+	private restart() {
+		this.userPaused = false;
+		this.updateToggleLabel();
+		this.goToStep(0);
 	}
 
 	private updateToggleLabel() {
 		if (!this.toggle) return;
-		this.toggle.setAttribute('aria-label', this.playing ? 'Pause animation' : 'Play animation');
-		this.toggle.classList.toggle('is-paused', !this.playing);
+		this.toggle.setAttribute('aria-label', this.userPaused ? 'Play animation' : 'Pause animation');
+		this.toggle.classList.toggle('is-paused', this.userPaused);
 	}
 }
 
@@ -201,9 +234,7 @@ class CapabilityExplorer {
 
 function init(): void {
 	observeScenes(document);
-	document
-		.querySelectorAll<HTMLElement>('[data-scene-carousel]')
-		.forEach((el) => new SceneCarousel(el));
+	document.querySelectorAll<HTMLElement>('[data-story]').forEach((el) => new StoryController(el));
 	document
 		.querySelectorAll<HTMLElement>('[data-capability-explorer]')
 		.forEach((el) => new CapabilityExplorer(el));
