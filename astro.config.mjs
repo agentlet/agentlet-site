@@ -9,12 +9,12 @@ export default defineConfig({
       description: 'Augment your web applications without friction.',
       logo: {
         src: './src/assets/agentlet-logo.png',
-        replacesTitle: true,
       },
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/agentlet/agentlet-core' },
       ],
       favicon: '/favicon.svg',
+      customCss: ['./src/styles/starlight-theme.css'],
       sidebar: [
         {
           label: 'Docs',

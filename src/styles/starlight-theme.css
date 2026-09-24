@@ -1,0 +1,39 @@
+/* Maps Starlight's default palette to the landing page palette (navy text
+   and surfaces, one orange accent), so /docs/ and / read as one site.
+   Starlight's own convention: the base :root block holds dark mode values,
+   :root[data-theme='light'] overrides them for light mode. See
+   node_modules/@astrojs/starlight/dist/style/props.css for the tokens this
+   overrides. */
+
+:root {
+	/* Dark mode */
+	--sl-color-white: #f3f8fb;
+	--sl-color-gray-1: #cfdce6;
+	--sl-color-gray-2: #93aebe;
+	--sl-color-gray-3: #6f8a9a;
+	--sl-color-gray-4: #4a6376;
+	--sl-color-gray-5: #2c4457;
+	--sl-color-gray-6: #16293a;
+	--sl-color-black: #0b1f30;
+
+	--sl-color-accent-low: #3a2313;
+	--sl-color-accent: #fb923c;
+	--sl-color-accent-high: #ffd9b3;
+}
+
+:root[data-theme='light'] {
+	/* Light mode */
+	--sl-color-white: #0f3350;
+	--sl-color-gray-1: #16293a;
+	--sl-color-gray-2: #263845;
+	--sl-color-gray-3: #55707e;
+	--sl-color-gray-4: #8ba3b0;
+	--sl-color-gray-5: #d7e1e8;
+	--sl-color-gray-6: #eef3f7;
+	--sl-color-gray-7: #f7fafc;
+	--sl-color-black: #ffffff;
+
+	--sl-color-accent-low: #fbe6d8;
+	--sl-color-accent: #c2410c;
+	--sl-color-accent-high: #7c2d0a;
+}
