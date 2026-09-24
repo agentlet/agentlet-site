@@ -1,0 +1,1038 @@
+/* Theme tokens, per the agentlet brand kit. Light by default, dark via
+   prefers-color-scheme or the explicit data-theme attribute set by the
+   toggle (see ThemeToggle.astro). Uses the same convention as Starlight:
+   localStorage key "starlight-theme", <html data-theme="light|dark">. */
+
+:root {
+	color-scheme: light dark;
+
+	/* Light theme */
+	--color-bg: #ffffff;
+	--color-surface: #f4f6f8;
+	--color-surface-border: #d9e0e6;
+	--color-heading: #0f3350;
+	--color-text: #3d4f5e;
+	--color-text-muted: #5b6b78;
+
+	--color-accent: #f4a261;
+	--color-accent-hover: #f7b47c;
+	--color-accent-text: #a8531c;
+	--color-badge-bg: #fde8d7;
+	--color-badge-text: #7a3a10;
+
+	--color-primary-bg: #0f3350;
+	--color-primary-bg-hover: #1b4a70;
+	--color-primary-text: #ffffff;
+
+	--color-focus: #0f3350;
+
+	/* The code block is always a "night" terminal, in both themes. */
+	--color-code-bg: #0b1a26;
+	--color-code-header-bg: #16293a;
+	--color-code-text: #e6edf2;
+	--color-code-label: #a9bccb;
+	--color-code-muted: #5b6b78;
+	--color-code-accent: #f4a261;
+
+	--font-sans:
+		'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+	--font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
+	--max-width: 72rem;
+	--radius-button: 8px;
+	--radius-card: 12px;
+	--radius-code: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme='light']) {
+		--color-bg: #0b1a26;
+		--color-surface: #16293a;
+		--color-surface-border: #24394d;
+		--color-heading: #e6edf2;
+		--color-text: #e6edf2;
+		--color-text-muted: #a9bccb;
+
+		--color-accent: #f4a261;
+		--color-accent-hover: #f7b47c;
+		--color-accent-text: #f4a261;
+		--color-badge-bg: #3a2313;
+		--color-badge-text: #f4c99b;
+
+		--color-primary-bg: #f4a261;
+		--color-primary-bg-hover: #f7b47c;
+		--color-primary-text: #0f3350;
+
+		--color-focus: #f4a261;
+	}
+}
+
+:root[data-theme='dark'] {
+	--color-bg: #0b1a26;
+	--color-surface: #16293a;
+	--color-surface-border: #24394d;
+	--color-heading: #e6edf2;
+	--color-text: #e6edf2;
+	--color-text-muted: #a9bccb;
+
+	--color-accent: #f4a261;
+	--color-accent-hover: #f7b47c;
+	--color-accent-text: #f4a261;
+	--color-badge-bg: #3a2313;
+	--color-badge-text: #f4c99b;
+
+	--color-primary-bg: #f4a261;
+	--color-primary-bg-hover: #f7b47c;
+	--color-primary-text: #0f3350;
+
+	--color-focus: #f4a261;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	background: var(--color-bg);
+}
+
+body {
+	margin: 0;
+	min-width: 320px;
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-family: var(--font-sans);
+	font-size: 17px;
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+	display: block;
+}
+
+a {
+	color: var(--color-heading);
+}
+
+/* Buttons don't inherit font by default in any browser; every button on
+   the page (theme toggle, copy button, hero tabs and pause button,
+   capability tabs) needs this to render in IBM Plex like the rest of the
+   page, not the browser's UI font. */
+button {
+	font: inherit;
+}
+
+h1,
+h2,
+h3 {
+	color: var(--color-heading);
+	font-weight: 600;
+	margin: 0;
+}
+
+h1 {
+	font-size: clamp(2rem, 5vw + 1rem, 3.25rem);
+	line-height: 1.1;
+	letter-spacing: -0.02em;
+}
+
+h2 {
+	font-size: clamp(1.5rem, 3vw + 1rem, 2rem);
+	line-height: 1.2;
+	letter-spacing: -0.01em;
+}
+
+h3 {
+	font-size: 1.3125rem;
+	line-height: 1.3;
+}
+
+code,
+pre {
+	font-family: var(--font-mono);
+}
+
+:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+
+.skip-link {
+	position: absolute;
+	left: 0.5rem;
+	top: -3rem;
+	z-index: 100;
+	background: var(--color-primary-bg);
+	color: var(--color-primary-text);
+	padding: 0.5rem 1rem;
+	border-radius: var(--radius-button);
+	transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+	top: 0.5rem;
+}
+
+.wrap {
+	max-width: var(--max-width);
+	margin-inline: auto;
+	padding-inline: 1.5rem;
+}
+
+.eyebrow {
+	display: block;
+	font-family: var(--font-mono);
+	font-size: 0.8125rem;
+	font-weight: 500;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--color-text-muted);
+}
+
+.pill {
+	display: inline-flex;
+	align-items: center;
+	font-family: var(--font-mono);
+	font-size: 0.75rem;
+	font-weight: 500;
+	padding: 0.25rem 0.65rem;
+	border-radius: 999px;
+	background: var(--color-surface);
+	border: 1px solid var(--color-surface-border);
+	color: var(--color-text);
+}
+
+/* Header */
+
+.site-header {
+	border-bottom: 1px solid var(--color-surface-border);
+}
+
+.site-header .wrap {
+	display: flex;
+	align-items: center;
+	gap: 2rem;
+	height: 68px;
+}
+
+.brand {
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+}
+
+.brand img {
+	height: 32px;
+	width: auto;
+}
+
+.brand-logo-dark {
+	display: none;
+}
+
+:root[data-theme='dark'] .brand-logo-light {
+	display: none;
+}
+
+:root[data-theme='dark'] .brand-logo-dark {
+	display: block;
+}
+
+.primary-nav {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+	margin-left: auto;
+}
+
+.primary-nav-links {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
+}
+
+.primary-nav-links a {
+	color: var(--color-text);
+	text-decoration: none;
+	font-size: 0.95rem;
+	font-weight: 500;
+}
+
+.primary-nav-links a:hover {
+	color: var(--color-accent-text);
+	text-decoration: underline;
+}
+
+.theme-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.25rem;
+	height: 2.25rem;
+	border-radius: var(--radius-button);
+	border: 1px solid var(--color-surface-border);
+	background: var(--color-surface);
+	color: var(--color-text);
+	cursor: pointer;
+}
+
+.theme-toggle:hover {
+	border-color: var(--color-accent);
+}
+
+.theme-toggle svg {
+	width: 1.1rem;
+	height: 1.1rem;
+}
+
+.theme-toggle .icon-moon {
+	display: none;
+}
+
+:root[data-theme='dark'] .theme-toggle .icon-sun {
+	display: none;
+}
+
+:root[data-theme='dark'] .theme-toggle .icon-moon {
+	display: block;
+}
+
+/* Buttons and links */
+
+.button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	height: 44px;
+	padding: 0 20px;
+	border-radius: var(--radius-button);
+	font-size: 15px;
+	font-weight: 600;
+	text-decoration: none;
+	border: 1.5px solid transparent;
+	white-space: nowrap;
+}
+
+.button-sm {
+	height: 38px;
+	padding: 0 16px;
+	font-size: 14px;
+}
+
+.button-primary {
+	background: var(--color-primary-bg);
+	color: var(--color-primary-text);
+}
+
+.button-primary:hover {
+	background: var(--color-primary-bg-hover);
+	color: var(--color-primary-text);
+}
+
+.button-secondary {
+	background: transparent;
+	color: var(--color-heading);
+	border-color: var(--color-heading);
+}
+
+.button-secondary:hover {
+	background: var(--color-surface);
+	color: var(--color-heading);
+}
+
+.text-link {
+	color: var(--color-heading);
+	font-weight: 600;
+	text-decoration: underline;
+	text-decoration-color: var(--color-accent);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 4px;
+}
+
+.text-link:hover {
+	color: var(--color-accent-text);
+}
+
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-top: 1.5rem;
+	padding: 0.4rem 0.85rem;
+	border-radius: 999px;
+	background: var(--color-bg);
+	border: 1px solid var(--color-surface-border);
+	color: var(--color-text-muted);
+	font-size: 0.85rem;
+}
+
+/* Sections */
+
+section {
+	padding-block: 3.5rem;
+}
+
+section.alt {
+	background: var(--color-surface);
+	border-block: 1px solid var(--color-surface-border);
+}
+
+.section-title {
+	margin-bottom: 0.5rem;
+}
+
+.section-intro {
+	color: var(--color-text-muted);
+	max-width: 42rem;
+	margin-top: 0;
+}
+
+/* Hero */
+
+.hero {
+	padding-block: 3rem;
+}
+
+.hero-surface {
+	background: var(--color-surface);
+	border-radius: var(--radius-card);
+	padding: clamp(1.75rem, 4vw, 4rem);
+	display: grid;
+	grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+	gap: 2.5rem;
+	align-items: center;
+}
+
+@media (max-width: 860px) {
+	.hero-surface {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+.hero-copy {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	align-items: flex-start;
+}
+
+.hero-copy h1 {
+	max-width: 22ch;
+}
+
+.hero-copy p {
+	max-width: 40rem;
+	color: var(--color-text);
+	font-size: 1.0625rem;
+	margin: 0;
+}
+
+.hero-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1rem;
+}
+
+/* Hero story: one animation, a subtitle, a segmented progress bar, and
+   pause/replay controls, all outside the scaled scene itself. */
+
+.hero-story {
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+	min-width: 0;
+}
+
+/* Fixed height for up to two lines, so swapping subtitle text never
+   shifts the layout below it. Purely decorative (aria-hidden): the same
+   sentences are always available via .story-steps. */
+.story-subtitle {
+	margin: 0;
+	min-height: 2.6em;
+	color: var(--color-text-muted);
+	font-size: 0.95rem;
+	line-height: 1.3;
+}
+
+.story-progress {
+	display: flex;
+	gap: 0.35rem;
+}
+
+.story-segment {
+	display: block;
+	flex: 1;
+	height: 2px;
+	background: var(--color-surface-border);
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.story-segment-fill {
+	display: block;
+	height: 100%;
+	width: 100%;
+	background: var(--color-accent);
+	transform: scaleX(0);
+	transform-origin: left;
+	transition: transform linear;
+}
+
+.story-controls {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.story-control {
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 2rem;
+	padding-inline: 0.6rem;
+	border-radius: var(--radius-button);
+	border: 1px solid var(--color-surface-border);
+	background: var(--color-bg);
+	color: var(--color-text);
+	font-size: 0.85rem;
+	cursor: pointer;
+}
+
+.story-control:hover {
+	border-color: var(--color-accent);
+}
+
+[data-story-toggle] {
+	width: 2rem;
+	padding-inline: 0;
+}
+
+.story-control svg {
+	width: 1rem;
+	height: 1rem;
+}
+
+.story-control .icon-play {
+	display: none;
+}
+
+.story-control.is-paused .icon-pause {
+	display: none;
+}
+
+.story-control.is-paused .icon-play {
+	display: block;
+}
+
+/* The full story, always available to assistive tech as a visually
+   hidden ordered list; the visible telling of it is the subtitle,
+   progress bar, and animation above. Scenes play the same way
+   regardless of prefers-reduced-motion, by product decision: Pause and
+   Replay (always visible, see .story-controls above) are the user's
+   way to stop it, not an automatic switch to a static view. */
+.story-steps {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Definition */
+
+.definition-section {
+	padding-block-start: 0;
+}
+
+/* As wide as .hero-surface above it: both are plain, unconstrained
+   block children of the same .wrap, so they always share its left and
+   right edges at any viewport width. The text itself stays capped at
+   readable width via .definition-text below, left-aligned next to the
+   opening quote; the closing quote (position: absolute, see .quote-close)
+   then falls naturally at the wide card's own bottom right corner. */
+.definition {
+	position: relative;
+	border: 1px solid var(--color-surface-border);
+	border-radius: var(--radius-card);
+	background: var(--color-surface);
+	padding: 2rem clamp(1.25rem, 6vw, 5.5rem) 3.25rem clamp(3rem, 9vw, 5.5rem);
+}
+
+.definition-text {
+	max-width: 70ch;
+}
+
+/* Large decorative quote marks, hidden from assistive technology. */
+.definition .quote {
+	position: absolute;
+	font-size: clamp(5rem, 12vw, 7.5rem);
+	font-weight: 600;
+	line-height: 1;
+	color: var(--color-accent);
+	pointer-events: none;
+	user-select: none;
+}
+
+.definition .quote-open {
+	top: 0.4rem;
+	left: clamp(0.5rem, 2vw, 1rem);
+}
+
+.definition .quote-close {
+	bottom: -2.4rem;
+	right: clamp(0.5rem, 2vw, 1rem);
+}
+
+.definition .term {
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: var(--color-heading);
+}
+
+.definition .pos {
+	font-style: italic;
+	color: var(--color-text-muted);
+	font-size: 0.9rem;
+	margin: 0.15rem 0 0.75rem;
+}
+
+.definition p {
+	margin: 0;
+}
+
+/* Demo */
+
+.demo-list {
+	display: grid;
+	gap: 2rem;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+figure.demo-figure {
+	margin: 0;
+}
+
+figure.demo-figure img {
+	border: 1px solid var(--color-surface-border);
+	border-radius: var(--radius-card);
+	width: 100%;
+	height: auto;
+}
+
+figure.demo-figure figcaption {
+	margin-top: 0.65rem;
+	color: var(--color-text-muted);
+	font-size: 0.9rem;
+}
+
+/* Deployment modes */
+
+.modes-list {
+	display: grid;
+	gap: 2rem;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	margin-top: 2rem;
+}
+
+.mode-card h3 {
+	margin: 0 0 0.5rem;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+}
+
+.mode-card p {
+	color: var(--color-text);
+	margin: 0 0 1rem;
+}
+
+/* Capabilities: an ARIA tabs explorer. Vertical list + panel from 900px,
+   a horizontally scrollable chip row above the panel below that. Without
+   JS every panel stays visible (stacked); scenes.ts adds .is-enhanced and
+   hides the inactive ones once tab behaviour is wired up. */
+
+.capability-explorer {
+	margin-top: 2rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.capability-tablist {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.capability-tablist [role='tab'] {
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+	align-items: flex-start;
+	text-align: left;
+	padding: 0.75rem 0.9rem;
+	border: 1px solid transparent;
+	border-radius: var(--radius-button);
+	background: none;
+	cursor: pointer;
+	color: var(--color-text);
+}
+
+.capability-tablist [role='tab'][aria-selected='true'] {
+	background: var(--color-bg);
+	border-color: var(--color-surface-border);
+}
+
+.capability-tablist .capability-label {
+	font-family: var(--font-mono);
+	font-size: 0.72rem;
+	color: var(--color-accent-text);
+	overflow-wrap: anywhere;
+}
+
+.capability-tablist .capability-tab-title {
+	font-size: 0.92rem;
+	font-weight: 500;
+	color: var(--color-heading);
+}
+
+.capability-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 1.25rem;
+	border: 1px solid var(--color-surface-border);
+	border-radius: var(--radius-card);
+	padding: 24px;
+	background: var(--color-bg);
+}
+
+.capability-panel[hidden] {
+	display: none;
+}
+
+/* Cap the scene's width so it reads at roughly the same size as the
+   hero's, instead of stretching to the full (much wider) panel column
+   and blowing up its inner text. */
+.capability-panel .scene-wrap {
+	max-width: 560px;
+}
+
+.capability-panel-copy h3 {
+	font-size: 20px;
+	margin: 0 0 0.6rem;
+}
+
+.capability-panel-copy p {
+	margin: 0 0 0.5rem;
+	color: var(--color-text);
+	font-size: 15px;
+	line-height: 1.55;
+}
+
+.capability-code {
+	display: block;
+	margin-top: 0.75rem;
+	padding: 0.6rem 0.85rem;
+	border-radius: 6px;
+	background: var(--color-code-bg);
+	color: var(--color-code-text);
+	font-family: var(--font-mono);
+	font-size: 0.82rem;
+	overflow-x: auto;
+	white-space: pre;
+}
+
+@media (min-width: 900px) {
+	.capability-explorer {
+		flex-direction: row;
+		align-items: flex-start;
+		gap: 2rem;
+	}
+
+	.capability-tablist {
+		width: 15rem;
+		flex-shrink: 0;
+		position: sticky;
+		top: 1.5rem;
+	}
+
+	.capability-panels {
+		flex: 1;
+		min-width: 0;
+	}
+}
+
+@media (max-width: 899px) {
+	.capability-tablist {
+		flex-direction: row;
+		gap: 0.5rem;
+		overflow-x: auto;
+		padding-bottom: 0.25rem;
+	}
+
+	.capability-tablist [role='tab'] {
+		flex-shrink: 0;
+	}
+}
+
+/* Without JS, the tabs do nothing (no click handler ever attaches); see
+   the <noscript> block in Capabilities.astro, which un-hides every panel
+   so they stay visible and stacked instead of only the first. */
+
+/* Principles */
+
+.principles-list {
+	list-style: none;
+	margin: 2rem 0 0;
+	padding: 0;
+	display: grid;
+	gap: 1rem;
+}
+
+.principles-list li {
+	padding-left: 1.5rem;
+	position: relative;
+	color: var(--color-text);
+}
+
+.principles-list li::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0.55rem;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 999px;
+	background: var(--color-accent);
+}
+
+/* Comparison table */
+
+.table-scroll-hint {
+	margin: 1rem 0 0;
+	color: var(--color-text-muted);
+	font-size: 0.85rem;
+}
+
+.table-scroll {
+	overflow-x: auto;
+	margin-top: 0.5rem;
+	background: var(--color-surface);
+	border: 1px solid var(--color-surface-border);
+	border-radius: var(--radius-card);
+}
+
+.comparison-table {
+	border-collapse: collapse;
+	width: 100%;
+	min-width: 640px;
+	font-size: 0.9rem;
+}
+
+.comparison-table caption {
+	text-align: left;
+	padding: 0.75rem 1rem 0;
+	color: var(--color-text-muted);
+}
+
+.comparison-table th,
+.comparison-table td {
+	text-align: left;
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid var(--color-surface-border);
+	color: var(--color-text);
+}
+
+.comparison-table thead th {
+	background: var(--color-surface);
+	color: var(--color-heading);
+	white-space: nowrap;
+}
+
+.comparison-table tbody th {
+	white-space: nowrap;
+	color: var(--color-heading);
+	font-weight: 600;
+}
+
+.comparison-table tbody tr:last-child td,
+.comparison-table tbody tr:last-child th {
+	border-bottom: none;
+}
+
+/* From 760px up, make the table fit its container instead of scrolling:
+   fixed layout with a narrower first column, tighter padding, smaller
+   font, and wrapping allowed on every cell. */
+@media (min-width: 760px) {
+	.table-scroll-hint {
+		display: none;
+	}
+
+	.comparison-table {
+		table-layout: fixed;
+		min-width: 0;
+		font-size: 0.82rem;
+	}
+
+	.comparison-table th,
+	.comparison-table td {
+		padding: 0.55rem 0.65rem;
+	}
+
+	.comparison-table thead th:first-child,
+	.comparison-table tbody th {
+		width: 22%;
+		white-space: normal;
+	}
+
+	.comparison-table thead th:not(:first-child) {
+		white-space: normal;
+	}
+}
+
+/* Get started */
+
+.code-block {
+	background: var(--color-code-bg);
+	border-radius: var(--radius-code);
+	margin-top: 2rem;
+	max-width: 42rem;
+	overflow: hidden;
+}
+
+.code-block-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 10px 16px;
+	background: var(--color-code-header-bg);
+}
+
+.code-block-label {
+	font-family: var(--font-mono);
+	font-size: 12px;
+	color: var(--color-code-label);
+}
+
+.code-block pre {
+	margin: 0;
+	padding: 18px 16px;
+	font-family: var(--font-mono);
+	font-size: 15px;
+	line-height: 1.7;
+	color: var(--color-code-text);
+	overflow-x: auto;
+	/* Each command is its own block-level div, so line breaks come from
+	   that, not from preserved whitespace: override the UA default
+	   `white-space: pre` on <pre>, which would otherwise render the
+	   template's own indentation as literal characters. */
+	white-space: normal;
+}
+
+.code-block pre .prompt {
+	color: var(--color-code-muted);
+	margin-right: 0.5em;
+}
+
+.copy-button {
+	flex-shrink: 0;
+	background: transparent;
+	border: none;
+	color: var(--color-code-accent);
+	font-family: var(--font-mono);
+	font-size: 12px;
+	cursor: pointer;
+	padding: 0.25rem;
+}
+
+.copy-button:hover {
+	text-decoration: underline;
+}
+
+.get-started-link {
+	margin-top: 1.25rem;
+}
+
+/* Footer, a fixed navy brand block regardless of theme */
+
+.site-footer {
+	background: #0f3350;
+	color: #a9bccb;
+	padding-block: 2rem;
+	font-size: 0.9rem;
+}
+
+.site-footer .wrap {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem 2rem;
+	align-items: center;
+}
+
+.site-footer img {
+	height: 28px;
+	width: auto;
+}
+
+.footer-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.25rem;
+}
+
+.footer-links a {
+	color: #a9bccb;
+	text-decoration: none;
+}
+
+.footer-links a:hover {
+	color: #f4a261;
+	text-decoration: underline;
+}
+
+.footer-note {
+	margin-left: auto;
+}
+
+@media (max-width: 640px) {
+	.site-header .wrap {
+		gap: 0.75rem;
+	}
+
+	.brand img {
+		height: 26px;
+	}
+
+	.primary-nav {
+		gap: 0.5rem;
+	}
+
+	.primary-nav-links {
+		display: none;
+	}
+
+	.button-sm {
+		padding: 0 12px;
+	}
+
+	.site-footer .wrap {
+		justify-content: flex-start;
+	}
+
+	.footer-note {
+		margin-left: 0;
+	}
+}

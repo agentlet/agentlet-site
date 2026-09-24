@@ -1,0 +1,41 @@
+---
+import DeployBookmarkletScene from '../scenes/DeployBookmarkletScene.astro';
+import DeployExtensionScene from '../scenes/DeployExtensionScene.astro';
+import DeployNativeScene from '../scenes/DeployNativeScene.astro';
+---
+
+<section>
+	<div class="wrap">
+		<h2 class="section-title">Three ways to deploy</h2>
+		<p class="section-intro">
+			The same core augmentation capabilities, adapted to different technical environments and
+			constraints.
+		</p>
+		<div class="modes-list">
+			<div class="mode-card">
+				<h3><span class="pill">Bookmarklet</span></h3>
+				<p>
+					A small JavaScript snippet stored as a browser bookmark. Clicking it injects the
+					agentlet into the current page, with no installation required.
+				</p>
+				<DeployBookmarkletScene captionVisible />
+			</div>
+			<div class="mode-card">
+				<h3><span class="pill">Extension</span></h3>
+				<p>
+					An installable extension that launches agentlets with access to browser APIs, persistent
+					state, and automatic injection on chosen sites.
+				</p>
+				<DeployExtensionScene captionVisible />
+			</div>
+			<div class="mode-card">
+				<h3><span class="pill">Native</span></h3>
+				<p>
+					The same code the bookmarklet would inject at runtime is instead loaded directly by the
+					host application, for teams who can add a script tag but not change the backend.
+				</p>
+				<DeployNativeScene captionVisible />
+			</div>
+		</div>
+	</div>
+</section>

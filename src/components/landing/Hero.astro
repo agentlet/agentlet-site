@@ -1,0 +1,70 @@
+---
+import HeroStoryScene from '../scenes/HeroStoryScene.astro';
+
+// One 8-step, ~27.5s story (see HeroStoryScene.astro), driven by
+// src/scripts/scenes.ts setting data-step on the scene root. Durations
+// here are the single source of truth: the JS controller reads them off
+// each progress segment's data-duration, and HeroStoryScene's CSS
+// comments call out where step 4's dwell (5000ms) needs to stay in sync
+// with its own keyframe durations.
+const steps = [
+	{ subtitle: 'Your web app, as it is today.', duration: 3000 },
+	{ subtitle: 'Click the agentlet extension.', duration: 3000 },
+	{ subtitle: 'A side panel opens. The app itself is unchanged.', duration: 3500 },
+	{ subtitle: 'It reads a receipt and fills the form. You review and submit.', duration: 5000 },
+	{ subtitle: 'It exports the table to Excel.', duration: 3500 },
+	{ subtitle: 'It answers questions about the page.', duration: 4000 },
+	{ subtitle: 'Nothing on the host page had to change.', duration: 2000 },
+	{ subtitle: 'All of this was built quickly on top of the existing app, with agentlet.', duration: 3500 },
+];
+---
+
+<section class="hero">
+	<div class="wrap">
+		<div class="hero-surface">
+			<div class="hero-copy">
+				<span class="eyebrow">Open source, MIT</span>
+				<h1>Augment your web apps, without touching the backend.</h1>
+				<p>
+					Drop a small agent into any page with a bookmarklet, an extension, or a native
+					integration. It adds a side panel with the actions your team needs.
+				</p>
+				<div class="hero-actions">
+					<a class="button button-primary" href="/docs/getting-started/">Get started</a>
+					<a class="button button-secondary" href="https://github.com/agentlet/agentlet-core">
+						View on GitHub
+					</a>
+				</div>
+				<p class="badge">Live demo, coming soon</p>
+			</div>
+			<div class="hero-story" data-story>
+				<HeroStoryScene />
+				<p class="story-subtitle" aria-hidden="true" data-story-subtitle>&nbsp;</p>
+				<div class="story-progress" role="presentation">
+					{
+						steps.map((step) => (
+							<span class="story-segment" data-story-segment data-duration={step.duration}>
+								<span class="story-segment-fill" />
+							</span>
+						))
+					}
+				</div>
+				<div class="story-controls">
+					<button type="button" class="story-control" data-story-toggle aria-label="Pause animation">
+						<svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<rect x="6" y="5" width="4" height="14" rx="1"></rect>
+							<rect x="14" y="5" width="4" height="14" rx="1"></rect>
+						</svg>
+						<svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+							<path d="M7 5v14l12-7z"></path>
+						</svg>
+					</button>
+					<button type="button" class="story-control story-replay" data-story-replay>Replay</button>
+				</div>
+				<ol class="story-steps">
+					{steps.map((step) => <li>{step.subtitle}</li>)}
+				</ol>
+			</div>
+		</div>
+	</div>
+</section>

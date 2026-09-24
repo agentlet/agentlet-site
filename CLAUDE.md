@@ -37,8 +37,10 @@ the UI.
 - Sentence case in all titles, buttons and navigation labels (for example
   "Get started", not "Get Started").
 - No emojis in titles.
-- No em dashes (`—`) anywhere, and no en dashes used as punctuation. Use a
-  comma, a period, or "and" instead.
+- No em dashes, no en dashes, and no middle dots anywhere (they read as
+  machine-written). Use a comma, a period, or "and" instead. Enforced by
+  `scripts/check-typography.mjs`, run in `npm run lint` and again in CI
+  against the built `dist/` output.
 - No marketing puffery: avoid words like "revolutionary", "seamless",
   "supercharge", "unleash".
 - Short sentences.
@@ -49,6 +51,14 @@ the UI.
 Simple, open source, honest. Plain typography, generous whitespace, content
 first, code blocks, one accent colour. No gradients, no stock illustrations,
 no testimonials, no pricing, no hype.
+
+By product decision, the animated product scenes under
+`src/components/scenes/` (hero story, capability explorer, deployment
+modes) play the same way regardless of the `prefers-reduced-motion`
+preference; they do not switch to a static state. The hero story always
+shows visible Pause and Replay controls, which are the user's way to stop
+the motion, alongside a visually hidden ordered list of its steps for
+screen readers.
 
 ## Source of truth
 

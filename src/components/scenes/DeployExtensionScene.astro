@@ -1,0 +1,135 @@
+---
+import SceneFrame from './SceneFrame.astro';
+
+interface Props {
+	captionVisible?: boolean;
+}
+
+const { captionVisible } = Astro.props;
+---
+
+<SceneFrame
+	class="scene-deploy-extension"
+	caption="Injected on the sites you choose"
+	captionVisible={captionVisible}
+	chrome
+	panelHidden
+>
+	<Fragment slot="chrome">
+		<span class="scene-url-stack">
+			<span class="scene-url scene-url-before">generic-site.com</span>
+			<span class="scene-url scene-url-after">your-internal-tool.app</span>
+		</span>
+		<span class="scene-ext-icon">
+			<img class="scene-ext-symbol" src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span class="scene-ext-badge"></span>
+		</span>
+	</Fragment>
+	<Fragment slot="app">
+		<div class="scene-app-url">your-internal-tool.app</div>
+		<div class="scene-bar" style="width:60%"></div>
+		<div class="scene-field"></div>
+		<div class="scene-field"></div>
+		<div class="scene-bar" style="width:40%"></div>
+		<div class="scene-field"></div>
+	</Fragment>
+	<Fragment slot="panel">
+		<div class="scene-panel-brand">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div class="scene-action scene-action-primary">Fill this form</div>
+		<div class="scene-action">Export table</div>
+		<div class="scene-action">Analyze page</div>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	/* No click to point at (no cursor is rendered): the URL change and
+	   panel appearance happen on their own. */
+	.scene-deploy-extension .scene-url-stack {
+		position: relative;
+		flex: 1;
+		height: 3.6cqi;
+	}
+
+	.scene-deploy-extension .scene-url {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		font-size: 2.6cqi;
+	}
+
+	.scene-deploy-extension .scene-url-before {
+		opacity: 1;
+		animation-name: scene-url-before;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	.scene-deploy-extension .scene-url-after {
+		opacity: 0;
+		animation-name: scene-url-after;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes scene-url-before {
+		0%,
+		29% {
+			opacity: 1;
+		}
+		32%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	@keyframes scene-url-after {
+		0%,
+		29% {
+			opacity: 0;
+		}
+		32%,
+		100% {
+			opacity: 1;
+		}
+	}
+
+	.scene-deploy-extension .scene-ext-icon {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: 5.4cqi;
+		height: 5.4cqi;
+		border-radius: 4px;
+		background: var(--color-surface-border);
+	}
+
+	.scene-deploy-extension .scene-ext-symbol {
+		width: 72%;
+		height: 72%;
+	}
+
+	.scene-deploy-extension .scene-ext-badge {
+		position: absolute;
+		top: -0.6cqi;
+		right: -0.6cqi;
+		width: 2cqi;
+		height: 2cqi;
+		border-radius: 999px;
+		background: var(--color-accent);
+		/* A ring in the toolbar colour keeps the badge distinct from the
+		   orange symbol it overlaps. */
+		border: 0.4cqi solid var(--color-surface);
+		opacity: 0;
+		animation-name: scene-fade-in;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+</style>

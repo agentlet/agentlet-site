@@ -1,0 +1,96 @@
+---
+import SceneFrame from './SceneFrame.astro';
+
+interface Props {
+	captionVisible?: boolean;
+}
+
+const { captionVisible } = Astro.props;
+---
+
+<SceneFrame class="scene-deploy-native" caption="Shipped by the host application" captionVisible={captionVisible} panelHidden>
+	<Fragment slot="app">
+		<div class="scene-native-stack">
+			<div class="scene-code-card scene-native-code">
+				<div class="scene-code-line">&lt;body&gt;</div>
+				<div class="scene-code-line scene-code-highlight scene-code-indent">
+					&lt;script src="/assets/agentlet-core.js"&gt;&lt;/script&gt;
+				</div>
+				<div class="scene-code-line">&lt;/body&gt;</div>
+			</div>
+			<div class="scene-native-app">
+				<div class="scene-app-url">your-internal-tool.app</div>
+				<div class="scene-bar" style="width:60%"></div>
+				<div class="scene-field"></div>
+				<div class="scene-field"></div>
+			</div>
+		</div>
+	</Fragment>
+	<Fragment slot="panel">
+		<div class="scene-panel-brand">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div class="scene-action scene-action-primary">Fill this form</div>
+		<div class="scene-action">Export table</div>
+		<div class="scene-action">Analyze page</div>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	/* No click to point at (no cursor is rendered): the code runs on its
+	   own as the host page loads. */
+	.scene-deploy-native .scene-native-stack {
+		position: relative;
+		flex: 1;
+	}
+
+	.scene-deploy-native .scene-native-code,
+	.scene-deploy-native .scene-native-app {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2cqi;
+	}
+
+	.scene-deploy-native .scene-native-code {
+		opacity: 1;
+		animation-name: scene-native-code;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	.scene-deploy-native .scene-native-app {
+		padding: 2cqi;
+		opacity: 0;
+		animation-name: scene-native-app;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes scene-native-code {
+		0%,
+		44% {
+			opacity: 1;
+		}
+		50%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	@keyframes scene-native-app {
+		0%,
+		44% {
+			opacity: 0;
+		}
+		50%,
+		100% {
+			opacity: 1;
+		}
+	}
+
+</style>

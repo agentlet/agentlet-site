@@ -1,0 +1,50 @@
+---
+import SceneFrame from './SceneFrame.astro';
+
+interface Props {
+	captionVisible?: boolean;
+}
+
+const { captionVisible } = Astro.props;
+---
+
+<SceneFrame class="scene-deploy-bookmarklet" caption="Injected at runtime, nothing to install" captionVisible={captionVisible} chrome panelHidden>
+	<Fragment slot="chrome">
+		<span class="scene-bookmark">Inbox</span>
+		<span class="scene-bookmark scene-bookmark-active scene-click-target" style="--cursor-offset-x:2cqi;--cursor-offset-y:11cqi">
+			agentlet
+			<span class="scene-cursor"></span>
+			<span class="scene-click-pulse"></span>
+		</span>
+		<span class="scene-bookmark">Docs</span>
+	</Fragment>
+	<Fragment slot="app">
+		<div class="scene-app-url">your-internal-tool.app</div>
+		<div class="scene-bar" style="width:60%"></div>
+		<div class="scene-field"></div>
+		<div class="scene-field"></div>
+		<div class="scene-bar" style="width:40%"></div>
+		<div class="scene-field"></div>
+	</Fragment>
+	<Fragment slot="panel">
+		<div class="scene-panel-brand">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div class="scene-action scene-action-primary">Fill this form</div>
+		<div class="scene-action">Export table</div>
+		<div class="scene-action">Analyze page</div>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	.scene-deploy-bookmarklet .scene-bookmark {
+		font-size: 2.6cqi;
+		color: var(--color-text-muted);
+	}
+
+	.scene-deploy-bookmarklet .scene-bookmark-active {
+		font-weight: 600;
+		color: var(--color-heading);
+	}
+</style>

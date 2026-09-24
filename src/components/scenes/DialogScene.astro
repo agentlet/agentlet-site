@@ -1,0 +1,176 @@
+---
+import SceneFrame from './SceneFrame.astro';
+
+const options = ['Travel', 'Office', 'Client'];
+---
+
+<SceneFrame
+	class="scene-dialog-scene"
+	caption="An export dialog asking Cost center, with three options. The cursor picks Travel, the dialog closes, and a toast confirms 12 rows exported before fading."
+>
+	<Fragment slot="app">
+		<div class="scene-app-url">invoices.app/list</div>
+		<div class="scene-bar" style="width:60%"></div>
+		<div class="scene-field"></div>
+		<div class="scene-field"></div>
+		<div class="scene-dialog-overlay">
+			<div class="scene-dialog">
+				<p class="scene-dialog-title">Cost center?</p>
+				<div class="scene-dialog-options">
+					{
+						options.map((option, i) =>
+							i === 0 ? (
+								<span
+									class="scene-dialog-option scene-click-target"
+									style="--cursor-offset-x:13cqi;--cursor-offset-y:9cqi"
+								>
+									{option}
+									<span class="scene-cursor"></span>
+									<span class="scene-click-pulse"></span>
+								</span>
+							) : (
+								<span class="scene-dialog-option">{option}</span>
+							),
+						)
+					}
+				</div>
+			</div>
+		</div>
+		<div class="scene-toast">12 rows exported</div>
+	</Fragment>
+	<Fragment slot="panel">
+		<div class="scene-panel-brand">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div class="scene-action scene-action-primary">Export table</div>
+		<div class="scene-action">Fill this form</div>
+		<div class="scene-action">Analyze page</div>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	.scene-dialog-scene .scene-dialog-overlay {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: color-mix(in srgb, var(--color-bg) 55%, transparent);
+		opacity: 0;
+		animation-name: scene-dialog-visible;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes scene-dialog-visible {
+		0%,
+		16% {
+			opacity: 0;
+		}
+		22%,
+		42% {
+			opacity: 1;
+		}
+		48%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	.scene-dialog-scene .scene-dialog {
+		width: 74%;
+		padding: 2.4cqi;
+		background: var(--color-bg);
+		border: 1px solid var(--color-surface-border);
+		border-radius: 8px;
+	}
+
+	.scene-dialog-scene .scene-dialog-title {
+		margin: 0 0 1.6cqi;
+		font-size: 2.6cqi;
+		font-weight: 600;
+		color: var(--color-heading);
+	}
+
+	.scene-dialog-scene .scene-dialog-options {
+		display: flex;
+		flex-direction: column;
+		gap: 1cqi;
+	}
+
+	.scene-dialog-scene .scene-dialog-option {
+		padding: 1.2cqi 1.6cqi;
+		border: 1px solid var(--color-surface-border);
+		border-radius: 4px;
+		font-size: 2.3cqi;
+		color: var(--color-text);
+	}
+
+	/* The picked option (first) gets the accent treatment as the cursor
+	   arrives, matching the shared click timing. */
+	.scene-dialog-scene .scene-dialog-option:first-child {
+		animation-name: scene-dialog-pick;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes scene-dialog-pick {
+		0%,
+		27% {
+			background: var(--color-bg);
+			border-color: var(--color-surface-border);
+			color: var(--color-text);
+		}
+		30%,
+		42% {
+			background: var(--color-primary-bg);
+			border-color: var(--color-primary-bg);
+			color: var(--color-primary-text);
+		}
+		48%,
+		100% {
+			background: var(--color-bg);
+			border-color: var(--color-surface-border);
+			color: var(--color-text);
+		}
+	}
+
+	.scene-dialog-scene .scene-toast {
+		position: absolute;
+		left: 50%;
+		bottom: 4cqi;
+		transform: translate(-50%, 3cqi);
+		padding: 1.2cqi 2.2cqi;
+		border-radius: 999px;
+		background: var(--color-heading);
+		color: var(--color-bg);
+		font-size: 2.2cqi;
+		opacity: 0;
+		animation-name: scene-dialog-toast;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	@keyframes scene-dialog-toast {
+		0%,
+		44% {
+			opacity: 0;
+			transform: translate(-50%, 3cqi);
+		}
+		50%,
+		90% {
+			opacity: 1;
+			transform: translate(-50%, 0);
+		}
+		97%,
+		100% {
+			opacity: 0;
+			transform: translate(-50%, 0);
+		}
+	}
+
+</style>

@@ -1,0 +1,115 @@
+---
+const rows = [
+	{
+		aspect: 'Installation',
+		robot: 'Heavy: desktop and backend',
+		bookmarklet: 'Light: bookmarklet',
+		extension: 'Light: browser extension',
+		native: 'Light: served by host app',
+	},
+	{
+		aspect: 'Autonomy',
+		robot: 'Fully autonomous',
+		bookmarklet: 'Needs user action',
+		extension: 'Semi-autonomous',
+		native: 'Semi-autonomous',
+	},
+	{
+		aspect: 'Security, scope of action',
+		robot: 'Full access: OS, files, apps',
+		bookmarklet: 'Sandboxed, browser only',
+		extension: 'Extended: extension APIs',
+		native: 'Sandboxed, inside app',
+	},
+	{
+		aspect: 'Robustness to UI changes',
+		robot: 'Fragile',
+		bookmarklet: 'Robust with good selectors',
+		extension: 'Same as bookmarklet',
+		native: 'Very robust: tied to app code',
+	},
+	{
+		aspect: 'Performance',
+		robot: 'Often slow',
+		bookmarklet: 'Instant',
+		extension: 'Instant',
+		native: 'Instant',
+	},
+	{
+		aspect: 'Relies on user context',
+		robot: 'Yes',
+		bookmarklet: 'Yes',
+		extension: 'Yes',
+		native: 'Yes',
+	},
+	{
+		aspect: 'Interacts with page like a user',
+		robot: 'Yes',
+		bookmarklet: 'Yes',
+		extension: 'Yes',
+		native: 'Yes',
+	},
+	{
+		aspect: 'Goes beyond current page',
+		robot: 'Yes',
+		bookmarklet: 'No: single page app only',
+		extension: 'Yes: across browser tabs',
+		native: 'No: single app context',
+	},
+	{
+		aspect: 'Goes beyond browser',
+		robot: 'Yes: system-wide',
+		bookmarklet: 'No',
+		extension: 'No',
+		native: 'No',
+	},
+	{
+		aspect: 'Interacts with embedded elements',
+		robot: 'Limited: surface only',
+		bookmarklet: 'Deep: full DOM access',
+		extension: 'Deep: same, plus APIs',
+		native: 'Deep: full access to app DOM',
+	},
+];
+---
+
+<section class="alt">
+	<div class="wrap">
+		<h2 class="section-title">Compared to robots</h2>
+		<p class="section-intro">
+			Agentlets can look like lightweight, local robots, the kind used in RPA (robotic process
+			automation). They are not true bots: they depend on the context of the user's active tab and
+			enhance, rather than replace, the user's interaction.
+		</p>
+		<p class="table-scroll-hint">Scroll for more</p>
+		<div class="table-scroll">
+			<table class="comparison-table">
+				<caption>
+					Robots compared to the three agentlet deployment modes
+				</caption>
+				<thead>
+					<tr>
+						<th scope="col">Aspect</th>
+						<th scope="col">Robot</th>
+						<th scope="col">Bookmarklet</th>
+						<th scope="col">Extension</th>
+						<th scope="col">Native</th>
+					</tr>
+				</thead>
+				<tbody>
+					{
+						rows.map((row) => (
+							<tr>
+								<th scope="row">{row.aspect}</th>
+								<td>{row.robot}</td>
+								<td>{row.bookmarklet}</td>
+								<td>{row.extension}</td>
+								<td>{row.native}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</section>

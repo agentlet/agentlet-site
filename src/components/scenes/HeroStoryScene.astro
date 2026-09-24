@@ -1,0 +1,584 @@
+---
+import SceneFrame from './SceneFrame.astro';
+
+// A single ~27.5s, 8-step story of the agentlet principle: one host page,
+// never changing, gaining a side panel that reads a receipt, exports a
+// table, answers a question, then (step 8) holds that finished state
+// while calling out the host page and the agentlet layer added on top
+// of it. Unlike the other scenes (one continuous CSS keyframe timeline
+// keyed to --scene-duration), this one is driven step by step:
+// src/scripts/scenes.ts sets data-step="1".."8" on the .scene root on a
+// timer, and every rule below keys off that attribute with plain CSS
+// transitions (a couple of short, step-scoped keyframe animations
+// handle the receipt card's own appear-then-shrink). The step durations
+// here (in the "step4 dwell" etc. comments) must match the durations
+// Hero.astro hands to the controller.
+---
+
+<SceneFrame
+	class="scene-herostory"
+	caption="An animated walkthrough: an expense report page gains an agentlet side panel that reads a receipt into the form, exports the line items to Excel, and answers a question about the page, all without changing the host page itself."
+	aspectRatio="4 / 3"
+	chrome
+>
+	<Fragment slot="chrome">
+		<span class="story-chrome-url">expenses.internal.app/report/2291</span>
+		<span class="story-ext-icon scene-click-target" style="--cursor-offset-x:1cqi;--cursor-offset-y:13cqi">
+			<img class="story-ext-symbol" src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span class="story-ext-badge"></span>
+			<span class="scene-cursor story-cursor-step2"></span>
+			<span class="scene-click-pulse story-pulse-step2"></span>
+		</span>
+	</Fragment>
+	<Fragment slot="app">
+		<div class="story-field-grid">
+			<div class="story-field-group">
+				<span class="story-field-label">Vendor</span>
+				<div class="scene-field">
+					<span class="scene-field-value story-field-value story-field-vendor">Cedar &amp; Co</span>
+				</div>
+			</div>
+			<div class="story-field-group">
+				<span class="story-field-label">Date</span>
+				<div class="scene-field">
+					<span class="scene-field-value story-field-value story-field-date">2024-03-21</span>
+				</div>
+			</div>
+			<div class="story-field-group">
+				<span class="story-field-label">Amount</span>
+				<div class="scene-field">
+					<span class="scene-field-value story-field-value story-field-amount">$187.40</span>
+				</div>
+			</div>
+			<div class="story-field-group">
+				<span class="story-field-label">Category</span>
+				<div class="scene-field">
+					<span class="scene-field-value story-field-value story-field-category">Travel</span>
+				</div>
+			</div>
+		</div>
+		<div class="scene-submit scene-submit-highlight story-submit">Submit</div>
+		<div class="story-table">
+			<div class="story-row story-row-head">
+				<span>Line item</span><span>Amount</span>
+			</div>
+			<div class="story-row">
+				<span>Hotel</span><span>$420.00</span>
+			</div>
+			<div class="story-row">
+				<span>Meals</span><span>$96.50</span>
+			</div>
+			<div class="story-row">
+				<span>Taxi</span><span>$54.20</span>
+			</div>
+		</div>
+		<span class="story-app-label">your app, unchanged</span>
+	</Fragment>
+	<Fragment slot="panel">
+		<span class="story-agentlet-layer-label">agentlet layer</span>
+		<div class="scene-panel-brand">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div
+			class="scene-action story-action story-action-receipt scene-click-target"
+			style="--cursor-offset-x:14cqi;--cursor-offset-y:10cqi"
+		>
+			Read a receipt
+			<span class="scene-cursor story-cursor-step4"></span>
+			<span class="scene-click-pulse story-pulse-step4"></span>
+		</div>
+		<div
+			class="scene-action story-action story-action-export scene-click-target"
+			style="--cursor-offset-x:14cqi;--cursor-offset-y:10cqi"
+		>
+			Export table
+			<span class="scene-cursor story-cursor-step5"></span>
+			<span class="scene-click-pulse story-pulse-step5"></span>
+		</div>
+		<div
+			class="scene-action story-action story-action-ai scene-click-target"
+			style="--cursor-offset-x:14cqi;--cursor-offset-y:10cqi"
+		>
+			Ask the AI
+			<span class="scene-cursor story-cursor-step6"></span>
+			<span class="scene-click-pulse story-pulse-step6"></span>
+		</div>
+		<div class="story-result">
+			<div class="story-receipt-card">
+				<p class="story-receipt-card-title">receipt.pdf</p>
+				<div class="story-receipt-card-row"><span>Vendor</span><span>Cedar &amp; Co</span></div>
+				<div class="story-receipt-card-row"><span>Date</span><span>2024-03-21</span></div>
+				<div class="story-receipt-card-row"><span>Amount</span><span>$187.40</span></div>
+			</div>
+			<span class="scene-chip story-receipt-chip">Receipt read</span>
+			<span class="scene-chip story-xlsx-chip">expenses.xlsx, 3 rows</span>
+			<div class="story-ai-block">
+				<p class="story-ai-question">Anything unusual here?</p>
+				<p class="story-ai-answer story-ai-answer-1">The hotel is 40% above policy.</p>
+				<p class="story-ai-answer story-ai-answer-2">Everything else is in range.</p>
+			</div>
+		</div>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	.scene-herostory .story-chrome-url {
+		flex: 1;
+	}
+
+	/* The host page (form + table) needs to fit a taller stack than the
+	   other scenes' host pages: tighten the shared .scene-app padding and
+	   .scene-field height to make room, instead of dropping the third
+	   table row (its own chip claims "3 rows", so the table has to show
+	   three to stay factually consistent with it). */
+	.scene-herostory .scene-app {
+		position: relative;
+		padding: 3cqi;
+		gap: 1.3cqi;
+		opacity: 1;
+		transition: opacity 0.4s ease;
+	}
+
+	/* Step 8 holds the finished state and calls out the two layers: the
+	   host page, dimmed and labelled, and the agentlet panel, outlined
+	   and labelled (see the panel rules further down). */
+	.scene-herostory[data-step='8'] .scene-app {
+		opacity: 0.55;
+	}
+
+	.scene-herostory .story-app-label {
+		align-self: flex-start;
+		margin-top: auto;
+		font-family: var(--font-mono);
+		font-size: 1.9cqi;
+		color: var(--color-text-muted);
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+
+	.scene-herostory[data-step='8'] .story-app-label {
+		opacity: 1;
+		transition-delay: 0.2s;
+	}
+
+	.scene-herostory .scene-field {
+		height: 5.5cqi;
+	}
+
+	.scene-herostory .story-ext-icon {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: 5.4cqi;
+		height: 5.4cqi;
+		border-radius: 4px;
+		background: var(--color-surface-border);
+	}
+
+	.scene-herostory .story-ext-symbol {
+		width: 72%;
+		height: 72%;
+	}
+
+	.scene-herostory .story-ext-badge {
+		position: absolute;
+		top: -0.6cqi;
+		right: -0.6cqi;
+		width: 2cqi;
+		height: 2cqi;
+		border-radius: 999px;
+		background: var(--color-accent);
+		border: 0.4cqi solid var(--color-surface);
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+
+	/* --- Cursor and click pulse: this scene keys them off data-step
+	   instead of the shared percentage timeline in scenes.css. --- */
+	.scene-herostory .scene-cursor,
+	.scene-herostory .scene-click-pulse {
+		animation: none;
+	}
+
+	.scene-herostory .scene-cursor {
+		opacity: 0;
+		transition:
+			opacity 0.35s ease,
+			transform 0.45s ease;
+	}
+
+	.scene-herostory .scene-click-pulse {
+		opacity: 0;
+	}
+
+	.scene-herostory[data-step='2'] .story-cursor-step2,
+	.scene-herostory[data-step='4'] .story-cursor-step4,
+	.scene-herostory[data-step='5'] .story-cursor-step5,
+	.scene-herostory[data-step='6'] .story-cursor-step6 {
+		opacity: 1;
+		transform: translate(0, 0);
+	}
+
+	.scene-herostory[data-step='2'] .story-pulse-step2,
+	.scene-herostory[data-step='4'] .story-pulse-step4,
+	.scene-herostory[data-step='5'] .story-pulse-step5,
+	.scene-herostory[data-step='6'] .story-pulse-step6 {
+		/* One-shot pulse: fires once whenever this step's attribute value
+		   freshly matches, including on every loop replay. */
+		animation: story-click-pulse 800ms ease-out;
+	}
+
+	@keyframes story-click-pulse {
+		0% {
+			opacity: 0;
+			transform: scale(0.3);
+		}
+		30% {
+			opacity: 0.6;
+			transform: scale(0.5);
+		}
+		100% {
+			opacity: 0;
+			transform: scale(1.6);
+		}
+	}
+
+	.scene-herostory:is([data-step='2'], [data-step='3'], [data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8'])
+		.story-ext-badge {
+		opacity: 1;
+	}
+
+	/* --- The panel: hidden for steps 1-2, in place from step 3. Slightly
+	   tighter than the shared 1.4cqi gap, so its content (brand, three
+	   actions, one result artifact) has margin to spare against the
+	   frame at every step, not just barely fit. --- */
+	.scene-herostory .scene-panel {
+		position: relative;
+		gap: 1.1cqi;
+		opacity: 0;
+		transform: translateX(6cqi);
+		transition:
+			opacity 0.5s ease,
+			transform 0.5s ease,
+			outline-color 0.4s ease;
+		outline: 1.5px dashed transparent;
+		outline-offset: -1.5px;
+	}
+
+	.scene-herostory:is([data-step='3'], [data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .scene-panel {
+		opacity: 1;
+		transform: translateX(0);
+	}
+
+	/* Step 8: a dashed outline traces the agentlet layer, drawn inward
+	   (a negative offset) so it never reaches past the frame's own edge. */
+	.scene-herostory[data-step='8'] .scene-panel {
+		outline-color: var(--color-accent);
+	}
+
+	/* Bottom corner, not top: the top of the panel already holds the
+	   brand row, and the two would be tight for room side by side at
+	   small sizes. The panel's own content leaves margin to spare at the
+	   bottom at every step (see the result-slot comment below), so nothing
+	   sits under the label there. */
+	.scene-herostory .story-agentlet-layer-label {
+		position: absolute;
+		bottom: 0.8cqi;
+		right: 0.8cqi;
+		padding: 0.2cqi 0.8cqi;
+		border-radius: 999px;
+		background: var(--color-bg);
+		font-family: var(--font-mono);
+		font-size: 1.8cqi;
+		color: var(--color-accent-text);
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+
+	.scene-herostory[data-step='8'] .story-agentlet-layer-label {
+		opacity: 1;
+		transition-delay: 0.2s;
+	}
+
+	/* Briefly highlight whichever action was just clicked. Tighter than
+	   the shared 1.8cqi/2cqi padding, for the same margin-to-spare reason
+	   as the panel gap above. */
+	.scene-herostory .story-action {
+		padding: 1.4cqi 1.8cqi;
+		transition:
+			background 0.3s ease,
+			border-color 0.3s ease,
+			color 0.3s ease;
+	}
+
+	.scene-herostory[data-step='4'] .story-action-receipt,
+	.scene-herostory[data-step='5'] .story-action-export,
+	.scene-herostory[data-step='6'] .story-action-ai {
+		background: var(--color-primary-bg);
+		border-color: var(--color-primary-bg);
+		color: var(--color-primary-text);
+	}
+
+	/* --- Form fields: reveal one by one on step 4, then stay filled. --- */
+	.scene-herostory .scene-field-value {
+		animation: none;
+		transition: clip-path 0.5s ease;
+	}
+
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-vendor {
+		clip-path: inset(0 0 0 0);
+		transition-delay: 0.3s;
+	}
+
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-date {
+		clip-path: inset(0 0 0 0);
+		transition-delay: 1s;
+	}
+
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-amount {
+		clip-path: inset(0 0 0 0);
+		transition-delay: 1.7s;
+	}
+
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-category {
+		clip-path: inset(0 0 0 0);
+		transition-delay: 2.4s;
+	}
+
+	.scene-herostory .story-field-label {
+		font-size: 1.9cqi;
+		color: var(--color-text-muted);
+	}
+
+	.scene-herostory .story-field-group {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6cqi;
+	}
+
+	.scene-herostory .story-field-grid {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 1cqi 2cqi;
+	}
+
+	.scene-herostory .story-submit {
+		margin-top: 0;
+		padding: 1cqi 2.4cqi;
+		font-size: 2.3cqi;
+	}
+
+	.scene-herostory .scene-submit-highlight {
+		animation: none;
+		transition:
+			box-shadow 0.4s ease,
+			border-color 0.4s ease;
+	}
+
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-submit {
+		box-shadow: 0 0 0 2px var(--color-accent);
+		border-color: var(--color-accent);
+		transition-delay: 2.8s;
+	}
+
+	/* --- Line-items table: rows highlight only for step 5. All three
+	   rows stay (the xlsx chip's text claims "3 rows"), tightened to fit
+	   under the form within the frame. --- */
+	.scene-herostory .story-table {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3cqi;
+		border: 1px solid var(--color-surface-border);
+		border-radius: 6px;
+		overflow: hidden;
+	}
+
+	.scene-herostory .story-row {
+		display: grid;
+		grid-template-columns: 1.4fr 1fr;
+		gap: 1cqi;
+		padding: 0.8cqi 1.4cqi;
+		font-size: 1.9cqi;
+		color: var(--color-text);
+		background: var(--color-bg);
+		transition: background 0.3s ease;
+	}
+
+	.scene-herostory .story-row-head {
+		font-weight: 600;
+		color: var(--color-heading);
+		background: var(--color-surface);
+	}
+
+	.scene-herostory[data-step='5'] .story-row:not(.story-row-head) {
+		background: var(--color-badge-bg);
+		transition-delay: 0.3s;
+	}
+
+	/* --- Result slot: one artifact at a time, replacing the last. Each
+	   candidate is absolutely positioned within a sized container, not
+	   stacked in normal flow: opacity alone would not remove an inactive
+	   item's box from the layout, so the panel would have to reserve
+	   room for all four at once instead of just the one currently
+	   showing. */
+	.scene-herostory .story-result {
+		position: relative;
+		margin-top: 0.4cqi;
+		min-height: 15cqi;
+	}
+
+	.scene-herostory .story-receipt-card,
+	.scene-herostory .story-receipt-chip,
+	.scene-herostory .story-xlsx-chip,
+	.scene-herostory .story-ai-block {
+		position: absolute;
+		top: 0;
+		left: 0;
+		opacity: 0;
+		/* .story-receipt-chip and .story-xlsx-chip also carry the shared
+		   .scene-chip class for its pill styling, which (in scenes.css)
+		   runs an unconditional 8s infinite animation: without this
+		   override that animation drives their opacity/transform on its
+		   own clock regardless of data-step, so they would fade in and
+		   out (and overlap other artifacts) independently of the story. */
+		animation: none;
+	}
+
+	/* The card and the AI block should read at panel width; the two
+	   chips stay content-sized, like scene-chip everywhere else. */
+	.scene-herostory .story-receipt-card,
+	.scene-herostory .story-ai-block {
+		right: 0;
+	}
+
+	.scene-herostory .story-receipt-card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6cqi;
+		padding: 1.4cqi 1.8cqi;
+		border-radius: 6px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-surface-border);
+		transform: translateY(-2cqi);
+	}
+
+	.scene-herostory .story-receipt-card-title {
+		margin: 0 0 0.2cqi;
+		font-family: var(--font-mono);
+		font-size: 2cqi;
+		color: var(--color-text-muted);
+	}
+
+	.scene-herostory .story-receipt-card-row {
+		display: flex;
+		justify-content: space-between;
+		gap: 1cqi;
+		font-size: 2cqi;
+	}
+
+	.scene-herostory .story-receipt-card-row span:first-child {
+		color: var(--color-text-muted);
+	}
+
+	.scene-herostory .story-receipt-card-row span:last-child {
+		color: var(--color-heading);
+		font-weight: 500;
+	}
+
+	/* The receipt card appears early in step 4 and shrinks into a chip
+	   partway through it; step 4's dwell is 5000ms, so this animation's
+	   duration must match that (see Hero.astro's step list). */
+	.scene-herostory[data-step='4'] .story-receipt-card {
+		animation: story-receipt-card-cycle 5000ms ease forwards;
+	}
+
+	@keyframes story-receipt-card-cycle {
+		0%,
+		100% {
+			opacity: 0;
+			transform: translateY(-2cqi);
+		}
+		8% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+		48% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+		58% {
+			opacity: 0;
+			transform: translateY(-2cqi);
+		}
+	}
+
+	.scene-herostory[data-step='4'] .story-receipt-chip {
+		animation: story-receipt-chip-in 5000ms ease forwards;
+	}
+
+	@keyframes story-receipt-chip-in {
+		0%,
+		46% {
+			opacity: 0;
+			transform: translateY(2cqi);
+		}
+		56%,
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.scene-herostory .story-xlsx-chip {
+		transition: opacity 0.4s ease;
+	}
+
+	.scene-herostory[data-step='5'] .story-xlsx-chip {
+		opacity: 1;
+		transition-delay: 0.3s;
+	}
+
+	.scene-herostory .story-ai-block {
+		display: flex;
+		flex-direction: column;
+		gap: 0.8cqi;
+	}
+
+	.scene-herostory .story-ai-question,
+	.scene-herostory .story-ai-answer {
+		margin: 0;
+		font-size: 2.1cqi;
+		clip-path: inset(0 100% 0 0);
+		transition: clip-path 0.4s ease;
+	}
+
+	.scene-herostory .story-ai-question {
+		color: var(--color-heading);
+		font-weight: 500;
+	}
+
+	.scene-herostory .story-ai-answer {
+		color: var(--color-text);
+	}
+
+	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-block {
+		opacity: 1;
+	}
+
+	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-question {
+		clip-path: inset(0 0 0 0);
+		transition-delay: 0.3s;
+	}
+
+	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-answer-1 {
+		clip-path: inset(0 0 0 0);
+		transition-delay: 1.2s;
+	}
+
+	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-answer-2 {
+		clip-path: inset(0 0 0 0);
+		transition-delay: 2s;
+	}
+
+</style>

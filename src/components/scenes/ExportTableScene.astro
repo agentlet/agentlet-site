@@ -1,0 +1,196 @@
+---
+import SceneFrame from './SceneFrame.astro';
+
+const rows = [
+	['INV-2291', 'Northwind Supply', '$412.00'],
+	['INV-2292', 'Acme Logistics', '$1,208.50'],
+	['INV-2293', 'Blue Harbor Ltd', '$76.20'],
+	['INV-2294', 'Cedar & Co', '$935.00'],
+];
+---
+
+<SceneFrame
+	class="scene-exporttable"
+	caption="A paginated invoice table exporting to Excel: rows highlight, the page counter advances through all three pages, then a file, invoices.xlsx, 42 rows, appears in the panel."
+>
+	<Fragment slot="app">
+		<div class="scene-app-url">invoices.app/list</div>
+		<div class="scene-table">
+			<div class="scene-row scene-row-head">
+				<span>Invoice</span><span>Vendor</span><span>Amount</span>
+			</div>
+			{
+				rows.map((row, i) => (
+					<div class="scene-row" style={`animation-delay:${i * 160}ms`}>
+						<span>{row[0]}</span>
+						<span>{row[1]}</span>
+						<span>{row[2]}</span>
+					</div>
+				))
+			}
+		</div>
+		<div class="scene-pager">
+			<span>Page</span>
+			<span class="scene-pager-count">
+				<span class="scene-pager-digit scene-pager-digit-rest">1</span>
+				<span class="scene-pager-digit scene-pager-digit-mid">2</span>
+				<span class="scene-pager-digit scene-pager-digit-final">3</span>
+			</span>
+			<span>of 3</span>
+		</div>
+	</Fragment>
+	<Fragment slot="panel">
+		<div class="scene-panel-brand">
+			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
+			<span>agentlet</span>
+		</div>
+		<div
+			class="scene-action scene-action-primary scene-click-target"
+			style="--cursor-offset-x:14cqi;--cursor-offset-y:12cqi"
+		>
+			Export table
+			<span class="scene-cursor"></span>
+			<span class="scene-click-pulse"></span>
+		</div>
+		<div class="scene-action">Fill this form</div>
+		<div class="scene-action">Analyze page</div>
+		<span class="scene-chip" style="animation-delay:700ms">invoices.xlsx, 42 rows</span>
+	</Fragment>
+</SceneFrame>
+
+<style is:global>
+	/* Table rows and the paginated counter are unique to this scene, so
+	   their keyframes live here rather than in the shared scenes.css. */
+	.scene-exporttable .scene-table {
+		display: flex;
+		flex-direction: column;
+		gap: 0.6cqi;
+		border: 1px solid var(--color-surface-border);
+		border-radius: 6px;
+		overflow: hidden;
+	}
+
+	.scene-exporttable .scene-row {
+		display: grid;
+		grid-template-columns: 1.1fr 1.3fr 0.9fr;
+		gap: 1cqi;
+		padding: 1.4cqi 1.6cqi;
+		font-size: 2.3cqi;
+		color: var(--color-text);
+		background: var(--color-bg);
+	}
+
+	.scene-exporttable .scene-row-head {
+		font-weight: 600;
+		color: var(--color-heading);
+		background: var(--color-surface);
+	}
+
+	.scene-exporttable .scene-row:not(.scene-row-head) {
+		animation-name: scene-row-highlight;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	/* A quick background flash sweeping down the rows, one by one, right
+	   as the click lands. */
+	@keyframes scene-row-highlight {
+		0%,
+		28% {
+			background: var(--color-bg);
+		}
+		32%,
+		40% {
+			background: var(--color-badge-bg);
+		}
+		48%,
+		100% {
+			background: var(--color-bg);
+		}
+	}
+
+	.scene-exporttable .scene-pager {
+		display: flex;
+		align-items: center;
+		gap: 0.8cqi;
+	}
+
+	/* The three digits are stacked in one fixed box, so the box must be a
+	   block-level box for its width and height to apply. */
+	.scene-exporttable .scene-pager-count {
+		position: relative;
+		display: inline-block;
+		width: 2.5cqi;
+		height: 3cqi;
+		line-height: 3cqi;
+		text-align: center;
+	}
+
+	.scene-exporttable .scene-pager-digit {
+		position: absolute;
+		inset: 0;
+		opacity: 0;
+		color: var(--color-heading);
+		font-weight: 600;
+		animation-timing-function: steps(1, end);
+		animation-duration: var(--scene-duration);
+		animation-iteration-count: infinite;
+	}
+
+	/* The counter reads 1 at rest (before the click), briefly passes
+	   through 2 as the export runs, then holds on 3 for the rest of the
+	   loop before resetting to 1 for the next pass. */
+	.scene-exporttable .scene-pager-digit-rest {
+		animation-name: scene-pager-digit-rest;
+	}
+
+	@keyframes scene-pager-digit-rest {
+		0%,
+		26% {
+			opacity: 1;
+		}
+		34%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	.scene-exporttable .scene-pager-digit-mid {
+		animation-name: scene-pager-digit-mid;
+	}
+
+	@keyframes scene-pager-digit-mid {
+		0%,
+		28% {
+			opacity: 0;
+		}
+		34%,
+		40% {
+			opacity: 1;
+		}
+		46%,
+		100% {
+			opacity: 0;
+		}
+	}
+
+	.scene-exporttable .scene-pager-digit-final {
+		animation-name: scene-pager-digit-final;
+	}
+
+	@keyframes scene-pager-digit-final {
+		0%,
+		40% {
+			opacity: 0;
+		}
+		46%,
+		95% {
+			opacity: 1;
+		}
+		100% {
+			opacity: 0;
+		}
+	}
+
+</style>
