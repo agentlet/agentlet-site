@@ -123,6 +123,20 @@ import SceneFrame from './SceneFrame.astro';
 		flex: 1;
 	}
 
+	/* The host page (form + table) needs to fit a taller stack than the
+	   other scenes' host pages: tighten the shared .scene-app padding and
+	   .scene-field height to make room, instead of dropping the third
+	   table row (its own chip claims "3 rows", so the table has to show
+	   three to stay factually consistent with it). */
+	.scene-herostory .scene-app {
+		padding: 3cqi;
+		gap: 1.3cqi;
+	}
+
+	.scene-herostory .scene-field {
+		height: 5.5cqi;
+	}
+
 	.scene-herostory .story-ext-icon {
 		position: relative;
 		display: grid;
@@ -276,8 +290,13 @@ import SceneFrame from './SceneFrame.astro';
 	.scene-herostory .story-field-grid {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 1.6cqi 2cqi;
-		margin-top: 1.4cqi;
+		gap: 1cqi 2cqi;
+	}
+
+	.scene-herostory .story-submit {
+		margin-top: 0;
+		padding: 1cqi 2.4cqi;
+		font-size: 2.3cqi;
 	}
 
 	.scene-herostory .scene-submit-highlight {
@@ -293,12 +312,13 @@ import SceneFrame from './SceneFrame.astro';
 		transition-delay: 2.8s;
 	}
 
-	/* --- Line-items table: rows highlight only for step 5. --- */
+	/* --- Line-items table: rows highlight only for step 5. All three
+	   rows stay (the xlsx chip's text claims "3 rows"), tightened to fit
+	   under the form within the frame. --- */
 	.scene-herostory .story-table {
-		margin-top: 2cqi;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5cqi;
+		gap: 0.3cqi;
 		border: 1px solid var(--color-surface-border);
 		border-radius: 6px;
 		overflow: hidden;
@@ -308,8 +328,8 @@ import SceneFrame from './SceneFrame.astro';
 		display: grid;
 		grid-template-columns: 1.4fr 1fr;
 		gap: 1cqi;
-		padding: 1.2cqi 1.6cqi;
-		font-size: 2.1cqi;
+		padding: 0.8cqi 1.4cqi;
+		font-size: 1.9cqi;
 		color: var(--color-text);
 		background: var(--color-bg);
 		transition: background 0.3s ease;
@@ -346,6 +366,13 @@ import SceneFrame from './SceneFrame.astro';
 		top: 0;
 		left: 0;
 		opacity: 0;
+		/* .story-receipt-chip and .story-xlsx-chip also carry the shared
+		   .scene-chip class for its pill styling, which (in scenes.css)
+		   runs an unconditional 8s infinite animation: without this
+		   override that animation drives their opacity/transform on its
+		   own clock regardless of data-step, so they would fade in and
+		   out (and overlap other artifacts) independently of the story. */
+		animation: none;
 	}
 
 	/* The card and the AI block should read at panel width; the two
