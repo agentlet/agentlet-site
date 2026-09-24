@@ -1,0 +1,52 @@
+<section>
+	<div class="wrap">
+		<h2 class="section-title">Three ways to deploy</h2>
+		<p class="section-intro">
+			The same core augmentation capabilities, adapted to different technical environments and
+			constraints.
+		</p>
+		<div class="modes-list">
+			<div class="mode-card">
+				<h3>Bookmarklet</h3>
+				<p>
+					A small JavaScript snippet stored as a browser bookmark. Clicking it injects the
+					agentlet into the current page, with no installation required.
+				</p>
+				<div class="diagram-card">
+					<img
+						src="/img/bookmarklet-archi1.svg"
+						width="800"
+						height="480"
+						loading="lazy"
+						decoding="async"
+						alt="Diagram: the web application loads normally in the browser before the bookmarklet is triggered"
+					/>
+				</div>
+			</div>
+			<div class="mode-card">
+				<h3>Browser extension</h3>
+				<p>
+					An installable extension that launches agentlets with access to browser APIs, persistent
+					state, and automatic injection on chosen sites.
+				</p>
+				<div class="diagram-card">
+					<img
+						src="/img/extension-archi1.svg"
+						width="800"
+						height="480"
+						loading="lazy"
+						decoding="async"
+						alt="Diagram: the web application loads with the extension already installed in the browser"
+					/>
+				</div>
+			</div>
+			<div class="mode-card">
+				<h3>Native integration</h3>
+				<p>
+					The same code the bookmarklet would inject at runtime is instead loaded directly by the
+					host application, for teams who can add a script tag but not change the backend.
+				</p>
+			</div>
+		</div>
+	</div>
+</section>

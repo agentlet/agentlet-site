@@ -1,0 +1,43 @@
+---
+import '../styles/landing.css';
+
+interface Props {
+	title: string;
+	description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="alternate icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		{
+			/* Set the theme before first paint to avoid a flash of the wrong
+			   theme. Same localStorage key and data-theme convention as
+			   Starlight, so the choice carries over to /docs/. */
+		}
+		<script is:inline>
+			(() => {
+				const storedTheme =
+					typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+				const theme =
+					storedTheme ||
+					(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+				document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+			})();
+		</script>
+	</head>
+	<body>
+		<a class="skip-link" href="#main">Skip to content</a>
+		<slot />
+	</body>
+</html>

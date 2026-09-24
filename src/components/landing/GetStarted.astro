@@ -1,0 +1,39 @@
+---
+const commands = [
+	'git clone https://github.com/agentlet/agentlet-core.git',
+	'cd agentlet-core',
+	'npm install',
+	'npm run demo',
+].join('\n');
+---
+
+<section>
+	<div class="wrap">
+		<h2 class="section-title">Get started</h2>
+		<p class="section-intro">Clone the core library and run the built-in demo.</p>
+		<div class="code-block">
+			<pre id="get-started-commands">{commands}</pre>
+			<button type="button" class="copy-button" id="copy-commands">Copy</button>
+		</div>
+		<p class="get-started-link"><a href="/docs/getting-started/">Read the getting started guide</a></p>
+	</div>
+</section>
+
+<script>
+	const button = document.getElementById('copy-commands');
+	const commandsEl = document.getElementById('get-started-commands');
+
+	button?.addEventListener('click', async () => {
+		const text = commandsEl?.textContent ?? '';
+		try {
+			await navigator.clipboard.writeText(text);
+			const original = button.textContent;
+			button.textContent = 'Copied';
+			setTimeout(() => {
+				button.textContent = original;
+			}, 2000);
+		} catch {
+			// Clipboard API may be unavailable; the commands remain selectable.
+		}
+	});
+</script>

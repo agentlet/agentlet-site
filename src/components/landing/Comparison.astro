@@ -1,0 +1,78 @@
+---
+const rows = [
+	{
+		aspect: 'Installation',
+		rpa: 'Heavy: desktop and backend install',
+		bookmarklet: 'Light: bookmarklet injection',
+		extension: 'Light: browser extension',
+		native: 'Light: served by the host app',
+	},
+	{
+		aspect: 'Autonomy',
+		rpa: 'Fully autonomous',
+		bookmarklet: 'Needs user action',
+		extension: 'Semi-autonomous',
+		native: 'Semi-autonomous',
+	},
+	{
+		aspect: 'Security scope',
+		rpa: 'Full access: OS, files, apps',
+		bookmarklet: 'Sandboxed, browser only',
+		extension: 'Extended, via extension APIs',
+		native: 'Sandboxed, inside the app',
+	},
+	{
+		aspect: 'Robustness to UI changes',
+		rpa: 'Fragile',
+		bookmarklet: 'Can be robust with good selectors',
+		extension: 'Same as bookmarklet',
+		native: 'Very robust: tied to app code',
+	},
+	{
+		aspect: 'Performance',
+		rpa: 'Often slow: simulates human actions',
+		bookmarklet: 'Instant: direct DOM manipulation',
+		extension: 'Same as bookmarklet',
+		native: 'Same as bookmarklet',
+	},
+];
+---
+
+<section class="alt">
+	<div class="wrap">
+		<h2 class="section-title">Compared to RPA</h2>
+		<p class="section-intro">
+			Agentlets can look like lightweight, local RPA. They are not true bots: they depend on the
+			context of the user's active tab and enhance, rather than replace, the user's interaction.
+		</p>
+		<div class="table-scroll">
+			<table class="comparison-table">
+				<caption>
+					RPA compared to the three agentlet deployment modes
+				</caption>
+				<thead>
+					<tr>
+						<th scope="col">Aspect</th>
+						<th scope="col">RPA</th>
+						<th scope="col">Bookmarklet</th>
+						<th scope="col">Extension</th>
+						<th scope="col">Native</th>
+					</tr>
+				</thead>
+				<tbody>
+					{
+						rows.map((row) => (
+							<tr>
+								<th scope="row">{row.aspect}</th>
+								<td>{row.rpa}</td>
+								<td>{row.bookmarklet}</td>
+								<td>{row.extension}</td>
+								<td>{row.native}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</section>

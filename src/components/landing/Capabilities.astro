@@ -1,0 +1,52 @@
+---
+const capabilities = [
+	{
+		title: 'Forms',
+		text: 'Extract form structure and fill forms programmatically, with AI-friendly data formats.',
+	},
+	{
+		title: 'Tables to Excel',
+		text: 'Extract table data with optional export to Excel, with user-controlled pagination.',
+	},
+	{
+		title: 'Screenshots',
+		text: 'Capture web elements as images for AI-powered visual analysis.',
+	},
+	{
+		title: 'AI, text, images, PDF',
+		text: 'Direct AI integration with support for text, images, and PDF documents.',
+	},
+	{
+		title: 'Dialogs and notifications',
+		text: 'Essential dialogs for user interaction, input collection, and progress display.',
+	},
+	{
+		title: 'Authentication',
+		text: 'Optional popup-based authentication for OAuth and OIDC flows.',
+	},
+	{
+		title: 'Shadow DOM isolation',
+		text: 'The side panel and its styles are isolated from the host page by Shadow DOM.',
+	},
+	{
+		title: 'Mount API',
+		text: 'A simple API to mount and unmount the panel from the host application.',
+	},
+];
+---
+
+<section class="alt">
+	<div class="wrap">
+		<h2 class="section-title">What it brings to your application</h2>
+		<div class="capabilities-grid">
+			{
+				capabilities.map((capability) => (
+					<div class="capability-card">
+						<h3>{capability.title}</h3>
+						<p>{capability.text}</p>
+					</div>
+				))
+			}
+		</div>
+	</div>
+</section>

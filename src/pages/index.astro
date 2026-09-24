@@ -1,23 +1,32 @@
 ---
-import '../styles/global.css';
+import LandingLayout from '../layouts/LandingLayout.astro';
+import Header from '../components/landing/Header.astro';
+import Hero from '../components/landing/Hero.astro';
+import Definition from '../components/landing/Definition.astro';
+import Demo from '../components/landing/Demo.astro';
+import DeploymentModes from '../components/landing/DeploymentModes.astro';
+import Capabilities from '../components/landing/Capabilities.astro';
+import Principles from '../components/landing/Principles.astro';
+import Comparison from '../components/landing/Comparison.astro';
+import GetStarted from '../components/landing/GetStarted.astro';
+import Footer from '../components/landing/Footer.astro';
 
-const title = 'agentlet';
-const description = 'Augment your web applications without friction.';
+const title = 'agentlet: augment your web applications without friction';
+const description =
+	'Agentlet is an open source JavaScript framework that adds form automation, data extraction, and AI to existing web applications, without touching their backend.';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-		<title>{title}</title>
-		<meta name="description" content={description} />
-	</head>
-	<body>
-		<main>
-			<h1>agentlet</h1>
-			<p>{description}</p>
-			<p><a href="/docs/">Read the docs</a></p>
-		</main>
-	</body>
-</html>
+<LandingLayout title={title} description={description}>
+	<Header />
+	<main id="main">
+		<Hero />
+		<Definition />
+		<Demo />
+		<DeploymentModes />
+		<Capabilities />
+		<Principles />
+		<Comparison />
+		<GetStarted />
+	</main>
+	<Footer />
+</LandingLayout>
