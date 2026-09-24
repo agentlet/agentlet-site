@@ -4,12 +4,9 @@
 // story's step timer, and (c) drives the capability explorer's tabs. No
 // animation logic lives here, no library, kept deliberately small.
 
-const prefersReducedMotion =
-	typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 /** Force a CSS animation to restart from 0% on its next running frame. */
 function restartScene(scene: Element | null): void {
-	if (!scene || prefersReducedMotion) return;
+	if (!scene) return;
 	scene.classList.remove('is-playing');
 	// Reading offsetWidth forces layout, so the class removal above is
 	// flushed before is-playing is re-added and the animation restarts.
@@ -19,7 +16,6 @@ function restartScene(scene: Element | null): void {
 
 /** Play scenes while they are on screen, pause (not just hide) offscreen ones. */
 function observeScenes(root: ParentNode): void {
-	if (prefersReducedMotion) return;
 	const scenes = root.querySelectorAll<HTMLElement>('.scene');
 	if (!scenes.length) return;
 	const observer = new IntersectionObserver(
@@ -39,9 +35,9 @@ function observeScenes(root: ParentNode): void {
  * hidden) subtitle text from the accessible step list, and fills a
  * segmented progress bar, one segment per step. Autoplay pauses while
  * the hero is offscreen or the tab is hidden and resumes when back,
- * unless the user paused; it does not pause on hover. Reduced motion
- * skips all of this and shows the last step's text with no timer
- * (HeroStoryScene's own CSS renders the matching static final state).
+ * unless the user paused; it does not pause on hover. Plays the same
+ * way regardless of prefers-reduced-motion, by product decision: Pause
+ * and Replay (always visible) are the user's way to stop it.
  */
 class StoryController {
 	private scene: HTMLElement | null;
@@ -73,10 +69,10 @@ class StoryController {
 		this.toggle?.addEventListener('click', () => this.toggleUserPause());
 		this.replay?.addEventListener('click', () => this.restart());
 
-		if (prefersReducedMotion || !this.stepTexts.length) {
-			// Static final state; HeroStoryScene's reduced-motion CSS does
-			// the actual rendering, this just sets a matching data-step.
-			this.scene?.setAttribute('data-step', String(this.stepTexts.length || 1));
+		if (!this.stepTexts.length) {
+			// Defensive: nothing to step through (the accessible list is
+			// missing or empty), so just hold a valid data-step.
+			this.scene?.setAttribute('data-step', '1');
 			return;
 		}
 

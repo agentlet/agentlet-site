@@ -539,45 +539,8 @@
 	}
 }
 
-/* Reduced motion: every scene stops animating and shows its final,
-   completed state instead of the resting (start of loop) state. Explicit
-   per-property overrides, not animation-fill-mode, per the brief. */
-@media (prefers-reduced-motion: reduce) {
-	.scene,
-	.scene * {
-		animation: none !important;
-	}
-
-	.scene-cursor,
-	.scene-click-pulse {
-		display: none !important;
-	}
-
-	.scene-field-value,
-	.scene-note,
-	.scene-chip,
-	.scene-pill,
-	.scene-panel--hidden {
-		opacity: 1 !important;
-		transform: none !important;
-		clip-path: inset(0 0 0 0) !important;
-	}
-
-	.scene-submit-highlight {
-		box-shadow: 0 0 0 2px var(--color-accent) !important;
-		border-color: var(--color-accent) !important;
-	}
-
-	.scene-code-highlight {
-		background: var(--color-code-header-bg) !important;
-		color: var(--color-code-accent) !important;
-	}
-
-	/* A toast read as "already shown" is more useful in a static view than
-	   the literal last frame of its fade (which is invisible). */
-	.scene-toast {
-		opacity: 1 !important;
-		transform: none !important;
-		animation: none !important;
-	}
-}
+/* Scenes play the same way regardless of prefers-reduced-motion, by
+   product decision: the hero story's always-visible Pause and Replay
+   controls are the user's way to stop the motion (see
+   src/scripts/scenes.ts and HeroStoryScene.astro). No reduced-motion
+   override lives here or in any individual scene. */

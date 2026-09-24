@@ -52,6 +52,14 @@ Simple, open source, honest. Plain typography, generous whitespace, content
 first, code blocks, one accent colour. No gradients, no stock illustrations,
 no testimonials, no pricing, no hype.
 
+By product decision, the animated product scenes under
+`src/components/scenes/` (hero story, capability explorer, deployment
+modes) play the same way regardless of the `prefers-reduced-motion`
+preference; they do not switch to a static state. The hero story always
+shows visible Pause and Replay controls, which are the user's way to stop
+the motion, alongside a visually hidden ordered list of its steps for
+screen readers.
+
 ## Source of truth
 
 `agentlet-core` (the framework itself) lives in a sibling repository and is

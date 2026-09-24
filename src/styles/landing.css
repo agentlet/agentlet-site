@@ -531,9 +531,12 @@ section.alt {
 	display: block;
 }
 
-/* The full story, always available to assistive tech; visually hidden
-   unless prefers-reduced-motion (below) makes it the primary way to
-   read it, since nothing is animating in that case. */
+/* The full story, always available to assistive tech as a visually
+   hidden ordered list; the visible telling of it is the subtitle,
+   progress bar, and animation above. Scenes play the same way
+   regardless of prefers-reduced-motion, by product decision: Pause and
+   Replay (always visible, see .story-controls above) are the user's
+   way to stop it, not an automatic switch to a static view. */
 .story-steps {
 	position: absolute;
 	width: 1px;
@@ -544,33 +547,6 @@ section.alt {
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
 	border: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	/* No autoplay, no progress, so nothing to pause or replay; the
-	   subtitle bar is replaced by the full list of steps, visible and
-	   compact, instead of the last (aria-hidden) subtitle on its own. */
-	.story-controls,
-	.story-subtitle,
-	.story-progress {
-		display: none;
-	}
-
-	.story-steps {
-		position: static;
-		width: auto;
-		height: auto;
-		margin: 0.5rem 0 0;
-		padding-left: 1.1rem;
-		overflow: visible;
-		clip: auto;
-		white-space: normal;
-		display: flex;
-		flex-direction: column;
-		gap: 0.3rem;
-		color: var(--color-text-muted);
-		font-size: 0.85rem;
-	}
 }
 
 /* Definition */
