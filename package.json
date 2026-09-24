@@ -1,0 +1,32 @@
+{
+  "name": "agentlet-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Source of agentlet.io: presentation site and documentation for the agentlet framework",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint .",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.42.3",
+    "astro": "^7.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "eslint": "^10.11.0",
+    "eslint-plugin-astro": "^3.2.1",
+    "husky": "^9.1.7",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1"
+  }
+}
