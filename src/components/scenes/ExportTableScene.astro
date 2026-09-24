@@ -110,10 +110,21 @@ const rows = [
 		}
 	}
 
+	.scene-exporttable .scene-pager {
+		display: flex;
+		align-items: center;
+		gap: 0.8cqi;
+	}
+
+	/* The three digits are stacked in one fixed box, so the box must be a
+	   block-level box for its width and height to apply. */
 	.scene-exporttable .scene-pager-count {
 		position: relative;
+		display: inline-block;
 		width: 2.5cqi;
 		height: 3cqi;
+		line-height: 3cqi;
+		text-align: center;
 	}
 
 	.scene-exporttable .scene-pager-digit {
