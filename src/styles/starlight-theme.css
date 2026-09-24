@@ -106,3 +106,16 @@
 :root[data-theme='light'] .sl-markdown-content a:not(:where(.not-content *)):hover {
 	color: #a8531c;
 }
+
+/* Diagram SVGs (the architecture pages) ship with a transparent background
+   and dark grey labels, drawn for a light page. In dark mode they need
+   their own light surface, matching the landing page's diagram cards
+   (--color-surface in landing.css), or the dark labels are nearly
+   invisible against the dark docs background. Scoped to markdown content
+   only, so it never touches the header logo or images outside doc pages. */
+:root:not([data-theme='light']) .sl-markdown-content img,
+:root[data-theme='dark'] .sl-markdown-content img {
+	background-color: #f4f6f8;
+	padding: 1rem;
+	border-radius: 8px;
+}

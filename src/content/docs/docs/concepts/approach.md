@@ -31,17 +31,94 @@ To apply this approach responsibly, agentlet development follows some key techni
 
 While agentlets can in some ways be seen as lightweight local RPA (robotic process automation) tools, they are not true bots: they fully depend on the context of the user's active tab and cannot autonomously operate or control the browser as a whole. They enhance, but do not replace, the user's interaction.
 
-| Aspect | RPA | Agentlet (bookmarklet) | Agentlet extension | Agentlet native |
-|---|---|---|---|---|
-| Installation and deployment | Heavy: desktop and backend install | Lightweight: bookmarklet injection | Lightweight: browser extension | Lightweight: served by host app, no user install |
-| Autonomy | Fully autonomous, no user needed | User action required: active tab, click | Semi-autonomous: limited to browser and user context | Semi-autonomous: runs in page, still user context |
-| Security and scope of action | Full access: OS, files, apps | Sandboxed: no external access, browser only | Extended permissions via extension APIs, browser limited | Sandboxed inside app, no external access |
-| Robustness to UI changes | Fragile: UI changes often break it | Can be robust with good selectors and JS | Same as bookmarklet | Very robust: tight to app code, controlled env |
-| Performance | Often slow: simulates human actions | Instant: direct DOM manipulation | Same as bookmarklet | Same as bookmarklet |
-| Relies on user context | Yes | Yes | Yes | Yes |
-| Interacts with page like a user | Yes | Yes | Yes | Yes |
-| Goes beyond current page | Yes | No, only within the single page app | Yes, cross-page within the browser | No, only within the app or page context |
-| Goes beyond the browser | Yes, system-wide | No | No | No |
-| Interacts with embedded elements | Limited: surface level only | Deep: full DOM access and manipulation | Deep: same, with extension APIs | Deep: full access to app DOM |
+**Installation and deployment**
+
+| Variant | Rating |
+|---|---|
+| RPA | Heavy: desktop and backend install |
+| Agentlet (bookmarklet) | Lightweight: bookmarklet injection |
+| Agentlet extension | Lightweight: browser extension |
+| Agentlet native | Lightweight: served by host app, no user install |
+
+**Autonomy**
+
+| Variant | Rating |
+|---|---|
+| RPA | Fully autonomous, no user needed |
+| Agentlet (bookmarklet) | User action required: active tab, click |
+| Agentlet extension | Semi-autonomous: limited to browser and user context |
+| Agentlet native | Semi-autonomous: runs in page, still user context |
+
+**Security and scope of action**
+
+| Variant | Rating |
+|---|---|
+| RPA | Full access: OS, files, apps |
+| Agentlet (bookmarklet) | Sandboxed: no external access, browser only |
+| Agentlet extension | Extended permissions via extension APIs, browser limited |
+| Agentlet native | Sandboxed inside app, no external access |
+
+**Robustness to UI changes**
+
+| Variant | Rating |
+|---|---|
+| RPA | Fragile: UI changes often break it |
+| Agentlet (bookmarklet) | Can be robust with good selectors and JS |
+| Agentlet extension | Same as bookmarklet |
+| Agentlet native | Very robust: tight to app code, controlled env |
+
+**Performance**
+
+| Variant | Rating |
+|---|---|
+| RPA | Often slow: simulates human actions |
+| Agentlet (bookmarklet) | Instant: direct DOM manipulation |
+| Agentlet extension | Same as bookmarklet |
+| Agentlet native | Same as bookmarklet |
+
+**Relies on user context**
+
+| Variant | Rating |
+|---|---|
+| RPA | Yes |
+| Agentlet (bookmarklet) | Yes |
+| Agentlet extension | Yes |
+| Agentlet native | Yes |
+
+**Interacts with page like a user**
+
+| Variant | Rating |
+|---|---|
+| RPA | Yes |
+| Agentlet (bookmarklet) | Yes |
+| Agentlet extension | Yes |
+| Agentlet native | Yes |
+
+**Goes beyond current page**
+
+| Variant | Rating |
+|---|---|
+| RPA | Yes |
+| Agentlet (bookmarklet) | No, only within the single page app |
+| Agentlet extension | Yes, cross-page within the browser |
+| Agentlet native | No, only within the app or page context |
+
+**Goes beyond the browser**
+
+| Variant | Rating |
+|---|---|
+| RPA | Yes, system-wide |
+| Agentlet (bookmarklet) | No |
+| Agentlet extension | No |
+| Agentlet native | No |
+
+**Interacts with embedded elements**
+
+| Variant | Rating |
+|---|---|
+| RPA | Limited: surface level only |
+| Agentlet (bookmarklet) | Deep: full DOM access and manipulation |
+| Agentlet extension | Deep: same, with extension APIs |
+| Agentlet native | Deep: full access to app DOM |
 
 Source: agentlet-core README.md, section "The agentlet approach".

@@ -7,58 +7,160 @@ This page is a reference for the shape of `window.agentlet`, the `Module` base c
 
 ## `window.agentlet.ai`
 
-| Member | Signature | Notes |
-|---|---|---|
-| `sendPrompt` | `(prompt: string, images?: string[], options?: AIPromptOptions) => Promise<string>` | Resolves to the raw text reply. Throws if no provider is configured. |
-| `sendPromptWithPDF` | `(prompt: string, pdfData: PDFInputData, options?: AISendPromptWithPDFOptions) => Promise<string>` | Converts the PDF to images internally, then behaves like `sendPrompt`. |
-| `convertPDFToImages` | `(pdfData: PDFInputData, options?: PDFConversionOptions) => Promise<string[]>` | Base64 data URL images, one per page. |
-| `isAvailable` | `() => boolean` | |
-| `getStatus` | `() => AIStatus` | `{ available, currentProvider, availableProviders, pdfSupport, providerStatus }` |
-| `validateAPI` | `() => Promise<AIValidateAPIResult>` | `{ success: true, message, details }` or `{ success: false, error, details }` |
-| `setProvider` | `(providerName: string) => void` | |
-| `getAvailableProviders` | `() => string[]` | |
-| `refresh` | `() => void` | Call after changing `env` values that affect the provider. |
-| `manager` | `AIManagerAPI` | Same as `window.agentlet.aiManager`; adds `getCurrentProvider()`. |
+- **`sendPrompt`**
+  ```ts
+  (prompt: string, images?: string[], options?: AIPromptOptions) => Promise<string>
+  ```
+  Resolves to the raw text reply. Throws if no provider is configured.
+
+- **`sendPromptWithPDF`**
+  ```ts
+  (prompt: string, pdfData: PDFInputData, options?: AISendPromptWithPDFOptions) => Promise<string>
+  ```
+  Converts the PDF to images internally, then behaves like `sendPrompt`.
+
+- **`convertPDFToImages`**
+  ```ts
+  (pdfData: PDFInputData, options?: PDFConversionOptions) => Promise<string[]>
+  ```
+  Base64 data URL images, one per page.
+
+- **`isAvailable`**
+  ```ts
+  () => boolean
+  ```
+
+- **`getStatus`**
+  ```ts
+  () => AIStatus
+  ```
+  `AIStatus` is `{ available, currentProvider, availableProviders, pdfSupport, providerStatus }`.
+
+- **`validateAPI`**
+  ```ts
+  () => Promise<AIValidateAPIResult>
+  ```
+  Resolves to `{ success: true, message, details }` or `{ success: false, error, details }`.
+
+- **`setProvider`**
+  ```ts
+  (providerName: string) => void
+  ```
+
+- **`getAvailableProviders`**
+  ```ts
+  () => string[]
+  ```
+
+- **`refresh`**
+  ```ts
+  () => void
+  ```
+  Call after changing `env` values that affect the provider.
+
+- **`manager`**: `AIManagerAPI`, same as `window.agentlet.aiManager`. Adds `getCurrentProvider()`.
 
 `AIImageInput` is a data URL, an http(s) URL, or a bare base64 string. `PDFInputData` is a `File`, `ArrayBuffer`, `Uint8Array`, or an http(s) URL string. See [AI](/docs/guides/ai/).
 
 ## `window.agentlet.forms`
 
-| Member | Signature | Notes |
-|---|---|---|
-| `extract` | `(element: Element, options?: FormExtractionOptions) => FormExtractionResult` | |
-| `exportForAI` | `(element: Element, options?: FormExtractionOptions) => AIFormExport` | |
-| `quickExport` | `(element: Element) => QuickExportField[]` | `exportForAI` with hidden/disabled/bounding-box options fixed to `false`. |
-| `fill` | `(parentElement: Element, selectorValues: FormFillSelectorValues, options?: FormFillOptions) => FormFillResult` | |
-| `fillFromAI` | `(parentElement: Element, aiFormData: AIFormExport, userValues: Record<string, FormFillValue>, options?: FormFillOptions) => FormFillResult` | |
-| `fillMultiple` | `(parentElement: Element, formDataArray: FormFillMultipleEntry[], options?: FormFillOptions) => Promise<FormFillResult[]>` | |
-| `extractor` | `FormExtractorAPI` | Direct access to `extractFormStructure`/`exportForAI`/`quickExport`. |
-| `filler` | `FormFillerAPI` | Direct access to `fillForm`/`fillFromAIData`/`fillMultipleForms`. |
+- **`extract`**
+  ```ts
+  (element: Element, options?: FormExtractionOptions) => FormExtractionResult
+  ```
+
+- **`exportForAI`**
+  ```ts
+  (element: Element, options?: FormExtractionOptions) => AIFormExport
+  ```
+
+- **`quickExport`**
+  ```ts
+  (element: Element) => QuickExportField[]
+  ```
+  `exportForAI` with hidden/disabled/bounding-box options fixed to `false`.
+
+- **`fill`**
+  ```ts
+  (parentElement: Element, selectorValues: FormFillSelectorValues, options?: FormFillOptions) => FormFillResult
+  ```
+
+- **`fillFromAI`**
+  ```ts
+  (parentElement: Element, aiFormData: AIFormExport, userValues: Record<string, FormFillValue>, options?: FormFillOptions) => FormFillResult
+  ```
+
+- **`fillMultiple`**
+  ```ts
+  (parentElement: Element, formDataArray: FormFillMultipleEntry[], options?: FormFillOptions) => Promise<FormFillResult[]>
+  ```
+
+- **`extractor`**: `FormExtractorAPI`. Direct access to `extractFormStructure`/`exportForAI`/`quickExport`.
+
+- **`filler`**: `FormFillerAPI`. Direct access to `fillForm`/`fillFromAIData`/`fillMultipleForms`.
 
 See [Form extraction](/docs/guides/forms-extraction/), [Form filling](/docs/guides/forms-filling/), [AI-ready forms](/docs/guides/forms-ai-ready/), and [Select options](/docs/guides/forms-select-options/) for the full result shapes and examples.
 
 ## `window.agentlet.tables`
 
-| Member | Signature | Notes |
-|---|---|---|
-| `extract` | `(tableElement: HTMLTableElement, options?: TableExtractionOptions) => TableData` | |
-| `extractAll` | `(tableElement: HTMLTableElement, options?: TableExtractAllOptions) => Promise<TableAllPagesData>` | Pagination only runs when `nextButtonSelector` is provided. |
-| `download` | `(tableData: TableData \| TableAllPagesData, options?: TableDownloadOptions) => Promise<TableDownloadResult>` | |
-| `extractAndDownload` | `(tableElement: HTMLTableElement, options?: TableExtractAndDownloadOptions) => Promise<TableDownloadResult>` | |
-| `extractor` | `TableExtractorAPI` | Adds `isExcelExportAvailable()`. |
+- **`extract`**
+  ```ts
+  (tableElement: HTMLTableElement, options?: TableExtractionOptions) => TableData
+  ```
+
+- **`extractAll`**
+  ```ts
+  (tableElement: HTMLTableElement, options?: TableExtractAllOptions) => Promise<TableAllPagesData>
+  ```
+  Pagination only runs when `nextButtonSelector` is provided.
+
+- **`download`**
+  ```ts
+  (tableData: TableData | TableAllPagesData, options?: TableDownloadOptions) => Promise<TableDownloadResult>
+  ```
+
+- **`extractAndDownload`**
+  ```ts
+  (tableElement: HTMLTableElement, options?: TableExtractAndDownloadOptions) => Promise<TableDownloadResult>
+  ```
+
+- **`extractor`**: `TableExtractorAPI`. Adds `isExcelExportAvailable()`.
 
 See [Tables and Excel](/docs/guides/tables-and-excel/).
 
 ## `window.agentlet.auth`
 
-| Member | Signature | Notes |
-|---|---|---|
-| `isEnabled` | `() => boolean \| string` | May return the configured `loginUrl` string instead of strict `true`. |
-| `startAuthentication` | `() => Promise<void>` | |
-| `logout` | `() => Promise<void>` | |
-| `getState` | `() => AuthState` | `{ enabled, authenticating, popupOpen }` |
-| `getAuthenticatedUser` | `() => Record<string, unknown> \| null` | |
-| `updateConfig` | `(config: Partial<AuthManagerConfig>) => void` | |
+- **`isEnabled`**
+  ```ts
+  () => boolean | string
+  ```
+  May return the configured `loginUrl` string instead of strict `true`.
+
+- **`startAuthentication`**
+  ```ts
+  () => Promise<void>
+  ```
+
+- **`logout`**
+  ```ts
+  () => Promise<void>
+  ```
+
+- **`getState`**
+  ```ts
+  () => AuthState
+  ```
+  `AuthState` is `{ enabled, authenticating, popupOpen }`.
+
+- **`getAuthenticatedUser`**
+  ```ts
+  () => Record<string, unknown> | null
+  ```
+
+- **`updateConfig`**
+  ```ts
+  (config: Partial<AuthManagerConfig>) => void
+  ```
 
 `window.agentlet.authManager` exposes the full `AuthManagerAPI`, which adds `createLoginButton()` and `cleanup()`. See [Authentication](/docs/guides/authentication/) for `AuthManagerConfig` and IDP examples.
 
@@ -158,29 +260,25 @@ Optional duck-typed hooks the core looks for, none required: `getStyles?()`, `ge
 
 ## `AgentletCoreConfig`
 
-Passed to `new AgentletCore(config)`.
+Passed to `new AgentletCore(config)`. Each option is optional; additional keys are also accepted and spread over the defaults (`[key: string]: unknown`).
 
-| Option | Type | Notes |
-|---|---|---|
-| `enablePlugins` | `boolean` | |
-| `registryUrl` | `string` | See [Script injection and registry](/docs/guides/script-injection/). |
-| `debugMode` | `boolean` | Enables `window.agentlet.debug`. |
-| `minimizeWithImage` | `string \| null` | Image shown when the panel is minimized. |
-| `startMinimized` | `boolean` | |
-| `showEnvVarsButton` / `showRefreshButton` / `showSettingsButton` / `showHelpButton` | `boolean` | Panel header buttons. |
-| `envManager` | `EnvAPI \| null` | Pass `null` to disable environment variables entirely. |
-| `resizablePanel` | `boolean` | |
-| `minimumPanelWidth` | `number` | |
-| `shadowDom` | `boolean` | Default `true`. See [Shadow DOM](/docs/guides/shadow-dom/). |
-| `quickCommandDialogShortcut` | `boolean` | Default `false`. Enables the `Ctrl`/`Cmd`+`;` shortcut. |
-| `quickCommandCallback` | `(result: unknown) => void \| null` | |
-| `auth` | `AuthManagerConfig` | See [Authentication](/docs/guides/authentication/). |
-| `env` | `Record<string, string>` | Loaded at startup, merged over any existing values. |
-| `theme` | `string \| Partial<AgentletTheme>` | |
-| `skipRegistryModuleRegistration` | `boolean` | |
-| `pdfWorkerUrl` | `string` | Forwarded to PDF.js setup. |
-
-Additional keys are accepted and spread over the defaults (`[key: string]: unknown`).
+- **`enablePlugins`**: `boolean`
+- **`registryUrl`**: `string`. See [Script injection and registry](/docs/guides/script-injection/).
+- **`debugMode`**: `boolean`. Enables `window.agentlet.debug`.
+- **`minimizeWithImage`**: `string | null`. Image shown when the panel is minimized.
+- **`startMinimized`**: `boolean`
+- **`showEnvVarsButton`**, **`showRefreshButton`**, **`showSettingsButton`**, **`showHelpButton`**: `boolean`. Panel header buttons.
+- **`envManager`**: `EnvAPI | null`. Pass `null` to disable environment variables entirely.
+- **`resizablePanel`**: `boolean`
+- **`minimumPanelWidth`**: `number`
+- **`shadowDom`**: `boolean`, default `true`. See [Shadow DOM](/docs/guides/shadow-dom/).
+- **`quickCommandDialogShortcut`**: `boolean`, default `false`. Enables the `Ctrl`/`Cmd`+`;` shortcut.
+- **`quickCommandCallback`**: `(result: unknown) => void | null`
+- **`auth`**: `AuthManagerConfig`. See [Authentication](/docs/guides/authentication/).
+- **`env`**: `Record<string, string>`. Loaded at startup, merged over any existing values.
+- **`theme`**: `string | Partial<AgentletTheme>`
+- **`skipRegistryModuleRegistration`**: `boolean`
+- **`pdfWorkerUrl`**: `string`. Forwarded to PDF.js setup.
 
 ## `window.agentlet.ui`
 
