@@ -1,0 +1,136 @@
+#!/usr/bin/env node
+/**
+ * Checks text files for punctuation that reads as AI-written: em dash, en
+ * dash, and middle dot. Plain Node ESM, no dependency.
+ *
+ * Usage: node scripts/check-typography.mjs <path> [<path> ...]
+ * Each path may be a file or a directory; directories are walked
+ * recursively, skipping node_modules, .astro, and .git. Only files whose
+ * extension is in CHECKED_EXTENSIONS are read.
+ *
+ * Exit codes: 0 nothing found, 1 forbidden characters found, 2 missing
+ * arguments.
+ */
+
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { extname, join } from 'node:path';
+
+/**
+ * @typedef {{ char: string, name: string }} ForbiddenChar
+ */
+
+// Built from character codes, not literal characters or \u escapes in a
+// string literal (either of which would put the actual character in this
+// file's source text and make the script flag itself).
+/** @type {ForbiddenChar[]} */
+const FORBIDDEN_CHARS = [
+	{ char: String.fromCharCode(0x2014), name: 'em dash' },
+	{ char: String.fromCharCode(0x2013), name: 'en dash' },
+	{ char: String.fromCharCode(0x00b7), name: 'middle dot' },
+];
+
+const CHECKED_EXTENSIONS = new Set([
+	'.astro',
+	'.css',
+	'.html',
+	'.js',
+	'.json',
+	'.md',
+	'.mdx',
+	'.mjs',
+	'.svg',
+	'.ts',
+	'.txt',
+	'.webmanifest',
+	'.xml',
+	'.yaml',
+	'.yml',
+]);
+
+// pagefind/ is Starlight's search index and vendored client bundle,
+// regenerated on every build: it isn't content this project authors (it
+// even bundles third-party code with its own em/en dashes in comments),
+// so it is out of scope the same way node_modules is.
+const SKIPPED_DIRECTORIES = new Set(['node_modules', '.astro', '.git', 'pagefind']);
+
+/**
+ * Recursively collect every file path under a directory, skipping
+ * SKIPPED_DIRECTORIES.
+ * @param {string} dir
+ * @returns {string[]}
+ */
+function walk(dir) {
+	/** @type {string[]} */
+	const files = [];
+	for (const entry of readdirSync(dir, { withFileTypes: true })) {
+		const entryPath = join(dir, entry.name);
+		if (entry.isDirectory()) {
+			if (SKIPPED_DIRECTORIES.has(entry.name)) continue;
+			files.push(...walk(entryPath));
+		} else if (entry.isFile()) {
+			files.push(entryPath);
+		}
+	}
+	return files;
+}
+
+/**
+ * Resolve a CLI path argument (file or directory) to a list of file paths.
+ * @param {string} path
+ * @returns {string[]}
+ */
+function collectFiles(path) {
+	const stats = statSync(path);
+	return stats.isDirectory() ? walk(path) : [path];
+}
+
+/**
+ * Scan one file's contents for forbidden characters.
+ * @param {string} file
+ * @returns {string[]} one formatted "file:line:column name" entry per hit
+ */
+function checkFile(file) {
+	const content = readFileSync(file, 'utf8');
+	const lines = content.split('\n');
+	/** @type {string[]} */
+	const findings = [];
+	lines.forEach((line, lineIndex) => {
+		for (let column = 0; column < line.length; column++) {
+			const character = line[column];
+			const forbidden = FORBIDDEN_CHARS.find((entry) => entry.char === character);
+			if (forbidden) {
+				findings.push(`${file}:${lineIndex + 1}:${column + 1} ${forbidden.name}`);
+			}
+		}
+	});
+	return findings;
+}
+
+function main() {
+	const args = process.argv.slice(2);
+	if (args.length === 0) {
+		console.error('Usage: node scripts/check-typography.mjs <path> [<path> ...]');
+		process.exit(2);
+	}
+
+	/** @type {string[]} */
+	const findings = [];
+	for (const arg of args) {
+		const files = collectFiles(arg).filter((file) => CHECKED_EXTENSIONS.has(extname(file)));
+		for (const file of files) {
+			findings.push(...checkFile(file));
+		}
+	}
+
+	if (findings.length > 0) {
+		for (const finding of findings) {
+			console.error(finding);
+		}
+		process.exit(1);
+	}
+
+	console.log('No em dash, en dash, or middle dot found.');
+	process.exit(0);
+}
+
+main();

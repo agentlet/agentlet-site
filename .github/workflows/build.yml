@@ -28,3 +28,6 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Check built pages for forbidden characters
+        run: node scripts/check-typography.mjs dist

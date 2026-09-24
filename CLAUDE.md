@@ -37,8 +37,10 @@ the UI.
 - Sentence case in all titles, buttons and navigation labels (for example
   "Get started", not "Get Started").
 - No emojis in titles.
-- No em dashes (`—`) anywhere, and no en dashes used as punctuation. Use a
-  comma, a period, or "and" instead.
+- No em dashes, no en dashes, and no middle dots anywhere (they read as
+  machine-written). Use a comma, a period, or "and" instead. Enforced by
+  `scripts/check-typography.mjs`, run in `npm run lint` and again in CI
+  against the built `dist/` output.
 - No marketing puffery: avoid words like "revolutionary", "seamless",
   "supercharge", "unleash".
 - Short sentences.

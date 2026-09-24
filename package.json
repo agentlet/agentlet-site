@@ -12,7 +12,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "lint": "eslint .",
+    "lint": "eslint . && node scripts/check-typography.mjs src public astro.config.mjs",
     "prepare": "husky"
   },
   "dependencies": {
