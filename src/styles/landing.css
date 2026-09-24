@@ -664,18 +664,6 @@ figure.demo-figure figcaption {
 	overflow-wrap: anywhere;
 }
 
-.hero-panel-brand .symbol-dark {
-	display: none;
-}
-
-:root[data-theme='dark'] .hero-panel-brand .symbol-light {
-	display: none;
-}
-
-:root[data-theme='dark'] .hero-panel-brand .symbol-dark {
-	display: inline;
-}
-
 .capability-card h3 {
 	font-size: 20px;
 	margin: 0;
