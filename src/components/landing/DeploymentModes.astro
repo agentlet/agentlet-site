@@ -1,3 +1,9 @@
+---
+import DeployBookmarkletScene from '../scenes/DeployBookmarkletScene.astro';
+import DeployExtensionScene from '../scenes/DeployExtensionScene.astro';
+import DeployNativeScene from '../scenes/DeployNativeScene.astro';
+---
+
 <section>
 	<div class="wrap">
 		<h2 class="section-title">Three ways to deploy</h2>
@@ -12,16 +18,7 @@
 					A small JavaScript snippet stored as a browser bookmark. Clicking it injects the
 					agentlet into the current page, with no installation required.
 				</p>
-				<div class="diagram-card">
-					<img
-						src="/img/bookmarklet-archi3.svg"
-						width="800"
-						height="540"
-						loading="lazy"
-						decoding="async"
-						alt="Diagram: clicking the agentlet bookmark in the bookmarks bar loads the agentlet core and module, which appear in the page as a side panel with actions such as Analyse with AI, Extract data, and Pre-fill form"
-					/>
-				</div>
+				<DeployBookmarkletScene />
 			</div>
 			<div class="mode-card">
 				<h3><span class="pill">Extension</span></h3>
@@ -29,16 +26,7 @@
 					An installable extension that launches agentlets with access to browser APIs, persistent
 					state, and automatic injection on chosen sites.
 				</p>
-				<div class="diagram-card">
-					<img
-						src="/img/extension-archi2.svg"
-						width="800"
-						height="480"
-						loading="lazy"
-						decoding="async"
-						alt="Diagram: the browser extension icon injects the same side panel used by the bookmarklet into the page"
-					/>
-				</div>
+				<DeployExtensionScene />
 			</div>
 			<div class="mode-card">
 				<h3><span class="pill">Native</span></h3>
@@ -46,6 +34,7 @@
 					The same code the bookmarklet would inject at runtime is instead loaded directly by the
 					host application, for teams who can add a script tag but not change the backend.
 				</p>
+				<DeployNativeScene />
 			</div>
 		</div>
 	</div>
