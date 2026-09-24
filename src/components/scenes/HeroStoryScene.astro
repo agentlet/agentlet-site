@@ -1,16 +1,18 @@
 ---
 import SceneFrame from './SceneFrame.astro';
 
-// A single ~24s, 7-step story of the agentlet principle: one host page,
+// A single ~27.5s, 8-step story of the agentlet principle: one host page,
 // never changing, gaining a side panel that reads a receipt, exports a
-// table, and answers a question. Unlike the other scenes (one continuous
-// CSS keyframe timeline keyed to --scene-duration), this one is driven
-// step by step: src/scripts/scenes.ts sets data-step="1".."7" on the
-// .scene root on a timer, and every rule below keys off that attribute
-// with plain CSS transitions (a couple of short, step-scoped keyframe
-// animations handle the receipt card's own appear-then-shrink). The
-// step durations here (in the "step4 dwell" etc. comments) must match
-// the durations Hero.astro hands to the controller.
+// table, answers a question, then (step 8) holds that finished state
+// while calling out the host page and the agentlet layer added on top
+// of it. Unlike the other scenes (one continuous CSS keyframe timeline
+// keyed to --scene-duration), this one is driven step by step:
+// src/scripts/scenes.ts sets data-step="1".."8" on the .scene root on a
+// timer, and every rule below keys off that attribute with plain CSS
+// transitions (a couple of short, step-scoped keyframe animations
+// handle the receipt card's own appear-then-shrink). The step durations
+// here (in the "step4 dwell" etc. comments) must match the durations
+// Hero.astro hands to the controller.
 ---
 
 <SceneFrame
@@ -70,8 +72,10 @@ import SceneFrame from './SceneFrame.astro';
 				<span>Taxi</span><span>$54.20</span>
 			</div>
 		</div>
+		<span class="story-app-label">your app, unchanged</span>
 	</Fragment>
 	<Fragment slot="panel">
+		<span class="story-agentlet-layer-label">agentlet layer</span>
 		<div class="scene-panel-brand">
 			<img src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
 			<span>agentlet</span>
@@ -129,8 +133,33 @@ import SceneFrame from './SceneFrame.astro';
 	   table row (its own chip claims "3 rows", so the table has to show
 	   three to stay factually consistent with it). */
 	.scene-herostory .scene-app {
+		position: relative;
 		padding: 3cqi;
 		gap: 1.3cqi;
+		opacity: 1;
+		transition: opacity 0.4s ease;
+	}
+
+	/* Step 8 holds the finished state and calls out the two layers: the
+	   host page, dimmed and labelled, and the agentlet panel, outlined
+	   and labelled (see the panel rules further down). */
+	.scene-herostory[data-step='8'] .scene-app {
+		opacity: 0.55;
+	}
+
+	.scene-herostory .story-app-label {
+		align-self: flex-start;
+		margin-top: auto;
+		font-family: var(--font-mono);
+		font-size: 1.9cqi;
+		color: var(--color-text-muted);
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+
+	.scene-herostory[data-step='8'] .story-app-label {
+		opacity: 1;
+		transition-delay: 0.2s;
 	}
 
 	.scene-herostory .scene-field {
@@ -215,7 +244,7 @@ import SceneFrame from './SceneFrame.astro';
 		}
 	}
 
-	.scene-herostory:is([data-step='2'], [data-step='3'], [data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'])
+	.scene-herostory:is([data-step='2'], [data-step='3'], [data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8'])
 		.story-ext-badge {
 		opacity: 1;
 	}
@@ -225,17 +254,51 @@ import SceneFrame from './SceneFrame.astro';
 	   actions, one result artifact) has margin to spare against the
 	   frame at every step, not just barely fit. --- */
 	.scene-herostory .scene-panel {
+		position: relative;
 		gap: 1.1cqi;
 		opacity: 0;
 		transform: translateX(6cqi);
 		transition:
 			opacity 0.5s ease,
-			transform 0.5s ease;
+			transform 0.5s ease,
+			outline-color 0.4s ease;
+		outline: 1.5px dashed transparent;
+		outline-offset: -1.5px;
 	}
 
-	.scene-herostory:is([data-step='3'], [data-step='4'], [data-step='5'], [data-step='6'], [data-step='7']) .scene-panel {
+	.scene-herostory:is([data-step='3'], [data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .scene-panel {
 		opacity: 1;
 		transform: translateX(0);
+	}
+
+	/* Step 8: a dashed outline traces the agentlet layer, drawn inward
+	   (a negative offset) so it never reaches past the frame's own edge. */
+	.scene-herostory[data-step='8'] .scene-panel {
+		outline-color: var(--color-accent);
+	}
+
+	/* Bottom corner, not top: the top of the panel already holds the
+	   brand row, and the two would be tight for room side by side at
+	   small sizes. The panel's own content leaves margin to spare at the
+	   bottom at every step (see the result-slot comment below), so nothing
+	   sits under the label there. */
+	.scene-herostory .story-agentlet-layer-label {
+		position: absolute;
+		bottom: 0.8cqi;
+		right: 0.8cqi;
+		padding: 0.2cqi 0.8cqi;
+		border-radius: 999px;
+		background: var(--color-bg);
+		font-family: var(--font-mono);
+		font-size: 1.8cqi;
+		color: var(--color-accent-text);
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+
+	.scene-herostory[data-step='8'] .story-agentlet-layer-label {
+		opacity: 1;
+		transition-delay: 0.2s;
 	}
 
 	/* Briefly highlight whichever action was just clicked. Tighter than
@@ -263,22 +326,22 @@ import SceneFrame from './SceneFrame.astro';
 		transition: clip-path 0.5s ease;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7']) .story-field-vendor {
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-vendor {
 		clip-path: inset(0 0 0 0);
 		transition-delay: 0.3s;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7']) .story-field-date {
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-date {
 		clip-path: inset(0 0 0 0);
 		transition-delay: 1s;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7']) .story-field-amount {
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-amount {
 		clip-path: inset(0 0 0 0);
 		transition-delay: 1.7s;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7']) .story-field-category {
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-category {
 		clip-path: inset(0 0 0 0);
 		transition-delay: 2.4s;
 	}
@@ -313,7 +376,7 @@ import SceneFrame from './SceneFrame.astro';
 			border-color 0.4s ease;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7']) .story-submit {
+	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-submit {
 		box-shadow: 0 0 0 2px var(--color-accent);
 		border-color: var(--color-accent);
 		transition-delay: 2.8s;
@@ -499,21 +562,21 @@ import SceneFrame from './SceneFrame.astro';
 		color: var(--color-text);
 	}
 
-	.scene-herostory:is([data-step='6'], [data-step='7']) .story-ai-block {
+	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-block {
 		opacity: 1;
 	}
 
-	.scene-herostory:is([data-step='6'], [data-step='7']) .story-ai-question {
+	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-question {
 		clip-path: inset(0 0 0 0);
 		transition-delay: 0.3s;
 	}
 
-	.scene-herostory:is([data-step='6'], [data-step='7']) .story-ai-answer-1 {
+	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-answer-1 {
 		clip-path: inset(0 0 0 0);
 		transition-delay: 1.2s;
 	}
 
-	.scene-herostory:is([data-step='6'], [data-step='7']) .story-ai-answer-2 {
+	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-answer-2 {
 		clip-path: inset(0 0 0 0);
 		transition-delay: 2s;
 	}

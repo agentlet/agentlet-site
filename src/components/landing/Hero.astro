@@ -1,7 +1,7 @@
 ---
 import HeroStoryScene from '../scenes/HeroStoryScene.astro';
 
-// One 7-step, ~24s story (see HeroStoryScene.astro), driven by
+// One 8-step, ~27.5s story (see HeroStoryScene.astro), driven by
 // src/scripts/scenes.ts setting data-step on the scene root. Durations
 // here are the single source of truth: the JS controller reads them off
 // each progress segment's data-duration, and HeroStoryScene's CSS
@@ -15,6 +15,7 @@ const steps = [
 	{ subtitle: 'It exports the table to Excel.', duration: 3500 },
 	{ subtitle: 'It answers questions about the page.', duration: 4000 },
 	{ subtitle: 'Nothing on the host page had to change.', duration: 2000 },
+	{ subtitle: 'All of this was built quickly on top of the existing app, with agentlet.', duration: 3500 },
 ];
 ---
 
