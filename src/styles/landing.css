@@ -119,6 +119,14 @@ a {
 	color: var(--color-heading);
 }
 
+/* Buttons don't inherit font by default in any browser; every button on
+   the page (theme toggle, copy button, hero tabs and pause button,
+   capability tabs) needs this to render in IBM Plex like the rest of the
+   page, not the browser's UI font. */
+button {
+	font: inherit;
+}
+
 h1,
 h2,
 h3 {
@@ -454,12 +462,17 @@ section.alt {
 	gap: 0.75rem;
 }
 
+/* A horizontally scrollable row, never wrapping and never truncating:
+   labels always show in full, from 320px up. The pause button lives
+   outside this container (a flex-shrink: 0 sibling), so it always stays
+   visible regardless of how the tabs scroll. */
 .hero-carousel-tabs {
 	display: flex;
-	flex-wrap: wrap;
-	gap: 0.4rem;
+	flex-wrap: nowrap;
+	gap: 1rem;
 	flex: 1;
 	min-width: 0;
+	overflow-x: auto;
 }
 
 .hero-carousel-tabs [role='tab'] {
@@ -474,8 +487,8 @@ section.alt {
 	font-size: 0.72rem;
 	font-weight: 500;
 	cursor: pointer;
-	flex: 1 1 0;
-	min-width: 3.5rem;
+	flex-shrink: 0;
+	white-space: nowrap;
 	text-align: left;
 }
 
@@ -484,8 +497,6 @@ section.alt {
 }
 
 .hero-tab-label {
-	overflow: hidden;
-	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
@@ -713,6 +724,13 @@ figure.demo-figure figcaption {
 
 .capability-panel[hidden] {
 	display: none;
+}
+
+/* Cap the scene's width so it reads at roughly the same size as the
+   hero's, instead of stretching to the full (much wider) panel column
+   and blowing up its inner text. */
+.capability-panel .scene-wrap {
+	max-width: 560px;
 }
 
 .capability-panel-copy h3 {

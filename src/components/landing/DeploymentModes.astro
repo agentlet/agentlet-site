@@ -18,7 +18,7 @@ import DeployNativeScene from '../scenes/DeployNativeScene.astro';
 					A small JavaScript snippet stored as a browser bookmark. Clicking it injects the
 					agentlet into the current page, with no installation required.
 				</p>
-				<DeployBookmarkletScene />
+				<DeployBookmarkletScene captionVisible />
 			</div>
 			<div class="mode-card">
 				<h3><span class="pill">Extension</span></h3>
@@ -26,7 +26,7 @@ import DeployNativeScene from '../scenes/DeployNativeScene.astro';
 					An installable extension that launches agentlets with access to browser APIs, persistent
 					state, and automatic injection on chosen sites.
 				</p>
-				<DeployExtensionScene />
+				<DeployExtensionScene captionVisible />
 			</div>
 			<div class="mode-card">
 				<h3><span class="pill">Native</span></h3>
@@ -34,7 +34,7 @@ import DeployNativeScene from '../scenes/DeployNativeScene.astro';
 					The same code the bookmarklet would inject at runtime is instead loaded directly by the
 					host application, for teams who can add a script tag but not change the backend.
 				</p>
-				<DeployNativeScene />
+				<DeployNativeScene captionVisible />
 			</div>
 		</div>
 	</div>
