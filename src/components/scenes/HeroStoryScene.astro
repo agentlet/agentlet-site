@@ -1,23 +1,29 @@
 ---
 import SceneFrame from './SceneFrame.astro';
 
-// A single ~27.5s, 8-step story of the agentlet principle: one host page,
-// never changing, gaining a side panel that reads a receipt, exports a
-// table, answers a question, then (step 8) holds that finished state
-// while calling out the host page and the agentlet layer added on top
-// of it. Unlike the other scenes (one continuous CSS keyframe timeline
-// keyed to --scene-duration), this one is driven step by step:
-// src/scripts/scenes.ts sets data-step="1".."8" on the .scene root on a
-// timer, and every rule below keys off that attribute with plain CSS
-// transitions (a couple of short, step-scoped keyframe animations
-// handle the receipt card's own appear-then-shrink). The step durations
-// here (in the "step4 dwell" etc. comments) must match the durations
-// Hero.astro hands to the controller.
+// A single ~37s, 8-step story of the agentlet principle: one host page
+// that only takes manual entry, never changing, gaining an agentlet
+// panel (floating on top of it) that reads an uploaded receipt, adds an
+// Excel export the app lacks, and answers questions about the page.
+// Step 7 calls out the host page and the agentlet layer; step 8 shows
+// example features from the library on top of the whole scene.
+//
+// Unlike the other scenes (one continuous CSS keyframe timeline keyed to
+// --scene-duration), this one is driven step by step: src/scripts/
+// scenes.ts sets data-step="1".."8" on the .scene root on a timer (or
+// when a progress segment is clicked), and every rule below keys off
+// that attribute. Anything that must happen at a given moment inside a
+// step is either a transition-delay scoped to that step only, or a
+// step-scoped keyframe animation. Scoping the delays to their own step
+// keeps a direct jump to a later step instant: the end state of earlier
+// steps applies with no delay. Keyframe durations here (in the "step N
+// dwell" comments) must match the durations Hero.astro hands to the
+// controller.
 ---
 
 <SceneFrame
 	class="scene-herostory"
-	caption="An animated walkthrough: an expense report page gains an agentlet side panel that reads a receipt into the form, exports the line items to Excel, and answers a question about the page, all without changing the host page itself."
+	caption="An animated walkthrough: an expense report page that only takes manual entry gains an agentlet panel on top of it. The panel reads an uploaded receipt into the form, adds an Excel export the app does not have, and answers questions about the page, all without changing the host page itself. It ends with example features from the agentlet library."
 	aspectRatio="4 / 3"
 	chrome
 >
@@ -26,50 +32,71 @@ import SceneFrame from './SceneFrame.astro';
 		<span class="story-ext-icon scene-click-target" style="--cursor-offset-x:1cqi;--cursor-offset-y:13cqi">
 			<img class="story-ext-symbol" src="/brand/agentlet-symbol-light.svg" alt="" width="16" height="16" />
 			<span class="story-ext-badge"></span>
-			<span class="scene-cursor story-cursor-step2"></span>
-			<span class="scene-click-pulse story-pulse-step2"></span>
+			<span class="story-ext-tooltip">agentlet for expenses</span>
+			<span class="scene-cursor story-cursor story-cursor-step2"></span>
+			<span class="scene-click-pulse story-pulse story-pulse-step2"></span>
 		</span>
 	</Fragment>
 	<Fragment slot="app">
-		<div class="story-field-grid">
-			<div class="story-field-group">
-				<span class="story-field-label">Vendor</span>
-				<div class="scene-field">
-					<span class="scene-field-value story-field-value story-field-vendor">Cedar &amp; Co</span>
-				</div>
-			</div>
-			<div class="story-field-group">
-				<span class="story-field-label">Date</span>
-				<div class="scene-field">
-					<span class="scene-field-value story-field-value story-field-date">2024-03-21</span>
-				</div>
-			</div>
-			<div class="story-field-group">
-				<span class="story-field-label">Amount</span>
-				<div class="scene-field">
-					<span class="scene-field-value story-field-value story-field-amount">$187.40</span>
-				</div>
-			</div>
-			<div class="story-field-group">
-				<span class="story-field-label">Category</span>
-				<div class="scene-field">
-					<span class="scene-field-value story-field-value story-field-category">Travel</span>
-				</div>
-			</div>
+		<div class="story-app-head">
+			<span class="story-app-title">Expense report</span>
+			<span class="story-manual-pill">Manual entry only</span>
 		</div>
-		<div class="scene-submit scene-submit-highlight story-submit">Submit</div>
-		<div class="story-table">
-			<div class="story-row story-row-head">
-				<span>Line item</span><span>Amount</span>
+		<div class="story-app-main">
+			<div class="story-app-form">
+				<div class="story-field-grid">
+					<div
+						class="story-field-group story-field-group-vendor scene-click-target"
+						style="--cursor-offset-x:10cqi;--cursor-offset-y:8cqi"
+					>
+						<span class="story-field-label">Vendor</span>
+						<div class="scene-field story-field-vendor-box">
+							<span class="story-typing"><span class="story-typing-text">Ced</span><span class="story-caret"></span></span>
+							<span class="scene-field-value story-field-value story-field-vendor">Cedar &amp; Co</span>
+						</div>
+						<span class="scene-cursor story-cursor story-cursor-step1"></span>
+						<span class="scene-click-pulse story-pulse story-pulse-step1"></span>
+					</div>
+					<div class="story-field-group">
+						<span class="story-field-label">Date</span>
+						<div class="scene-field">
+							<span class="scene-field-value story-field-value story-field-date">2024-03-21</span>
+						</div>
+					</div>
+					<div class="story-field-group">
+						<span class="story-field-label">Amount</span>
+						<div class="scene-field">
+							<span class="scene-field-value story-field-value story-field-amount">$187.40</span>
+						</div>
+					</div>
+					<div class="story-field-group">
+						<span class="story-field-label">Category</span>
+						<div class="scene-field">
+							<span class="scene-field-value story-field-value story-field-category">Travel</span>
+						</div>
+					</div>
+				</div>
+				<div class="scene-submit scene-submit-highlight story-submit">Submit</div>
+				<div class="story-table">
+					<div class="story-row story-row-head">
+						<span>Line item</span><span>Amount</span>
+					</div>
+					<div class="story-row">
+						<span>Hotel</span><span>$420.00</span>
+					</div>
+					<div class="story-row">
+						<span>Meals</span><span>$96.50</span>
+					</div>
+					<div class="story-row">
+						<span>Taxi</span><span>$54.20</span>
+					</div>
+				</div>
 			</div>
-			<div class="story-row">
-				<span>Hotel</span><span>$420.00</span>
-			</div>
-			<div class="story-row">
-				<span>Meals</span><span>$96.50</span>
-			</div>
-			<div class="story-row">
-				<span>Taxi</span><span>$54.20</span>
+			<div class="story-app-side">
+				<span class="story-field-label">Recent reports</span>
+				<div class="story-side-item"><span class="scene-bar"></span><span class="scene-bar"></span></div>
+				<div class="story-side-item"><span class="scene-bar"></span><span class="scene-bar"></span></div>
+				<div class="story-side-item"><span class="scene-bar"></span><span class="scene-bar"></span></div>
 			</div>
 		</div>
 		<span class="story-app-label">your app, unchanged</span>
@@ -85,38 +112,67 @@ import SceneFrame from './SceneFrame.astro';
 			style="--cursor-offset-x:14cqi;--cursor-offset-y:10cqi"
 		>
 			Read a receipt
-			<span class="scene-cursor story-cursor-step4"></span>
-			<span class="scene-click-pulse story-pulse-step4"></span>
+			<span class="scene-cursor story-cursor story-cursor-step4"></span>
+			<span class="scene-click-pulse story-pulse story-pulse-step4"></span>
 		</div>
 		<div
 			class="scene-action story-action story-action-export scene-click-target"
 			style="--cursor-offset-x:14cqi;--cursor-offset-y:10cqi"
 		>
-			Export table
-			<span class="scene-cursor story-cursor-step5"></span>
-			<span class="scene-click-pulse story-pulse-step5"></span>
+			Export to Excel
+			<span class="scene-cursor story-cursor story-cursor-step5"></span>
+			<span class="scene-click-pulse story-pulse story-pulse-step5"></span>
 		</div>
 		<div
 			class="scene-action story-action story-action-ai scene-click-target"
 			style="--cursor-offset-x:14cqi;--cursor-offset-y:10cqi"
 		>
-			Ask the AI
-			<span class="scene-cursor story-cursor-step6"></span>
-			<span class="scene-click-pulse story-pulse-step6"></span>
+			Ask about this page
+			<span class="scene-cursor story-cursor story-cursor-step6"></span>
+			<span class="scene-click-pulse story-pulse story-pulse-step6"></span>
 		</div>
 		<div class="story-result">
-			<div class="story-receipt-card">
-				<p class="story-receipt-card-title">receipt.pdf</p>
-				<div class="story-receipt-card-row"><span>Vendor</span><span>Cedar &amp; Co</span></div>
-				<div class="story-receipt-card-row"><span>Date</span><span>2024-03-21</span></div>
-				<div class="story-receipt-card-row"><span>Amount</span><span>$187.40</span></div>
-			</div>
 			<span class="scene-chip story-receipt-chip">Receipt read</span>
-			<span class="scene-chip story-xlsx-chip">expenses.xlsx, 3 rows</span>
+			<div class="story-xlsx-block">
+				<span class="scene-chip story-xlsx-chip">expenses.xlsx, 3 rows</span>
+				<p class="story-xlsx-note">Not in the app. Added by the agentlet.</p>
+			</div>
 			<div class="story-ai-block">
-				<p class="story-ai-question">Anything unusual here?</p>
-				<p class="story-ai-answer story-ai-answer-1">The hotel is 40% above policy.</p>
-				<p class="story-ai-answer story-ai-answer-2">Everything else is in range.</p>
+				<p class="story-bubble story-bubble-question">Anything unusual here?</p>
+				<p class="story-bubble story-bubble-answer story-ai-answer-1">The hotel is 40% above policy.</p>
+				<p class="story-bubble story-bubble-answer story-ai-answer-2">Everything else is in range.</p>
+			</div>
+		</div>
+	</Fragment>
+	<Fragment slot="overlay">
+		<div class="story-modal-backdrop">
+			<div class="story-modal">
+				<p class="story-modal-title">Read a receipt</p>
+				<div class="story-dropzone">
+					<span>Drop a receipt here</span>
+					<span class="story-dropzone-hint">PDF or image</span>
+				</div>
+				<div class="story-file">
+					<span class="story-file-name">receipt.pdf</span>
+					<span class="story-file-track"><span class="story-file-bar"></span></span>
+				</div>
+			</div>
+		</div>
+		<div class="story-features">
+			<p class="story-features-heading">Ready to use in the library</p>
+			<div class="story-features-grid">
+				<span class="story-feature" style="--i:0">Read PDFs and images with AI</span>
+				<span class="story-feature" style="--i:1">Fill forms</span>
+				<span class="story-feature" style="--i:2">Export tables to Excel</span>
+				<span class="story-feature" style="--i:3">Screenshots for visual analysis</span>
+				<span class="story-feature" style="--i:4">Dialogs and progress</span>
+				<span class="story-feature" style="--i:5">Sign in with your identity provider</span>
+			</div>
+			<p class="story-features-heading story-features-heading-ideas">Or build your own</p>
+			<div class="story-features-grid">
+				<span class="story-feature story-feature-idea" style="--i:7">Check against a policy</span>
+				<span class="story-feature story-feature-idea" style="--i:8">Bulk entry from a spreadsheet</span>
+				<span class="story-feature story-feature-idea" style="--i:9">Your idea here</span>
 			</div>
 		</div>
 	</Fragment>
@@ -127,23 +183,91 @@ import SceneFrame from './SceneFrame.astro';
 		flex: 1;
 	}
 
-	/* The host page (form + table) needs to fit a taller stack than the
-	   other scenes' host pages: tighten the shared .scene-app padding and
-	   .scene-field height to make room, instead of dropping the third
-	   table row (its own chip claims "3 rows", so the table has to show
-	   three to stay factually consistent with it). */
+	/* --- Layout: unlike the other scenes' side-by-side grid, the host app
+	   here takes the full width, and the agentlet panel floats on top of
+	   it (covering the app's own "recent reports" column), to show that
+	   the agentlet is an overlay, not part of the page. --- */
+	.scene-herostory .scene-body {
+		display: block;
+	}
+
 	.scene-herostory .scene-app {
-		position: relative;
+		position: absolute;
+		inset: 0;
 		padding: 3cqi;
 		gap: 1.3cqi;
 		opacity: 1;
 		transition: opacity 0.4s ease;
 	}
 
-	/* Step 8 holds the finished state and calls out the two layers: the
+	.scene-herostory .story-app-head {
+		display: flex;
+		align-items: center;
+		gap: 2cqi;
+	}
+
+	.scene-herostory .story-app-title {
+		font-size: 2.8cqi;
+		font-weight: 600;
+		color: var(--color-heading);
+	}
+
+	/* Step 1 insists on the app as it is: manual entry only. */
+	.scene-herostory .story-manual-pill {
+		font-family: var(--font-mono);
+		font-size: 1.9cqi;
+		padding: 0.5cqi 1.4cqi;
+		border-radius: 999px;
+		border: 1px solid var(--color-accent);
+		color: var(--color-accent-text);
+		opacity: 0;
+		transition: opacity 0.4s ease;
+	}
+
+	.scene-herostory[data-step='1'] .story-manual-pill {
+		opacity: 1;
+		transition-delay: 1.4s;
+	}
+
+	.scene-herostory .story-app-main {
+		display: grid;
+		grid-template-columns: 56cqi minmax(0, 1fr);
+		gap: 4cqi;
+	}
+
+	.scene-herostory .story-app-form {
+		display: flex;
+		flex-direction: column;
+		gap: 1.3cqi;
+	}
+
+	.scene-herostory .story-app-side {
+		display: flex;
+		flex-direction: column;
+		gap: 1.2cqi;
+	}
+
+	.scene-herostory .story-side-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.8cqi;
+		padding: 1.4cqi;
+		border: 1px solid var(--color-surface-border);
+		border-radius: 6px;
+	}
+
+	.scene-herostory .story-side-item .scene-bar {
+		height: 1.6cqi;
+	}
+
+	.scene-herostory .story-side-item .scene-bar + .scene-bar {
+		width: 60%;
+	}
+
+	/* Step 7 holds the finished state and calls out the two layers: the
 	   host page, dimmed and labelled, and the agentlet panel, outlined
 	   and labelled (see the panel rules further down). */
-	.scene-herostory[data-step='8'] .scene-app {
+	.scene-herostory[data-step='7'] .scene-app {
 		opacity: 0.55;
 	}
 
@@ -157,15 +281,86 @@ import SceneFrame from './SceneFrame.astro';
 		transition: opacity 0.4s ease;
 	}
 
-	.scene-herostory[data-step='8'] .story-app-label {
+	.scene-herostory[data-step='7'] .story-app-label {
 		opacity: 1;
 		transition-delay: 0.2s;
 	}
 
 	.scene-herostory .scene-field {
 		height: 5.5cqi;
+		transition: border-color 0.3s ease;
 	}
 
+	/* --- Step 1: the user types into the form by hand. --- */
+	.scene-herostory .story-field-group-vendor {
+		position: relative;
+	}
+
+	.scene-herostory[data-step='1'] .story-field-vendor-box {
+		border-color: var(--color-accent);
+		transition-delay: 0.7s;
+	}
+
+	.scene-herostory .story-typing {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		padding-inline: 1.6cqi;
+		font-size: 2.6cqi;
+		color: var(--color-heading);
+		opacity: 0;
+	}
+
+	.scene-herostory[data-step='1'] .story-typing {
+		opacity: 1;
+	}
+
+	.scene-herostory .story-typing-text {
+		clip-path: inset(0 100% 0 0);
+	}
+
+	/* Step 1 dwell is 4000ms: three letters typed slowly from 1s on. */
+	.scene-herostory[data-step='1'] .story-typing-text {
+		animation: story-typing 4000ms steps(1, end) forwards;
+	}
+
+	@keyframes story-typing {
+		0%,
+		25% {
+			clip-path: inset(0 100% 0 0);
+		}
+		40% {
+			clip-path: inset(0 66% 0 0);
+		}
+		55% {
+			clip-path: inset(0 33% 0 0);
+		}
+		70%,
+		100% {
+			clip-path: inset(0 0 0 0);
+		}
+	}
+
+	.scene-herostory .story-caret {
+		display: inline-block;
+		width: 0.25cqi;
+		height: 3cqi;
+		margin-left: 0.2cqi;
+		background: var(--color-heading);
+	}
+
+	.scene-herostory[data-step='1'] .story-caret {
+		animation: story-caret-blink 900ms steps(1, end) infinite;
+	}
+
+	@keyframes story-caret-blink {
+		50% {
+			opacity: 0;
+		}
+	}
+
+	/* --- Browser chrome: the agentlet extension icon. --- */
 	.scene-herostory .story-ext-icon {
 		position: relative;
 		display: grid;
@@ -194,39 +389,95 @@ import SceneFrame from './SceneFrame.astro';
 		transition: opacity 0.4s ease;
 	}
 
+	.scene-herostory:not([data-step='1']) .story-ext-badge {
+		opacity: 1;
+	}
+
+	/* Step 2: the icon announces the agentlet, then gets clicked. */
+	.scene-herostory[data-step='2'] .story-ext-icon {
+		animation: story-ext-ring 1200ms ease-out 2;
+	}
+
+	@keyframes story-ext-ring {
+		0% {
+			box-shadow: 0 0 0 0 var(--color-accent);
+		}
+		100% {
+			box-shadow: 0 0 0 1.6cqi transparent;
+		}
+	}
+
+	.scene-herostory .story-ext-tooltip {
+		position: absolute;
+		top: calc(100% + 1.6cqi);
+		right: 0;
+		z-index: 20;
+		padding: 0.8cqi 1.4cqi;
+		border-radius: 6px;
+		background: var(--color-primary-bg);
+		color: var(--color-primary-text);
+		font-family: var(--font-mono);
+		font-size: 2cqi;
+		white-space: nowrap;
+		opacity: 0;
+		transform: translateY(-1cqi);
+		transition:
+			opacity 0.3s ease,
+			transform 0.3s ease;
+		pointer-events: none;
+	}
+
+	.scene-herostory[data-step='2'] .story-ext-tooltip {
+		opacity: 1;
+		transform: translateY(0);
+		transition-delay: 0.3s;
+	}
+
 	/* --- Cursor and click pulse: this scene keys them off data-step
-	   instead of the shared percentage timeline in scenes.css. --- */
-	.scene-herostory .scene-cursor,
-	.scene-herostory .scene-click-pulse {
+	   instead of the shared percentage timeline in scenes.css. Each step
+	   sets when its cursor arrives (--cursor-at) and the pulse fires
+	   0.5s later. --- */
+	.scene-herostory .story-cursor,
+	.scene-herostory .story-pulse {
+		--cursor-at: 0.2s;
+
 		animation: none;
 	}
 
-	.scene-herostory .scene-cursor {
+	.scene-herostory .story-cursor-step2,
+	.scene-herostory .story-pulse-step2 {
+		--cursor-at: 1.6s;
+	}
+
+	.scene-herostory .story-cursor {
 		opacity: 0;
 		transition:
 			opacity 0.35s ease,
 			transform 0.45s ease;
 	}
 
-	.scene-herostory .scene-click-pulse {
+	.scene-herostory .story-pulse {
 		opacity: 0;
 	}
 
+	.scene-herostory[data-step='1'] .story-cursor-step1,
 	.scene-herostory[data-step='2'] .story-cursor-step2,
 	.scene-herostory[data-step='4'] .story-cursor-step4,
 	.scene-herostory[data-step='5'] .story-cursor-step5,
 	.scene-herostory[data-step='6'] .story-cursor-step6 {
 		opacity: 1;
 		transform: translate(0, 0);
+		transition-delay: var(--cursor-at);
 	}
 
+	.scene-herostory[data-step='1'] .story-pulse-step1,
 	.scene-herostory[data-step='2'] .story-pulse-step2,
 	.scene-herostory[data-step='4'] .story-pulse-step4,
 	.scene-herostory[data-step='5'] .story-pulse-step5,
 	.scene-herostory[data-step='6'] .story-pulse-step6 {
 		/* One-shot pulse: fires once whenever this step's attribute value
 		   freshly matches, including on every loop replay. */
-		animation: story-click-pulse 800ms ease-out;
+		animation: story-click-pulse 800ms ease-out calc(var(--cursor-at) + 0.5s) backwards;
 	}
 
 	@keyframes story-click-pulse {
@@ -244,18 +495,18 @@ import SceneFrame from './SceneFrame.astro';
 		}
 	}
 
-	.scene-herostory:is([data-step='2'], [data-step='3'], [data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8'])
-		.story-ext-badge {
-		opacity: 1;
-	}
-
-	/* --- The panel: hidden for steps 1-2, in place from step 3. Slightly
-	   tighter than the shared 1.4cqi gap, so its content (brand, three
-	   actions, one result artifact) has margin to spare against the
-	   frame at every step, not just barely fit. --- */
+	/* --- The panel: hidden for steps 1-2, floating on top of the app
+	   from step 3. --- */
 	.scene-herostory .scene-panel {
-		position: relative;
+		position: absolute;
+		top: 2cqi;
+		right: 2cqi;
+		bottom: 2cqi;
+		width: 36cqi;
 		gap: 1.1cqi;
+		border: 1px solid var(--color-surface-border);
+		border-radius: 8px;
+		box-shadow: 0 1.2cqi 4cqi rgb(0 0 0 / 0.18);
 		opacity: 0;
 		transform: translateX(6cqi);
 		transition:
@@ -263,25 +514,19 @@ import SceneFrame from './SceneFrame.astro';
 			transform 0.5s ease,
 			outline-color 0.4s ease;
 		outline: 1.5px dashed transparent;
-		outline-offset: -1.5px;
+		outline-offset: 0.6cqi;
 	}
 
-	.scene-herostory:is([data-step='3'], [data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .scene-panel {
+	.scene-herostory:not([data-step='1'], [data-step='2']) .scene-panel {
 		opacity: 1;
 		transform: translateX(0);
 	}
 
-	/* Step 8: a dashed outline traces the agentlet layer, drawn inward
-	   (a negative offset) so it never reaches past the frame's own edge. */
-	.scene-herostory[data-step='8'] .scene-panel {
+	/* Step 7: a dashed outline traces the agentlet layer. */
+	.scene-herostory[data-step='7'] .scene-panel {
 		outline-color: var(--color-accent);
 	}
 
-	/* Bottom corner, not top: the top of the panel already holds the
-	   brand row, and the two would be tight for room side by side at
-	   small sizes. The panel's own content leaves margin to spare at the
-	   bottom at every step (see the result-slot comment below), so nothing
-	   sits under the label there. */
 	.scene-herostory .story-agentlet-layer-label {
 		position: absolute;
 		bottom: 0.8cqi;
@@ -296,20 +541,41 @@ import SceneFrame from './SceneFrame.astro';
 		transition: opacity 0.4s ease;
 	}
 
-	.scene-herostory[data-step='8'] .story-agentlet-layer-label {
+	.scene-herostory[data-step='7'] .story-agentlet-layer-label {
 		opacity: 1;
 		transition-delay: 0.2s;
 	}
 
-	/* Briefly highlight whichever action was just clicked. Tighter than
-	   the shared 1.8cqi/2cqi padding, for the same margin-to-spare reason
-	   as the panel gap above. */
+	/* Actions: offered one by one as the panel opens (step 3), then stay.
+	   Briefly highlight whichever action was just clicked. */
 	.scene-herostory .story-action {
+		position: relative;
 		padding: 1.4cqi 1.8cqi;
+		opacity: 0;
+		transform: translateY(1cqi);
 		transition:
+			opacity 0.3s ease,
+			transform 0.3s ease,
 			background 0.3s ease,
 			border-color 0.3s ease,
 			color 0.3s ease;
+	}
+
+	.scene-herostory:not([data-step='1'], [data-step='2']) .story-action {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	.scene-herostory[data-step='3'] .story-action-receipt {
+		transition-delay: 0.6s;
+	}
+
+	.scene-herostory[data-step='3'] .story-action-export {
+		transition-delay: 1s;
+	}
+
+	.scene-herostory[data-step='3'] .story-action-ai {
+		transition-delay: 1.4s;
 	}
 
 	.scene-herostory[data-step='4'] .story-action-receipt,
@@ -318,32 +584,194 @@ import SceneFrame from './SceneFrame.astro';
 		background: var(--color-primary-bg);
 		border-color: var(--color-primary-bg);
 		color: var(--color-primary-text);
+		transition-delay: 0.7s;
 	}
 
-	/* --- Form fields: reveal one by one on step 4, then stay filled. --- */
+	/* --- Step 4: the upload dialog. It opens after the click, receives
+	   the file, shows reading progress, then closes before the form
+	   fills. Step 4 dwell is 7000ms: these keyframe durations match. --- */
+	.scene-herostory .story-modal-backdrop {
+		position: absolute;
+		inset: 0;
+		z-index: 10;
+		display: grid;
+		place-items: center;
+		background: rgb(0 0 0 / 0.25);
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.scene-herostory[data-step='4'] .story-modal-backdrop {
+		animation: story-modal-backdrop 7000ms ease forwards;
+	}
+
+	@keyframes story-modal-backdrop {
+		0%,
+		12%,
+		57%,
+		100% {
+			opacity: 0;
+		}
+		16%,
+		53% {
+			opacity: 1;
+		}
+	}
+
+	.scene-herostory .story-modal {
+		display: flex;
+		flex-direction: column;
+		gap: 1.6cqi;
+		width: 46cqi;
+		padding: 2.6cqi;
+		border-radius: 8px;
+		background: var(--color-bg);
+		border: 1px solid var(--color-surface-border);
+		box-shadow: 0 1.2cqi 4cqi rgb(0 0 0 / 0.2);
+	}
+
+	.scene-herostory[data-step='4'] .story-modal {
+		animation: story-modal-pop 7000ms ease forwards;
+	}
+
+	@keyframes story-modal-pop {
+		0%,
+		12% {
+			transform: scale(0.94);
+		}
+		16%,
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	.scene-herostory .story-modal-title {
+		margin: 0;
+		font-size: 2.6cqi;
+		font-weight: 600;
+		color: var(--color-heading);
+	}
+
+	.scene-herostory .story-dropzone {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.6cqi;
+		padding: 2.6cqi;
+		border: 1.5px dashed var(--color-surface-border);
+		border-radius: 6px;
+		font-size: 2.2cqi;
+		color: var(--color-text);
+	}
+
+	.scene-herostory[data-step='4'] .story-dropzone {
+		animation: story-dropzone 7000ms ease forwards;
+	}
+
+	@keyframes story-dropzone {
+		0%,
+		18%,
+		28%,
+		100% {
+			border-color: var(--color-surface-border);
+		}
+		22% {
+			border-color: var(--color-accent);
+		}
+	}
+
+	.scene-herostory .story-dropzone-hint {
+		font-size: 1.9cqi;
+		color: var(--color-text-muted);
+	}
+
+	.scene-herostory .story-file {
+		display: flex;
+		align-items: center;
+		gap: 1.6cqi;
+		opacity: 0;
+	}
+
+	.scene-herostory[data-step='4'] .story-file {
+		animation: story-file-in 7000ms ease forwards;
+	}
+
+	@keyframes story-file-in {
+		0%,
+		20% {
+			opacity: 0;
+			transform: translateY(-1.4cqi);
+		}
+		25%,
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.scene-herostory .story-file-name {
+		font-family: var(--font-mono);
+		font-size: 2cqi;
+		color: var(--color-heading);
+	}
+
+	.scene-herostory .story-file-track {
+		flex: 1;
+		height: 0.8cqi;
+		border-radius: 999px;
+		background: var(--color-surface-border);
+		overflow: hidden;
+	}
+
+	.scene-herostory .story-file-bar {
+		display: block;
+		height: 100%;
+		background: var(--color-accent);
+		transform: scaleX(0);
+		transform-origin: left;
+	}
+
+	.scene-herostory[data-step='4'] .story-file-bar {
+		animation: story-file-bar 7000ms ease forwards;
+	}
+
+	@keyframes story-file-bar {
+		0%,
+		27% {
+			transform: scaleX(0);
+		}
+		50%,
+		100% {
+			transform: scaleX(1);
+		}
+	}
+
+	/* --- Form fields: fill one by one after the dialog closes (step 4),
+	   then stay filled. Delays apply to step 4 only, so jumping straight
+	   to a later step shows them filled at once. --- */
 	.scene-herostory .scene-field-value {
 		animation: none;
 		transition: clip-path 0.5s ease;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-vendor {
+	.scene-herostory:not([data-step='1'], [data-step='2'], [data-step='3']) .story-field-value {
 		clip-path: inset(0 0 0 0);
-		transition-delay: 0.3s;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-date {
-		clip-path: inset(0 0 0 0);
-		transition-delay: 1s;
+	.scene-herostory[data-step='4'] .story-field-vendor {
+		transition-delay: 4.1s;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-amount {
-		clip-path: inset(0 0 0 0);
-		transition-delay: 1.7s;
+	.scene-herostory[data-step='4'] .story-field-date {
+		transition-delay: 4.5s;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-field-category {
-		clip-path: inset(0 0 0 0);
-		transition-delay: 2.4s;
+	.scene-herostory[data-step='4'] .story-field-amount {
+		transition-delay: 4.9s;
+	}
+
+	.scene-herostory[data-step='4'] .story-field-category {
+		transition-delay: 5.3s;
 	}
 
 	.scene-herostory .story-field-label {
@@ -376,15 +804,17 @@ import SceneFrame from './SceneFrame.astro';
 			border-color 0.4s ease;
 	}
 
-	.scene-herostory:is([data-step='4'], [data-step='5'], [data-step='6'], [data-step='7'], [data-step='8']) .story-submit {
+	.scene-herostory:not([data-step='1'], [data-step='2'], [data-step='3']) .story-submit {
 		box-shadow: 0 0 0 2px var(--color-accent);
 		border-color: var(--color-accent);
-		transition-delay: 2.8s;
+	}
+
+	.scene-herostory[data-step='4'] .story-submit {
+		transition-delay: 5.9s;
 	}
 
 	/* --- Line-items table: rows highlight only for step 5. All three
-	   rows stay (the xlsx chip's text claims "3 rows"), tightened to fit
-	   under the form within the frame. --- */
+	   rows stay (the xlsx chip's text claims "3 rows"). --- */
 	.scene-herostory .story-table {
 		display: flex;
 		flex-direction: column;
@@ -413,152 +843,100 @@ import SceneFrame from './SceneFrame.astro';
 
 	.scene-herostory[data-step='5'] .story-row:not(.story-row-head) {
 		background: var(--color-badge-bg);
-		transition-delay: 0.3s;
+		transition-delay: 0.9s;
 	}
 
 	/* --- Result slot: one artifact at a time, replacing the last. Each
-	   candidate is absolutely positioned within a sized container, not
-	   stacked in normal flow: opacity alone would not remove an inactive
-	   item's box from the layout, so the panel would have to reserve
-	   room for all four at once instead of just the one currently
-	   showing. */
+	   candidate is absolutely positioned within a sized container, so the
+	   panel only reserves room for the one currently showing. --- */
 	.scene-herostory .story-result {
 		position: relative;
 		margin-top: 0.4cqi;
-		min-height: 15cqi;
+		min-height: 17cqi;
 	}
 
-	.scene-herostory .story-receipt-card,
 	.scene-herostory .story-receipt-chip,
-	.scene-herostory .story-xlsx-chip,
+	.scene-herostory .story-xlsx-block,
 	.scene-herostory .story-ai-block {
 		position: absolute;
 		top: 0;
 		left: 0;
 		opacity: 0;
-		/* .story-receipt-chip and .story-xlsx-chip also carry the shared
-		   .scene-chip class for its pill styling, which (in scenes.css)
-		   runs an unconditional 8s infinite animation: without this
-		   override that animation drives their opacity/transform on its
-		   own clock regardless of data-step, so they would fade in and
-		   out (and overlap other artifacts) independently of the story. */
-		animation: none;
-	}
-
-	/* The card and the AI block should read at panel width; the two
-	   chips stay content-sized, like scene-chip everywhere else. */
-	.scene-herostory .story-receipt-card,
-	.scene-herostory .story-ai-block {
-		right: 0;
-	}
-
-	.scene-herostory .story-receipt-card {
-		display: flex;
-		flex-direction: column;
-		gap: 0.6cqi;
-		padding: 1.4cqi 1.8cqi;
-		border-radius: 6px;
-		background: var(--color-bg);
-		border: 1px solid var(--color-surface-border);
-		transform: translateY(-2cqi);
-	}
-
-	.scene-herostory .story-receipt-card-title {
-		margin: 0 0 0.2cqi;
-		font-family: var(--font-mono);
-		font-size: 2cqi;
-		color: var(--color-text-muted);
-	}
-
-	.scene-herostory .story-receipt-card-row {
-		display: flex;
-		justify-content: space-between;
-		gap: 1cqi;
-		font-size: 2cqi;
-	}
-
-	.scene-herostory .story-receipt-card-row span:first-child {
-		color: var(--color-text-muted);
-	}
-
-	.scene-herostory .story-receipt-card-row span:last-child {
-		color: var(--color-heading);
-		font-weight: 500;
-	}
-
-	/* The receipt card appears early in step 4 and shrinks into a chip
-	   partway through it; step 4's dwell is 5000ms, so this animation's
-	   duration must match that (see Hero.astro's step list). */
-	.scene-herostory[data-step='4'] .story-receipt-card {
-		animation: story-receipt-card-cycle 5000ms ease forwards;
-	}
-
-	@keyframes story-receipt-card-cycle {
-		0%,
-		100% {
-			opacity: 0;
-			transform: translateY(-2cqi);
-		}
-		8% {
-			opacity: 1;
-			transform: translateY(0);
-		}
-		48% {
-			opacity: 1;
-			transform: translateY(0);
-		}
-		58% {
-			opacity: 0;
-			transform: translateY(-2cqi);
-		}
-	}
-
-	.scene-herostory[data-step='4'] .story-receipt-chip {
-		animation: story-receipt-chip-in 5000ms ease forwards;
-	}
-
-	@keyframes story-receipt-chip-in {
-		0%,
-		46% {
-			opacity: 0;
-			transform: translateY(2cqi);
-		}
-		56%,
-		100% {
-			opacity: 1;
-			transform: translateY(0);
-		}
-	}
-
-	.scene-herostory .story-xlsx-chip {
 		transition: opacity 0.4s ease;
 	}
 
-	.scene-herostory[data-step='5'] .story-xlsx-chip {
-		opacity: 1;
-		transition-delay: 0.3s;
-	}
-
+	.scene-herostory .story-xlsx-block,
 	.scene-herostory .story-ai-block {
+		right: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.8cqi;
 	}
 
-	.scene-herostory .story-ai-question,
-	.scene-herostory .story-ai-answer {
+	/* The two chips carry the shared .scene-chip class for its pill
+	   styling, which (in scenes.css) runs an unconditional infinite
+	   animation: override it so only data-step drives them. */
+	.scene-herostory .story-receipt-chip,
+	.scene-herostory .story-xlsx-chip {
+		animation: none;
+	}
+
+	.scene-herostory .story-xlsx-chip {
+		font-size: 2cqi;
+		white-space: nowrap;
+		opacity: 1;
+		transform: none;
+	}
+
+	.scene-herostory[data-step='4'] .story-receipt-chip {
+		opacity: 1;
+		transform: translateY(0);
+		transition-delay: 4.2s;
+	}
+
+	.scene-herostory[data-step='5'] .story-xlsx-block {
+		opacity: 1;
+		transition-delay: 1.3s;
+	}
+
+	.scene-herostory .story-xlsx-block {
+		gap: 1cqi;
+	}
+
+	.scene-herostory .story-xlsx-note {
 		margin: 0;
-		font-size: 2.1cqi;
-		clip-path: inset(0 100% 0 0);
-		transition: clip-path 0.4s ease;
+		font-size: 1.9cqi;
+		color: var(--color-accent-text);
 	}
 
-	.scene-herostory .story-ai-question {
-		color: var(--color-heading);
-		font-weight: 500;
+	/* Step 6: a short chat about the data on the page. */
+	.scene-herostory .story-ai-block {
+		gap: 0.9cqi;
 	}
 
-	.scene-herostory .story-ai-answer {
+	.scene-herostory .story-bubble {
+		margin: 0;
+		max-width: 88%;
+		padding: 0.8cqi 1.4cqi;
+		border-radius: 8px;
+		font-size: 2cqi;
+		line-height: 1.3;
+		opacity: 0;
+		transform: translateY(1cqi);
+		transition:
+			opacity 0.3s ease,
+			transform 0.3s ease;
+	}
+
+	.scene-herostory .story-bubble-question {
+		align-self: flex-end;
+		background: var(--color-primary-bg);
+		color: var(--color-primary-text);
+	}
+
+	.scene-herostory .story-bubble-answer {
+		align-self: flex-start;
+		background: var(--color-bg);
+		border: 1px solid var(--color-surface-border);
 		color: var(--color-text);
 	}
 
@@ -566,19 +944,91 @@ import SceneFrame from './SceneFrame.astro';
 		opacity: 1;
 	}
 
-	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-question {
-		clip-path: inset(0 0 0 0);
-		transition-delay: 0.3s;
+	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-bubble {
+		opacity: 1;
+		transform: translateY(0);
 	}
 
-	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-answer-1 {
-		clip-path: inset(0 0 0 0);
-		transition-delay: 1.2s;
+	.scene-herostory[data-step='6'] .story-bubble-question {
+		transition-delay: 1s;
 	}
 
-	.scene-herostory:is([data-step='6'], [data-step='7'], [data-step='8']) .story-ai-answer-2 {
-		clip-path: inset(0 0 0 0);
+	.scene-herostory[data-step='6'] .story-ai-answer-1 {
 		transition-delay: 2s;
 	}
 
+	.scene-herostory[data-step='6'] .story-ai-answer-2 {
+		transition-delay: 2.8s;
+	}
+
+	/* --- Step 8: example features pop onto the scene, on top of the
+	   finished story. --- */
+	.scene-herostory .story-features {
+		position: absolute;
+		inset: 0;
+		z-index: 11;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 1.4cqi;
+		padding: 4cqi 5cqi;
+		background: color-mix(in srgb, var(--color-bg) 97%, transparent);
+		opacity: 0;
+		transition: opacity 0.4s ease;
+		pointer-events: none;
+	}
+
+	.scene-herostory[data-step='8'] .story-features {
+		opacity: 1;
+	}
+
+	.scene-herostory .story-features-heading {
+		margin: 0;
+		font-family: var(--font-mono);
+		font-size: 2cqi;
+		color: var(--color-text-muted);
+	}
+
+	.scene-herostory .story-features-heading-ideas {
+		margin-top: 1.4cqi;
+	}
+
+	.scene-herostory .story-features-grid {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 1.4cqi;
+	}
+
+	.scene-herostory .story-feature {
+		display: flex;
+		align-items: center;
+		min-height: 8cqi;
+		padding: 1.2cqi 1.8cqi;
+		border-radius: 6px;
+		background: var(--color-surface);
+		border: 1px solid var(--color-surface-border);
+		border-left: 0.6cqi solid var(--color-accent);
+		font-size: 2.1cqi;
+		font-weight: 500;
+		line-height: 1.25;
+		color: var(--color-heading);
+		opacity: 0;
+		transform: scale(0.85);
+		transition:
+			opacity 0.3s ease,
+			transform 0.3s ease;
+	}
+
+	.scene-herostory .story-feature-idea {
+		background: transparent;
+		border: 1.5px dashed var(--color-surface-border);
+		color: var(--color-text);
+		font-weight: 400;
+	}
+
+	.scene-herostory[data-step='8'] .story-feature {
+		opacity: 1;
+		transform: scale(1);
+		transition-delay: calc(0.4s + var(--i) * 0.3s);
+	}
 </style>

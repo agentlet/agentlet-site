@@ -1,21 +1,26 @@
 ---
 import HeroStoryScene from '../scenes/HeroStoryScene.astro';
 
-// One 8-step, ~27.5s story (see HeroStoryScene.astro), driven by
+// One 8-step, ~37s story (see HeroStoryScene.astro), driven by
 // src/scripts/scenes.ts setting data-step on the scene root. Durations
 // here are the single source of truth: the JS controller reads them off
 // each progress segment's data-duration, and HeroStoryScene's CSS
-// comments call out where step 4's dwell (5000ms) needs to stay in sync
-// with its own keyframe durations.
+// comments call out where a step's dwell (steps 1 and 4) needs to stay
+// in sync with its own keyframe durations. Each segment is a button that
+// jumps straight to its step, numbered, with its short label as a tooltip.
 const steps = [
-	{ subtitle: 'Your web app, as it is today.', duration: 3000 },
-	{ subtitle: 'Click the agentlet extension.', duration: 3000 },
-	{ subtitle: 'A side panel opens. The app itself is unchanged.', duration: 3500 },
-	{ subtitle: 'It reads a receipt and fills the form. You review and submit.', duration: 5000 },
-	{ subtitle: 'It exports the table to Excel.', duration: 3500 },
-	{ subtitle: 'It answers questions about the page.', duration: 4000 },
-	{ subtitle: 'Nothing on the host page had to change.', duration: 2000 },
-	{ subtitle: 'All of this was built quickly on top of the existing app, with agentlet.', duration: 3500 },
+	{ label: 'Today', subtitle: 'Your app as it is today. Expenses are typed in by hand, field by field.', duration: 4000 },
+	{ label: 'Agentlet', subtitle: 'An agentlet was built to add features to this app. Just click the agentlet icon.', duration: 4000 },
+	{ label: 'Panel', subtitle: 'The agentlet panel opens on top of the app and offers its services.', duration: 3500 },
+	{ label: 'Receipt', subtitle: 'Read a receipt. Upload it and the form is filled for you. You review and submit.', duration: 7000 },
+	{ label: 'Excel', subtitle: 'Export to Excel. The app has no such feature. The agentlet adds it.', duration: 4000 },
+	{ label: 'Chat', subtitle: 'Ask questions about the data on the page.', duration: 4500 },
+	{ label: 'Layers', subtitle: 'The host page did not change. Everything was added on top, with agentlet.', duration: 4000 },
+	{
+		label: 'Ideas',
+		subtitle: 'These are just examples. Build what your team needs, with many features ready to use in the library.',
+		duration: 6000,
+	},
 ];
 ---
 
@@ -40,12 +45,24 @@ const steps = [
 			<div class="hero-story" data-story>
 				<HeroStoryScene />
 				<p class="story-subtitle" aria-hidden="true" data-story-subtitle>&nbsp;</p>
-				<div class="story-progress" role="presentation">
+				<div class="story-progress">
 					{
-						steps.map((step) => (
-							<span class="story-segment" data-story-segment data-duration={step.duration}>
-								<span class="story-segment-fill" />
-							</span>
+						steps.map((step, i) => (
+							<button
+								type="button"
+								class="story-segment"
+								data-story-segment
+								data-duration={step.duration}
+								aria-label={`Go to step ${i + 1}: ${step.subtitle}`}
+								title={`${i + 1}. ${step.label}`}
+							>
+								<span class="story-segment-track">
+									<span class="story-segment-fill" />
+								</span>
+								<span class="story-segment-label" aria-hidden="true">
+									{i + 1}
+								</span>
+							</button>
 						))
 					}
 				</div>
