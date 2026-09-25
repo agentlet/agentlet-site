@@ -18,6 +18,14 @@ npm run scaffold:agentlet
 
 The minimal template provides a clean 74-line starting point with basic structure and `agentlet.Dialog` API usage, while the full template includes comprehensive examples of all framework features.
 
+## Choose the agentlet-core dependency
+
+By default, the scaffolded project's `package.json` depends on the published npm package, `"agentlet-core": "^2.0.1"`. Pass `--core=local`, or answer "Local checkout" in the interactive prompt, to depend on this checkout instead, `"file:../<folder>"`. Local checkout is for developing agentlet-core itself alongside a scaffolded agentlet.
+
+```bash
+npm run scaffold:agentlet -- --core=local
+```
+
 ## Run the custom agentlet
 
 ```bash
@@ -27,4 +35,4 @@ npm run build
 npm start
 ```
 
-Source: agentlet-core README.md, section "Getting started".
+Source: agentlet-core README.md, section "Getting started", and plopfile.js and plop-templates/agentlet/ from agentlet-core 2.0.1.
