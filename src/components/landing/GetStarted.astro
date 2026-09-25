@@ -1,17 +1,12 @@
 ---
-const commands = [
-	'git clone https://github.com/agentlet/agentlet-core.git',
-	'cd agentlet-core',
-	'npm install',
-	'npm run demo',
-];
+const commands = ['npm install agentlet-core'];
 const commandsRaw = commands.join('\n');
 ---
 
 <section>
 	<div class="wrap">
 		<h2 class="section-title">Get started</h2>
-		<p class="section-intro">Clone the core library and run the built-in demo.</p>
+		<p class="section-intro">Install the package and build your own agentlet.</p>
 		<div class="code-block" id="get-started-commands" data-commands={commandsRaw}>
 			<div class="code-block-header">
 				<span class="code-block-label">terminal</span>
