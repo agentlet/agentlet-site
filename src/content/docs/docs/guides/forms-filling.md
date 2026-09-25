@@ -146,6 +146,10 @@ window.agentlet.forms.fill(form, {
 });
 ```
 
+## React-controlled fields
+
+Fields controlled by a UI framework such as React are updated through the element's native `value`/`checked` setter rather than a direct assignment, so the framework's own change detection notices the update. For a checkbox or a radio, a `click` event is also dispatched in addition to `change`, since that is what React listens for on those input types.
+
 ## Scoped selection
 
 All selectors resolve through `parentElement.querySelector()`, which prevents accidental modification of elements outside the target area and cross-form interference:
@@ -184,4 +188,4 @@ if (result.successful < result.total) {
 }
 ```
 
-Source: agentlet-core docs/form-filling-api.md and src/types/public-api.d.ts at e3f78fa. Options and callbacks not present in the current `FormFillOptions`/`FormFillResult` types (`validateValues`, `waitForElement`, `onSuccess`/`onError`/`onSkipped` callbacks) were dropped in favor of the documented `validateFields` option and the returned `details`/`errors` arrays.
+Source: agentlet-core docs/form-filling-api.md and src/types/public-api.d.ts at 4a8aaab. Options and callbacks not present in the current `FormFillOptions`/`FormFillResult` types (`validateValues`, `waitForElement`, `onSuccess`/`onError`/`onSkipped` callbacks) were dropped in favor of the documented `validateFields` option and the returned `details`/`errors` arrays.
