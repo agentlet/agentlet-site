@@ -15,22 +15,27 @@ open points, and the lessons learned.
   - #3 `ci: prepare cloudflare pages deployment`, merged.
   - #4 `docs: migrate the agentlet-core documentation to starlight`, merged.
   - #5 `docs: add phase b handoff recap` (this file), merged.
-  - A follow-up adds `wrangler.jsonc`, `public/_redirects` and an internal
-    link check, after the first Cloudflare build failed (see below).
+  - #6 `fix: deploy as a static assets worker and repair get started
+    links`, merged: `wrangler.jsonc`, `public/_redirects` and the internal
+    link check.
 - CI: `.github/workflows/build.yml` runs `npm ci`, lint, check, build, the
   typography check and the internal link check on `dist/`, on every push
   and pull request. All runs
   since the Node 22 fix are green. The three failed runs of 2026-09-24 at
   21:36 UTC predate that fix and are expected.
-- Deployment: **not live yet.** The user created the Cloudflare project as
-  a Worker built from Git (the dashboard default), not as a Pages project.
-  Its first build failed: with no wrangler config in the repository,
-  `npx wrangler deploy` auto-configured the site as a server-rendered
-  Astro app and that build broke. `wrangler.jsonc` now declares a static
-  assets Worker serving `dist/`. The remaining dashboard steps are the
-  user's: redeploy, attach `agentlet.io` and `www.agentlet.io`, add the www
-  to apex redirect rule, set SSL/TLS to Full (strict). Nothing is served
-  on agentlet.io until then. See `docs/deploy.md`.
+- Deployment: **live on https://agentlet.io since 2026-09-25.** The
+  Cloudflare project is a Worker built from Git (the dashboard default),
+  not a Pages project, deployed from `main` with `npx wrangler deploy`.
+  Its first build failed because, with no wrangler config in the
+  repository, wrangler auto-configured the site as a server-rendered Astro
+  app; `wrangler.jsonc` now declares a static assets Worker serving
+  `dist/` (#6). Custom domains `agentlet.io` and `www.agentlet.io` are
+  attached to the Worker. A Redirect Rule sends www to the apex (301, path
+  and query kept), and Always Use HTTPS is on. Verified on the live site:
+  pages, 404, the `/docs/getting-started/` redirect, all security headers,
+  immutable cache on `/_astro/`, fonts, and the docs search under the CSP
+  with no console error. The workers.dev URL is
+  `agentlet-site.fabien-vinas.workers.dev`.
 - Domain: agentlet.io was transferred to Cloudflare on 2026-09-24.
   Registrar and DNS are both Cloudflare (nameservers
   `rafe.ns.cloudflare.com`, `dakota.ns.cloudflare.com`). The apex can point
@@ -41,7 +46,7 @@ open points, and the lessons learned.
   requests by convention only.
 - Merged remote branches still present: `build/astro-skeleton`,
   `feat/landing`, `ci/cloudflare-pages`, `feat/docs-migration`,
-  `docs/phase-b-handoff`. Safe to delete.
+  `docs/phase-b-handoff`, `ci/workers-static-assets`. Safe to delete.
 
 ## What was delivered
 
@@ -151,11 +156,7 @@ open points, and the lessons learned.
 
 ## Open points
 
-1. **Cloudflare setup, by the user.** Follow `docs/deploy.md`. After the
-   first deploy, run its verification checklist on the `*.workers.dev` URL,
-   then again on agentlet.io.
-2. **Pull request #4 (docs)** to merge.
-3. **agentlet-core docs.** Out of scope for phase B, to do in agentlet-core:
+1. **agentlet-core docs.** Out of scope for phase B, to do in agentlet-core:
    replace its `docs/` with links to agentlet.io/docs. Also fix or drop the
    stale APIs they describe, which do not exist in the code:
    - form filling: `validateValues`, `waitForElement`, the `onSuccess`,
@@ -169,18 +170,18 @@ open points, and the lessons learned.
    - script injection: the `validateSecurity` option;
    - form extraction, AI-ready forms and select options: certainty-scored
      selectors, ARIA metadata, `defaultSelected`.
-4. **`/cdn/v1/`** is reserved and empty. Chip C decides what goes there:
+2. **`/cdn/v1/`** is reserved and empty. Chip C decides what goes there:
    the built core, the registry, the demo agentlet.
-5. **Looping scenes without a pause control.** The explorer and deployment
+3. **Looping scenes without a pause control.** The explorer and deployment
    scenes loop with no way to stop them. WCAG 2.2.2 asks for one on moving
    content longer than five seconds. The options are a site-wide "Pause
    animations" toggle or a loop limit. The user has not decided.
-6. **Demo GIFs** (about 6 MB) could become muted looping videos, for mobile
+4. **Demo GIFs** (about 6 MB) could become muted looping videos, for mobile
    performance.
-7. **CSP hardening.** `script-src` needs `'unsafe-inline'` today for the
+5. **CSP hardening.** `script-src` needs `'unsafe-inline'` today for the
    inline scripts of Astro and Starlight. Hashes or nonces are a later
    option.
-8. **Stale remote branches** to delete, listed above.
+6. **Stale remote branches** to delete, listed above.
 
 ## Notes for chip C (playable demo)
 
