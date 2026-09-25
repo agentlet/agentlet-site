@@ -10,5 +10,9 @@
     "directory": "./dist",
     "not_found_handling": "404-page",
     "html_handling": "auto-trailing-slash"
-  }
+  },
+  // Required by `npx wrangler preview`, the default deploy command of
+  // Cloudflare's builds for non-production branches. Empty on purpose:
+  // previews inherit the assets settings above.
+  "previews": {}
 }

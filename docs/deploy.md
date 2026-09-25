@@ -34,9 +34,12 @@ fails.
 4. Set the production branch to `main`.
 5. Set the build command to `npm run build`.
 6. Set the deploy command to `npx wrangler deploy`.
-7. Set the non-production branch deploy command to
-   `npx wrangler versions upload`, so other branches get a preview URL
-   without replacing production.
+7. Keep the non-production branch deploy command at Cloudflare's default,
+   `npx wrangler preview` (Worker Previews, open beta), so other branches
+   get a preview URL without replacing production. It requires the
+   `previews` block in `wrangler.jsonc`, which is present and empty on
+   purpose. `npx wrangler versions upload` also works if Previews are ever
+   turned off.
 8. Leave the root directory empty (the project lives at the repository
    root).
 9. The build reads the Node version from `.node-version`. If a build log
@@ -45,8 +48,9 @@ fails.
 10. Save and deploy.
 
 With this setup, every push to `main` deploys to production on
-`agentlet-site.<account>.workers.dev`. Other branches upload a new version
-with its own preview URL. No GitHub secret is needed: the GitHub app only
+`agentlet-site.<account>.workers.dev`. Other branches, including pull
+request branches, get their own preview deployment and URL. Cloudflare
+reports each of these builds as a check on the pull request. No GitHub secret is needed: the GitHub app only
 grants Cloudflare read access to the repository content.
 
 ## Alternative: Cloudflare Pages
