@@ -248,7 +248,7 @@ class MyAgentlet extends window.agentlet.Module {
 }
 ```
 
-`ModuleConfig`: `name`, `version?`, `description?`, `patterns: ModulePatternMatcher | ModulePatternMatcher[]`, `eventBus?`. A `ModulePatternMatcher` is a plain string (matched as a substring) or `{ type: 'includes' | 'exact' | 'regex', value: string }`.
+`ModuleConfig`: `name`, `version?`, `description?`, `patterns: ModulePatternMatcher | ModulePatternMatcher[]`, `eventBus?`. A `ModulePatternMatcher` is a plain string, matched as a substring, or `{ type: 'includes' | 'exact' | 'regex', value: string }`. As a string, `'*'` alone matches any non-empty URL, and a string containing `*` elsewhere is a simple, unanchored glob where `*` matches any run of characters, for example `'localhost:*/admin'`.
 
 Instance state: `name`, `version`, `description`, `patterns`, `isActive`, `eventBus?`, `mounted` (true between a successful `mount()` and the matching `unmount()`), `mountedContainer`, `performanceMetrics`, `isInitialized?`.
 
@@ -288,9 +288,11 @@ Passed to `new AgentletCore(config)`. Each option is optional; additional keys a
 
 `theme` is the current `AgentletTheme` snapshot. `window.agentlet.themeManager.getTheme()` returns it fresh; `updateTheme(newThemeConfig)` merges and returns the updated theme; `processThemeConfig(themeConfig)` normalizes a theme config without applying it. See [Shadow DOM](/docs/guides/shadow-dom/#theming-through-css-custom-properties) for the `--agentlet-*` custom property bridge.
 
+**`window.agentlet.setTheme(newThemeConfig)`** merges `newThemeConfig` into the theme defaults, re-injects the panel's CSS, updates `window.agentlet.theme`, and emits `theme:changed` on `window.agentlet.eventBus` with a `ThemeChangedEventPayload` (`{ theme, previousTheme }`). It returns the fully merged `AgentletTheme` now in effect. This is the entry point a theme change goes through; calling `themeManager.updateTheme()` alone does not re-inject styles or notify anything. See [Mount API](/docs/guides/mount-api/#reacting-to-a-theme-change) for subscribing to the change from a mounted module.
+
 ## `window.agentlet.eventBus`
 
-`emit(event, data?)`, `on(event, callback)`, `off(event, callback)`, `request(event, data?)` (calls only the first registered listener), `getEvents()`, `getListenerCount(event)`, `clear()`, `clearEvent(event)`. Event names are plain strings; common ones emitted by the framework include `module:registered`, `module:activated`, `module:deactivated`, `module:initialized`, `module:cleaned`, `url:changed`, `core:initialized`, `core:cleanup`, `ui:contentUpdated`, `ui:error`, and `localStorage:changed`.
+`emit(event, data?)`, `on(event, callback)`, `off(event, callback)`, `request(event, data?)` (calls only the first registered listener), `getEvents()`, `getListenerCount(event)`, `clear()`, `clearEvent(event)`. Event names are plain strings; common ones emitted by the framework include `module:registered`, `module:activated`, `module:deactivated`, `module:initialized`, `module:cleaned`, `url:changed`, `core:initialized`, `core:cleanup`, `ui:contentUpdated`, `ui:error`, `ui:stylesRegenerated`, `localStorage:changed`, and `theme:changed` (payload: `ThemeChangedEventPayload`, `{ theme, previousTheme }`, emitted by `agentlet.setTheme()`).
 
 ## `window.agentlet.modules`
 
@@ -300,4 +302,4 @@ Passed to `new AgentletCore(config)`. Each option is optional; additional keys a
 
 Only present when `AgentletCore` was constructed with `debugMode: true`: `getMetrics()`, `getConfig()`, `getStatistics()`, plus direct references `eventBus`, `envManager`, `cookieManager`, `storageManager`.
 
-Source: agentlet-core src/types/public-api.d.ts and CLAUDE.md, API Quick Reference, at e3f78fa.
+Source: agentlet-core src/types/public-api.d.ts and CLAUDE.md, API Quick Reference, at 4a8aaab.
