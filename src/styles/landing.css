@@ -449,7 +449,7 @@ section.alt {
 	min-width: 0;
 }
 
-/* Fixed height for up to two lines, so swapping subtitle text never
+/* Fixed height for up to two lines (three on narrow screens), so swapping subtitle text never
    shifts the layout below it. Purely decorative (aria-hidden): the same
    sentences are always available via .story-steps. */
 .story-subtitle {
@@ -460,18 +460,71 @@ section.alt {
 	line-height: 1.3;
 }
 
+/* Narrow screens: the longest subtitles wrap to three lines. */
+@media (max-width: 560px) {
+	.story-subtitle {
+		min-height: 3.9em;
+	}
+}
+
 .story-progress {
 	display: flex;
 	gap: 0.35rem;
 }
 
+/* Each segment is a button that jumps to its step: the thin track plus
+   its step number under it, with the whole block as hit area. */
 .story-segment {
-	display: block;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
 	flex: 1;
-	height: 2px;
+	min-width: 0;
+	padding: 0.4rem 0 0.2rem;
+	border: 0;
+	background: none;
+	color: var(--color-text-muted);
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.story-segment-track {
+	display: block;
+	width: 100%;
+	height: 3px;
 	background: var(--color-surface-border);
 	border-radius: 999px;
 	overflow: hidden;
+	transition: height 0.15s ease;
+}
+
+.story-segment-label {
+	align-self: center;
+	font-size: 0.75rem;
+	line-height: 1.2;
+	font-variant-numeric: tabular-nums;
+	transition: color 0.15s ease;
+}
+
+.story-segment[aria-current='step'] {
+	color: var(--color-heading);
+	font-weight: 600;
+}
+
+.story-segment:hover {
+	color: var(--color-heading);
+}
+
+.story-segment:hover .story-segment-track,
+.story-segment:focus-visible .story-segment-track {
+	height: 5px;
+}
+
+.story-segment:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+	border-radius: 2px;
 }
 
 .story-segment-fill {

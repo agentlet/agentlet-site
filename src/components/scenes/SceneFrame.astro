@@ -13,6 +13,10 @@
 // from an offset transform to translate(0, 0). That element is the
 // cursor's positioning anchor, so it can never drift from its target
 // regardless of scene scale. See scenes.css.
+//
+// The optional "overlay" slot renders after the panel inside the scene
+// body, for layers that must sit above both the app and the panel (the
+// hero story's upload dialog and feature cards).
 interface Props {
 	/** Sentence describing what the scene shows; the accessible description. */
 	caption: string;
@@ -61,6 +65,7 @@ const style = [`--scene-duration:${duration}ms`, aspectRatio && `aspect-ratio:${
 			<div class:list={['scene-panel', { 'scene-panel--hidden': panelHidden }]}>
 				<slot name="panel" />
 			</div>
+			<slot name="overlay" />
 		</div>
 	</div>
 	<p class:list={['scene-caption', { 'scene-caption--visible': captionVisible }]}>{caption}</p>

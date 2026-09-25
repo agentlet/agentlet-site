@@ -33,7 +33,8 @@ function observeScenes(root: ParentNode): void {
  * The hero's single story animation (see HeroStoryScene.astro): a step
  * timer sets data-step="1".."N" on the scene root, updates the (aria
  * hidden) subtitle text from the accessible step list, and fills a
- * segmented progress bar, one segment per step. Autoplay pauses while
+ * segmented progress bar, one segment per step (each a button that
+ * jumps to its step). Autoplay pauses while
  * the hero is offscreen or the tab is hidden and resumes when back,
  * unless the user paused; it does not pause on hover. Plays the same
  * way regardless of prefers-reduced-motion, by product decision: Pause
@@ -68,6 +69,7 @@ class StoryController {
 
 		this.toggle?.addEventListener('click', () => this.toggleUserPause());
 		this.replay?.addEventListener('click', () => this.restart());
+		this.segments.forEach((segment, i) => segment.addEventListener('click', () => this.jumpTo(i)));
 
 		if (!this.stepTexts.length) {
 			// Defensive: nothing to step through (the accessible list is
@@ -101,6 +103,8 @@ class StoryController {
 		if (this.subtitle) this.subtitle.textContent = this.stepTexts[i] ?? '';
 		this.remainingMs = this.durations[i] ?? 3000;
 		this.segments.forEach((segment, si) => {
+			if (si === i) segment.setAttribute('aria-current', 'step');
+			else segment.removeAttribute('aria-current');
 			const fill = segment.querySelector<HTMLElement>('.story-segment-fill');
 			if (!fill) return;
 			fill.style.transitionDuration = '0ms';
@@ -163,6 +167,18 @@ class StoryController {
 		this.userPaused = !this.userPaused;
 		this.updateToggleLabel();
 		this.applyRunState();
+	}
+
+	/** Jump to a step from its progress segment. Keeps the user's pause
+	 * state: a paused story shows the step and stays paused there. */
+	private jumpTo(i: number) {
+		if (i === this.index && this.scene) {
+			// Same step: clear the attribute and force a style flush, so its
+			// step-scoped keyframe animations restart from the beginning.
+			this.scene.removeAttribute('data-step');
+			void this.scene.offsetWidth;
+		}
+		this.goToStep(i);
 	}
 
 	private restart() {
