@@ -59,6 +59,19 @@ const LIGHT_THEME: Partial<AgentletTheme> = {
 	borderColor: '#d9e0e6',
 	headerBackground: '#0f3350',
 	headerTextColor: '#ffffff',
+	// agentlet-core's ThemeManager default theme (agentlet-core
+	// src/core/ThemeManager.ts) always sets dialogHeaderTextColor
+	// ('#333333') and dialogHeaderBackground ('#ffffff'), and every dialog
+	// type (info/wait/command/fullscreen, see
+	// src/utils/ui/dialog/*.ts) reads theme.dialogHeaderTextColor before
+	// ever falling back to headerTextColor, so leaving these two unset
+	// here does not fall back to the brand colours above: it always wins
+	// with the framework's own default, unreadable dark gray text on this
+	// theme's navy header. Set explicitly to match headerBackground/
+	// headerTextColor so every dialog's header reads the same as the
+	// panel's own header.
+	dialogHeaderBackground: '#0f3350',
+	dialogHeaderTextColor: '#ffffff',
 	actionButtonBackground: '#f4a261',
 	actionButtonBorder: '#f4a261',
 	actionButtonHover: '#f7b47c',
@@ -76,6 +89,12 @@ const DARK_THEME: Partial<AgentletTheme> = {
 	borderColor: '#24394d',
 	headerBackground: '#f4a261',
 	headerTextColor: '#0f3350',
+	// See the comment on LIGHT_THEME's own dialogHeaderBackground/
+	// dialogHeaderTextColor above: without these, every dialog header
+	// falls back to the framework's default dark gray text on white,
+	// not this theme's orange/navy header.
+	dialogHeaderBackground: '#f4a261',
+	dialogHeaderTextColor: '#0f3350',
 	actionButtonBackground: '#f4a261',
 	actionButtonBorder: '#f4a261',
 	actionButtonHover: '#f7b47c',
@@ -232,8 +251,32 @@ if (previouslyActive) {
 		.then((core) => {
 			core.show();
 			if (previouslyActive !== DEFAULT_MODULE) {
-				const instance = core.modules.get(previouslyActive);
-				if (instance) void core.moduleRegistry.activateModule(instance);
+				// core.modules.get() (the documented ModulesAPI, agentlet-core
+				// src/core/GlobalAPI.ts) always returns undefined for a module
+				// loaded through registryUrl, the only loading mode this site
+				// uses: it prefers core.moduleManager.get(), which registry
+				// loading never populates, over core.moduleRegistry.get(),
+				// which it does. core.moduleRegistry.get() is equally public
+				// (ModuleRegistryAPI) and reads from the registry that is
+				// actually populated here. See src/agentlets/launcher.ts's
+				// _activate() for the same workaround, and the build report
+				// for the precise gap to file against agentlet-core.
+				const instance = core.moduleRegistry.get(previouslyActive);
+				// Only force the previously active module back if its own
+				// patterns still match this page. ModuleRegistry registers
+				// every module from the registry during core.init() above, and
+				// each registration already runs checkUrlChange()
+				// (agentlet-core src/core/ModuleRegistry.ts), which activates
+				// whichever registered module's pattern matches the current
+				// URL (or none). Restoring blindly here would override that
+				// correct, pattern-based choice, e.g. keeping a non-docs demo
+				// active after navigating into /docs/ (or the docs companion
+				// active after navigating back out of /docs/), instead of
+				// letting that auto-detection hand control to the module that
+				// actually belongs on this page.
+				if (instance && instance.checkPattern(window.location.href)) {
+					void core.moduleRegistry.activateModule(instance);
+				}
 			}
 		})
 		.catch((error: unknown) => {
