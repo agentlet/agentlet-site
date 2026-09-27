@@ -40,7 +40,13 @@ const steps = [
 						View on GitHub
 					</a>
 				</div>
-				<p class="badge">Live demo, coming soon</p>
+				<div class="hero-demo-actions">
+					<button type="button" class="button button-secondary hero-demo-button" id="hero-try-button">
+						Try it on this page
+					</button>
+					<p class="hero-demo-mobile-hint">Best on desktop</p>
+					<a class="text-link hero-bookmarklet-link" href="/try/bookmarklet/">Or try it on any page</a>
+				</div>
 			</div>
 			<div class="hero-story" data-story>
 				<HeroStoryScene />
@@ -85,3 +91,28 @@ const steps = [
 		</div>
 	</div>
 </section>
+
+<script>
+	// The hero button is the only thing on the home page that can start
+	// downloading agentlet-core, and nothing loads until this click, not
+	// even the loader script itself. LOADER_URL is the single source of
+	// truth for its path (src/scripts/agentlet-inline-snippets.mjs).
+	import { LOADER_URL } from '../../scripts/agentlet-inline-snippets.mjs';
+
+	function openDemo(): void {
+		(window as unknown as { __openAgentletDemo?: () => void }).__openAgentletDemo?.();
+	}
+
+	document.getElementById('hero-try-button')?.addEventListener('click', () => {
+		const win = window as unknown as { __openAgentletDemo?: () => void };
+		if (win.__openAgentletDemo) {
+			openDemo();
+			return;
+		}
+		const script = document.createElement('script');
+		script.type = 'module';
+		script.src = LOADER_URL;
+		script.onload = openDemo;
+		document.head.appendChild(script);
+	});
+</script>

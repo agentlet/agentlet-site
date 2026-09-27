@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Builds everything served under /cdn/v1/, plus the tiny cross-page
- * bootstrap script, from src/agentlets/manifest.ts, the single source of
- * truth for which agentlets exist.
+ * Builds everything served under /cdn/v1/, the only path the live demo
+ * downloads anything from, from src/agentlets/manifest.ts, the single
+ * source of truth for which agentlets exist.
  *
  * Output:
  *   public/cdn/v1/agentlet-core.min.js   copied from node_modules/agentlet-core
@@ -13,14 +13,15 @@
  *   public/cdn/v1/agentlets/<id>.js      one esbuild IIFE bundle per manifest entry
  *   public/cdn/v1/agentlets-registry.js  generated registry, agentlet-core's
  *                                          script-injection format
- *   public/scripts/agentlet-bootstrap.js esbuild bundle of
- *                                          src/scripts/agentlet-bootstrap.ts
+ *   public/cdn/v1/demo-loader.js         esbuild bundle of
+ *                                          src/scripts/demo-loader.ts, at the
+ *                                          path LOADER_URL in
+ *                                          src/scripts/agentlet-inline-snippets.mjs
  *
- * None of this is committed: public/cdn/v1/ and public/scripts/ are
- * gitignored, and this script rebuilds them from scratch every run.
- * package.json's "prebuild"/"predev" hooks call it automatically, so both
- * `npm run build` and `npm run dev` produce a working /cdn/v1/ with no
- * separate manual step.
+ * None of this is committed: public/cdn/v1/ is gitignored, and this script
+ * rebuilds it from scratch every run. package.json's "prebuild"/"predev"
+ * hooks call it automatically, so both `npm run build` and `npm run dev`
+ * produce a working /cdn/v1/ with no separate manual step.
  *
  * Usage: node scripts/build-cdn.mjs
  */
@@ -29,11 +30,15 @@ import { build, buildSync } from 'esbuild';
 import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { LOADER_URL } from '../src/scripts/agentlet-inline-snippets.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const AGENTLETS_SRC = join(ROOT, 'src/agentlets');
 const CDN_OUT = join(ROOT, 'public/cdn/v1');
-const SCRIPTS_OUT = join(ROOT, 'public/scripts');
+// LOADER_URL is a site-root path (e.g. "/cdn/v1/demo-loader.js"); public/
+// mirrors the site root, so stripping the leading slash gives its on-disk
+// location under public/.
+const LOADER_OUT = join(ROOT, 'public', LOADER_URL.replace(/^\//, ''));
 
 /**
  * src/agentlets/manifest.ts is plain TypeScript (interfaces and a couple of
@@ -108,6 +113,22 @@ async function buildAgentletBundles(manifest) {
  * by the launcher (src/agentlets/launcher.ts) instead, from its own bundled
  * copy of manifest.ts, so they are included here mainly so the generated
  * registry file itself documents the full picture.
+ *
+ * The event dispatches synchronously, in the same task as the script's own
+ * execution, rather than after the `setTimeout(..., 10)` the framework's own
+ * docs example uses "to ensure the event listener is set up". That listener
+ * is actually attached by `ModuleRegistry.loadRegistryScript()` before the
+ * `<script>` element is even created, so the delay was never load-bearing
+ * for correctness, only a defensive habit copied from the example. On a
+ * heavier page (Starlight's docs pages run more JS than the landing page:
+ * Pagefind's index, its search UI, and this project's own launcher/demo
+ * scripts on top), the main thread can stay busy long enough after this
+ * script's `onload` fires that a queued `setTimeout` callback is delayed
+ * past `ModuleRegistry`'s fixed 10 second timeout, so the registry never
+ * arrives and the core logs "Registry loading timeout after 10000ms" with
+ * zero modules registered. Dispatching synchronously removes that timer
+ * from the picture entirely: the event fires deterministically, inside the
+ * same script evaluation agentlet-core already waited for via `onload`.
  */
 function buildRegistry(manifest) {
 	const agentlets = manifest.map((entry) => ({
@@ -123,45 +144,43 @@ function buildRegistry(manifest) {
 //
 // Format: agentlet-core's registry script contract. See
 // /docs/guides/script-injection/ and agentlet-core's ModuleRegistry.
+// Dispatches synchronously; see the comment on buildRegistry() in
+// scripts/build-cdn.mjs for why this does not use a setTimeout.
 (function () {
 	'use strict';
 	var registry = ${JSON.stringify({ agentlets }, null, 2)};
-	var event = new CustomEvent('agentletRegistryLoaded', { detail: registry });
-	setTimeout(function () {
-		window.dispatchEvent(event);
-	}, 10);
+	window.dispatchEvent(new CustomEvent('agentletRegistryLoaded', { detail: registry }));
 })();
 `;
 	writeFileSync(join(CDN_OUT, 'agentlets-registry.js'), contents, 'utf8');
 }
 
-async function buildBootstrap() {
-	mkdirSync(SCRIPTS_OUT, { recursive: true });
+async function buildLoader() {
+	mkdirSync(dirname(LOADER_OUT), { recursive: true });
 	await build({
-		entryPoints: [join(ROOT, 'src/scripts/agentlet-bootstrap.ts')],
+		entryPoints: [join(ROOT, 'src/scripts/demo-loader.ts')],
 		bundle: true,
 		minify: true,
 		format: 'esm',
 		platform: 'browser',
 		target: 'es2020',
-		outfile: join(SCRIPTS_OUT, 'agentlet-bootstrap.js'),
+		outfile: LOADER_OUT,
 		logLevel: 'warning',
 	});
 }
 
 async function main() {
 	rmSync(CDN_OUT, { recursive: true, force: true });
-	rmSync(SCRIPTS_OUT, { recursive: true, force: true });
 	mkdirSync(CDN_OUT, { recursive: true });
 
 	const manifest = await loadManifest();
 	copyCoreAssets();
 	await buildAgentletBundles(manifest);
 	buildRegistry(manifest);
-	await buildBootstrap();
+	await buildLoader();
 
 	console.log(
-		`Built /cdn/v1/ (${manifest.length} agentlet bundle(s): ${manifest.map((e) => e.id).join(', ')}) and /scripts/agentlet-bootstrap.js`,
+		`Built /cdn/v1/ (${manifest.length} agentlet bundle(s): ${manifest.map((e) => e.id).join(', ')}, plus the demo loader at ${LOADER_URL})`,
 	);
 }
 
