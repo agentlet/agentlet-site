@@ -76,19 +76,22 @@ test.describe('Expense receipt agentlet', () => {
 		await expect(page.locator('.expense-thumb')).toBeVisible();
 		await expect(page.locator('.expense-note')).toContainText('Only this sample receipt is supported');
 
-		// Step 2: see what the AI receives.
+		// Step 2: see what the AI receives. Expanded by default (review round
+		// 1), and the recorded response is not shown yet: each step reveals
+		// one thing.
 		await page.getByRole('button', { name: 'See what the AI receives' }).click();
 		const formDataDetails = page.locator('.expense-details');
 		await expect(formDataDetails).toBeVisible();
-		await formDataDetails.locator('summary').click();
+		expect(await formDataDetails.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
 		await expect(formDataDetails.locator('pre')).toContainText('"selector"');
+		await expect(page.locator('.expense-recorded-label')).toHaveCount(0);
 
-		// The recorded response is shown, labeled, before filling.
+		// Step 3: fill the form (also highlights, scrolls, and shows both bubbles).
+		await page.getByRole('button', { name: 'Fill the form' }).click();
+
+		// The recorded response now appears, labeled, with the fill itself.
 		await expect(page.locator('.expense-recorded-label')).toHaveText('Recorded AI response');
 		await expect(page.locator('.expense-json').last()).toContainText('Riverside Bistro');
-
-		// Step 3: fill the form (also highlights and shows both bubbles).
-		await page.getByRole('button', { name: 'Fill the form' }).click();
 
 		await expect(page.locator('#expense-vendor')).toHaveValue('Riverside Bistro');
 		await expect(page.locator('#expense-date')).toHaveValue('2026-03-14');
@@ -97,27 +100,40 @@ test.describe('Expense receipt agentlet', () => {
 		await expect(page.locator('#expense-currency')).toHaveValue('GBP');
 		await expect(page.locator('#expense-category')).toHaveValue('meals');
 
-		// The changed fields are highlighted with PageHighlighter.
-		await expect(page.locator('.agentlet-highlight-border')).toHaveCount(6);
+		// The changed fields plus the Submit button are highlighted with
+		// PageHighlighter (review round 1: border only), and exactly one of
+		// those highlights carries a message, on the Submit button.
+		await expect(page.locator('.agentlet-highlight-border')).toHaveCount(7);
+		await expect(page.locator('.agentlet-tooltip')).toHaveCount(1);
+		await expect(page.locator('.agentlet-tooltip')).toHaveText('Check before submitting');
+
+		// The sandbox form scrolls into view (review round 1: it sits below
+		// the hero, out of view when the visitor clicks inside the panel).
+		await expect(page.locator('#expense-form')).toBeInViewport();
 
 		// "Check before submitting" bubble (agentlet-core's MessageBubble
 		// markup, not this project's own, hence .first() rather than a class
-		// hook this project controls).
+		// hook this project controls) appears right away...
 		await expect(page.getByText('Check before submitting.').first()).toBeVisible();
 
-		// Closing MessageBubble, with a working link to the demo section
-		// (shown ~1.2s after the fill; see expense-receipt.ts's _handleFill()).
+		// ...but the closing bubble is delayed by ~2s, not stacked with it at
+		// the same instant (review round 1): still absent right as the first
+		// one appears, then visible within the delay window.
 		const closingLink = page.getByRole('link', { name: 'See it on a real business app' });
+		await expect(closingLink).not.toBeVisible();
 		await expect(closingLink).toBeVisible({ timeout: 5_000 });
 		await expect(page.getByText('This ran on agentlet.io.').first()).toBeVisible();
 		await closingLink.click();
 		await expect(page).toHaveURL(/#demo$/);
 		await expect(page.locator('#demo')).toBeInViewport();
 
-		// Start over clears the form and the highlights.
+		// Start over clears the form, the highlights, and the bubbles, and
+		// resets the steps.
 		await page.getByRole('button', { name: 'Start over' }).click();
 		await expect(page.locator('#expense-vendor')).toHaveValue('');
 		await expect(page.locator('.agentlet-highlight-border')).toHaveCount(0);
+		await expect(page.getByText('Check before submitting.')).toHaveCount(0);
+		await expect(page.getByRole('link', { name: 'See it on a real business app' })).toHaveCount(0);
 		await expect(page.getByRole('button', { name: 'Read the receipt' })).toBeVisible();
 
 		// The demo never submitted the form itself: only the in-page anchor
