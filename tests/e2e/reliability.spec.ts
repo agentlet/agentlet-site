@@ -14,7 +14,9 @@ test.describe('Theme switching', () => {
 
 		await page.getByRole('button', { name: 'Try it on this page' }).click();
 		await expect(page.locator('#agentlet-container')).toBeVisible();
-		await expect(page.getByText('The first demos are on their way.')).toBeVisible();
+		// The empty state ("The first demos are on their way.") is gone now
+		// that a real demo agentlet exists; check for its card instead.
+		await expect(page.locator('[data-demo="expense-receipt"]')).toBeVisible();
 
 		const backgroundBefore = await page
 			.locator('#agentlet-container')
@@ -25,7 +27,7 @@ test.describe('Theme switching', () => {
 		// The launcher's content must survive the toggle: this is what broke
 		// before the fix in src/scripts/demo-loader.ts (syncTheme()/wireLifecycle()),
 		// where a theme change during the loading window was silently missed.
-		await expect(page.getByText('The first demos are on their way.')).toBeVisible();
+		await expect(page.locator('[data-demo="expense-receipt"]')).toBeVisible();
 		await expect(page.getByText('No application detected')).toHaveCount(0);
 
 		await expect
