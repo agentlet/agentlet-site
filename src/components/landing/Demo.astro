@@ -1,3 +1,24 @@
+---
+// Each GIF is paired with a still frame at the same dimensions
+// (public/img/*-still.png, the GIF's first frame). A GIF cannot be
+// paused, so the site-wide "Pause animations" toggle swaps to the
+// still instead (see src/styles/landing.css and AnimationsToggle.astro).
+const demos = [
+	{
+		gif: '/img/demo-part1.gif',
+		still: '/img/demo-part1-still.png',
+		alt: 'A recurring business task being processed manually, field by field, in a web application',
+		caption: 'Manual processing of a recurring task',
+	},
+	{
+		gif: '/img/demo-part2.gif',
+		still: '/img/demo-part2-still.png',
+		alt: 'The same application, augmented with an agentlet side panel that automates the task',
+		caption: 'The same application, augmented with an agentlet',
+	},
+];
+---
+
 <section class="alt">
 	<div class="wrap">
 		<h2 class="section-title">See it in action</h2>
@@ -5,28 +26,33 @@
 			The same business application, before and after being augmented with an agentlet.
 		</p>
 		<div class="demo-list">
-			<figure class="demo-figure">
-				<img
-					src="/img/demo-part1.gif"
-					width="600"
-					height="390"
-					loading="lazy"
-					decoding="async"
-					alt="A recurring business task being processed manually, field by field, in a web application"
-				/>
-				<figcaption>Manual processing of a recurring task</figcaption>
-			</figure>
-			<figure class="demo-figure">
-				<img
-					src="/img/demo-part2.gif"
-					width="600"
-					height="390"
-					loading="lazy"
-					decoding="async"
-					alt="The same application, augmented with an agentlet side panel that automates the task"
-				/>
-				<figcaption>The same application, augmented with an agentlet</figcaption>
-			</figure>
+			{
+				demos.map((demo) => (
+					<figure class="demo-figure">
+						<div class="demo-media">
+							<img
+								class="demo-media-gif"
+								src={demo.gif}
+								width="600"
+								height="390"
+								loading="lazy"
+								decoding="async"
+								alt={demo.alt}
+							/>
+							<img
+								class="demo-media-still"
+								src={demo.still}
+								width="600"
+								height="390"
+								loading="lazy"
+								decoding="async"
+								alt={demo.alt}
+							/>
+						</div>
+						<figcaption>{demo.caption}</figcaption>
+					</figure>
+				))
+			}
 		</div>
 	</div>
 </section>

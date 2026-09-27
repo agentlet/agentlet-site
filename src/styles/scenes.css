@@ -42,6 +42,29 @@
 	animation-play-state: running;
 }
 
+/* The site-wide "Pause animations" toggle (src/components/landing/
+   AnimationsToggle.astro): while active, every scene stays paused no
+   matter what .is-playing says, so a scene scrolling into view (or a
+   capability-explorer tab switch restarting its scene) cannot resume
+   it. This selector is more specific than .scene.is-playing above
+   (an attribute selector plus a type selector beats two classes), so
+   it always wins while html[data-animations="paused"] is set. */
+html[data-animations='paused'] .scene,
+html[data-animations='paused'] .scene * {
+	animation-play-state: paused;
+}
+
+/* The hero story is the one scene that can keep running during a
+   global pause: its own Pause/Replay controls are a local, explicit
+   override for that page view (see the StoryController class in
+   scenes.ts, which toggles .force-playing on the scene root to match).
+   More specific than the rule above (an extra class), so it wins while
+   both are present. */
+html[data-animations='paused'] .scene.force-playing,
+html[data-animations='paused'] .scene.force-playing * {
+	animation-play-state: running;
+}
+
 /* The caption is the scene's accessible description. By default it is
    visually hidden (the hero carousel and capability explorer already show
    the same information as visible text); SceneFrame's captionVisible prop
@@ -541,6 +564,8 @@
 
 /* Scenes play the same way regardless of prefers-reduced-motion, by
    product decision: the hero story's always-visible Pause and Replay
-   controls are the user's way to stop the motion (see
-   src/scripts/scenes.ts and HeroStoryScene.astro). No reduced-motion
-   override lives here or in any individual scene. */
+   controls, and the site-wide "Pause animations" header toggle (see
+   the html[data-animations="paused"] rule above), are the user's way
+   to stop the motion (see src/scripts/scenes.ts and
+   HeroStoryScene.astro). No reduced-motion override lives here or in
+   any individual scene. */

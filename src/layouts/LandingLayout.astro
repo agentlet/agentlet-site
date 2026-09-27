@@ -57,6 +57,23 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site);
 				document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
 			})();
 		</script>
+		{
+			/* Apply the "Pause animations" choice before first paint, so a
+			   returning visitor who paused never sees a flash of motion.
+			   Default when nothing is stored: playing. See
+			   src/components/landing/AnimationsToggle.astro. */
+		}
+		<script is:inline>
+			(() => {
+				let storedAnimations = null;
+				try {
+					storedAnimations = localStorage.getItem('agentlet-animations');
+				} catch {
+					// localStorage may be unavailable (private browsing, blocked storage).
+				}
+				document.documentElement.dataset.animations = storedAnimations === 'paused' ? 'paused' : 'playing';
+			})();
+		</script>
 	</head>
 	<body>
 		<a class="skip-link" href="#main">Skip to content</a>
