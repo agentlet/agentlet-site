@@ -1,0 +1,102 @@
+---
+import LandingLayout from '../../layouts/LandingLayout.astro';
+import Header from '../../components/landing/Header.astro';
+import Footer from '../../components/landing/Footer.astro';
+import { LOADER_URL } from '../../scripts/agentlet-inline-snippets.mjs';
+
+const title = 'Try the agentlet bookmarklet';
+const description = 'A bookmarklet that loads the agentlet live demo on agentlet.io from any of its pages.';
+
+// Static fallback for when JavaScript does not run: the production origin.
+// The inline script below rewrites this to location.origin once it runs, so
+// the link also works from a local dev server or a preview deployment.
+const fallbackOrigin = 'https://agentlet.io';
+---
+
+<LandingLayout title={title} description={description}>
+	<Header />
+	<main id="main">
+		<section>
+			<div class="wrap bookmarklet-page">
+				<h1>Try the agentlet bookmarklet</h1>
+				<p>
+					Drag the button below to your bookmarks bar. Clicking it loads the same live demo as the{' '}
+					<a href="/">home page</a>'s "Try it on this page" button, on whichever agentlet.io page you are
+					currently viewing.
+				</p>
+				<p>
+					<a
+						class="button button-primary bookmarklet-link"
+						id="bookmarklet-link"
+						href={`javascript:(function(){var s=document.createElement('script');s.type='module';s.src='${fallbackOrigin}${LOADER_URL}';s.onload=function(){window.__openAgentletDemo&&window.__openAgentletDemo()};document.head.appendChild(s)})()`}
+					>
+						Agentlet demo
+					</a>
+				</p>
+				<p class="bookmarklet-hint">
+					Most browsers show the bookmarks bar with a keyboard shortcut such as Ctrl+Shift+B
+					(Windows and Linux) or Cmd+Shift+B (macOS). Drag the button above onto it, then click it on
+					any page here.
+				</p>
+
+				<h2>What it does</h2>
+				<p>
+					The bookmarklet is a small piece of JavaScript, stored as the link's own address instead of
+					an ordinary URL. Clicking it runs that code on the page you are currently on: it loads
+					agentlet-core and the demo registry from this site, the same way the hero button does, and
+					opens the panel.
+				</p>
+
+				<h2>Where it works</h2>
+				<p>
+					It only works on agentlet.io. A page's Content Security Policy decides whether a
+					bookmarklet can run any code at all, and whether that code can then load further scripts.
+					agentlet.io's policy, site-wide, allows inline scripts and same-origin scripts, which is what
+					this bookmarklet needs. Most other sites set a stricter policy and block bookmarklets
+					entirely, which is expected: this is a way to try the demo here, not a general-purpose
+					deployment method. See{' '}
+					<a href="/docs/concepts/deployment-modes/">deployment modes</a> for how a real bookmarklet deployment
+					differs.
+				</p>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</LandingLayout>
+
+<style>
+	.bookmarklet-page {
+		max-width: 42rem;
+		padding-block: 1rem 3rem;
+	}
+
+	.bookmarklet-page h1 {
+		margin-bottom: 1rem;
+	}
+
+	.bookmarklet-page h2 {
+		margin-top: 2rem;
+	}
+
+	.bookmarklet-page p {
+		margin: 1rem 0;
+	}
+
+	.bookmarklet-link {
+		cursor: grab;
+	}
+
+	.bookmarklet-hint {
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+</style>
+
+<script define:vars={{ fallbackOrigin, LOADER_URL }}>
+	const link = document.getElementById('bookmarklet-link');
+	if (link) {
+		const origin = window.location.origin || fallbackOrigin;
+		const code = `(function(){var s=document.createElement('script');s.type='module';s.src='${origin}${LOADER_URL}';s.onload=function(){window.__openAgentletDemo&&window.__openAgentletDemo()};document.head.appendChild(s)})()`;
+		link.setAttribute('href', `javascript:${code}`);
+	}
+</script>
