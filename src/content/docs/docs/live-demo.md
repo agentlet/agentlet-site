@@ -23,6 +23,21 @@ Filling the form highlights the changed fields with `agentlet.utils.PageHighligh
 
 Source: [`src/agentlets/expense-receipt.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/expense-receipt.ts).
 
+### Page audit
+
+Pick "Page audit" in the launcher on any page (except the docs section) to run a small, deterministic accessibility and structure audit of the page you are on. It checks for:
+
+- Images with no `alt` attribute, or an `alt` that looks like a leftover file name (for example ending in `.png`).
+- Heading hierarchy problems: more than one `<h1>`, a heading level skipped on the way down, or an empty heading.
+- Tables with no header cells (`<th>` or `role="columnheader"`), ignoring tables explicitly marked `role="presentation"`.
+- Form fields with no accessible label: no `<label for>`, no wrapping `<label>`, no `aria-label`, and no `aria-labelledby`. A placeholder alone does not count.
+
+It runs with a progress dialog, one step per check, via `agentlet.utils.Dialog.showProgressWithSteps()`, then shows the findings in a fullscreen dialog via `agentlet.utils.Dialog.show('fullscreen', ...)`. Each finding has a "Show on page" action that scrolls to and highlights the element with `agentlet.utils.PageHighlighter`; closing the report highlights every finding at once, with a "Clear highlights" action in the panel. "Export to Excel" downloads the full report (check, severity, element, detail, page URL) with `agentlet.tables.download()`.
+
+This is a small demo audit, not a replacement for a real accessibility audit: it only runs the four checks above, only against the light DOM (it does not see into the agentlet panel's own shadow root), and does not check color contrast, keyboard navigation, or ARIA roles beyond what is listed here.
+
+Source: [`src/agentlets/page-audit.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/page-audit.ts).
+
 ## How it loads
 
 Nothing related to the demo is downloaded until you click the button, not even the loader that drives the rest of the process. On click, the page loads:

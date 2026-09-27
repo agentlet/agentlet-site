@@ -77,10 +77,20 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		isDemo: true,
 	},
 
-	// More demo agentlets (docs companion, page audit, and more) are added
-	// here, one manifest entry per module, by later work. Nothing else in
-	// the build pipeline or the launcher needs to change for a new entry to
-	// appear and work.
+	{
+		id: 'page-audit',
+		file: 'page-audit',
+		className: 'PageAuditModule',
+		title: 'Page audit',
+		description: 'Runs a deterministic accessibility and structure audit of the current page.',
+		audience: 'it-and-security',
+		isDemo: true,
+	},
+
+	// More demo agentlets (docs companion and more) are added here, one
+	// manifest entry per module, by later work. Nothing else in the build
+	// pipeline or the launcher needs to change for a new entry to appear and
+	// work.
 ];
 
 /** Demo entries only, in manifest order: what the launcher lists. */
