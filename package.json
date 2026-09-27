@@ -13,6 +13,7 @@
     "prebuild": "node scripts/build-cdn.mjs",
     "build": "astro build",
     "build:cdn": "node scripts/build-cdn.mjs",
+    "generate:demo-receipt": "node scripts/generate-demo-receipt.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint . && node scripts/check-typography.mjs src public astro.config.mjs",
