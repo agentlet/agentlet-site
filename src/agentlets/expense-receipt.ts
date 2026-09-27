@@ -242,7 +242,11 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 	private _error: string | null = null;
 	private _receiptImage: string | null = null;
 	private _aiExport: AIFormExport | null = null;
+	/** True from the moment "Fill the form" is clicked (see _handleFill()); gates the "Recorded AI response" block so it appears with the fill itself, not merely once the button is available (review round 1). */
+	private _filled = false;
 	private _highlights: PageHighlighterHighlightControl[] = [];
+	/** Pending closing-bubble timer (see _handleFill()); cleared on unmount/restart so a stale bubble cannot appear after the panel moves on. */
+	private _closingBubbleTimeout: ReturnType<typeof setTimeout> | null = null;
 	private _container: HTMLElement | null = null;
 
 	constructor() {
@@ -265,6 +269,7 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 
 	async unmount(): Promise<void> {
 		this._clearHighlights();
+		this._clearClosingBubbleTimeout();
 		this._container = null;
 	}
 
@@ -289,6 +294,13 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 	private _clearHighlights(): void {
 		this._highlights.forEach((highlight) => highlight.destroy());
 		this._highlights = [];
+	}
+
+	private _clearClosingBubbleTimeout(): void {
+		if (this._closingBubbleTimeout !== null) {
+			clearTimeout(this._closingBubbleTimeout);
+			this._closingBubbleTimeout = null;
+		}
 	}
 
 	private _renderInto(container: HTMLElement): void {
@@ -359,16 +371,19 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 			);
 		}
 
-		if (this._aiExport && (this._step === 'inspect' || this._step === 'fill' || this._step === 'done')) {
+		if (this._aiExport) {
+			// Expanded by default (review round 1: a collapsed block showed
+			// nothing new when this step revealed it), but still a real
+			// <details> the visitor can collapse by hand.
 			blocks.push(`
-				<details class="expense-details">
+				<details class="expense-details" open>
 					<summary>Form data sent to the AI</summary>
 					<pre class="expense-json">${this._escape(JSON.stringify(this._aiExport, null, 2))}</pre>
 				</details>
 			`);
 		}
 
-		if (this._step === 'fill' || this._step === 'done') {
+		if (this._filled) {
 			blocks.push(`
 				<div>
 					<span class="expense-recorded-label">Recorded AI response</span>
@@ -497,8 +512,14 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 		this._aiExport = forms.exportForAI(form);
 	}
 
-	/** Steps 3-5: apply the recorded response, highlight what changed, then hand off. */
+	/** Steps 3-5: apply the recorded response, highlight what changed, scroll it into view, then hand off. */
 	private async _handleFill(): Promise<void> {
+		// Marks the "Recorded AI response" block visible from the moment this
+		// action starts, not merely once the "Fill the form" button became
+		// available (review round 1: showing it earlier revealed two things
+		// at once when step 2 completed).
+		this._filled = true;
+
 		const form = this._formElement();
 		if (!form) throw new Error('The expense form could not be found on this page.');
 
@@ -513,6 +534,9 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 
 		this._clearHighlights();
 		const highlighter = window.agentlet?.utils.PageHighlighter;
+		// Border only, no per-field tooltip (review round 1: six "Filled by
+		// the agentlet" messages covered the field labels next to them). The
+		// one message the visitor gets is on the Submit button instead, below.
 		for (const detail of result.details) {
 			if (detail.status !== 'success') continue;
 			const element = document.querySelector(detail.selector);
@@ -521,14 +545,35 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 				type: 'border',
 				style: 'success',
 				animation: 'pulse',
-				message: 'Filled by the agentlet',
 			});
 			if (highlight) this._highlights.push(highlight);
 		}
 
+		const submitButton = form.querySelector('button[type="submit"]');
+		if (submitButton && highlighter) {
+			const submitHighlight = highlighter.highlight(submitButton, {
+				type: 'border',
+				style: 'warning',
+				animation: 'pulse',
+				message: 'Check before submitting',
+			});
+			if (submitHighlight) this._highlights.push(submitHighlight);
+		}
+
+		// Scrolls the form into view: the visitor is looking at the panel
+		// (and, behind it, the hero) when they click "Fill the form", so the
+		// sandbox section further down the page is off-screen otherwise
+		// (review round 1).
+		if (highlighter) {
+			await highlighter.scrollTo(form, { behavior: 'smooth', block: 'center' });
+		}
+
 		window.agentlet?.utils.MessageBubble.info('Check before submitting.', { duration: 8000, closable: true });
 
-		window.setTimeout(() => {
+		// Delayed so this bubble does not stack with the one right above
+		// (review round 1: both used to appear at the same instant).
+		this._closingBubbleTimeout = setTimeout(() => {
+			this._closingBubbleTimeout = null;
 			window.agentlet?.utils.MessageBubble.show({
 				type: 'info',
 				message: `This ran on agentlet.io. <a href="${DEMO_SECTION_URL}" style="color: inherit;">See it on a real business app</a>.`,
@@ -536,17 +581,20 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 				duration: 0,
 				closable: true,
 			});
-		}, 1200);
+		}, 2000);
 	}
 
 	private _restart(): void {
 		this._formElement()?.reset();
 		this._clearHighlights();
+		this._clearClosingBubbleTimeout();
+		window.agentlet?.utils.MessageBubble.hideAll();
 		this._step = 'read';
 		this._busy = false;
 		this._error = null;
 		this._receiptImage = null;
 		this._aiExport = null;
+		this._filled = false;
 		this._rerender();
 	}
 }
