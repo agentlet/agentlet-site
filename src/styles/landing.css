@@ -302,6 +302,21 @@ pre {
 	display: block;
 }
 
+/* The "Pause animations" toggle: same button chrome as .theme-toggle,
+   sharing its class, with its own pause/play icon pair swapped by the
+   pressed state instead of the theme. */
+.animations-toggle .icon-play {
+	display: none;
+}
+
+:root[data-animations='paused'] .animations-toggle .icon-pause {
+	display: none;
+}
+
+:root[data-animations='paused'] .animations-toggle .icon-play {
+	display: block;
+}
+
 /* Buttons and links */
 
 .button {
@@ -682,6 +697,34 @@ figure.demo-figure img {
 	border-radius: var(--radius-card);
 	width: 100%;
 	height: auto;
+}
+
+/* Each demo GIF is paired with a still frame at the same dimensions
+   (see src/components/landing/Demo.astro): the "Pause animations"
+   toggle swaps to the still, since a GIF cannot be paused. The fixed
+   aspect-ratio box keeps both images stacked in place with no layout
+   shift when the swap happens. */
+.demo-media {
+	position: relative;
+	aspect-ratio: 600 / 390;
+}
+
+.demo-media img {
+	position: absolute;
+	inset: 0;
+	height: 100%;
+}
+
+.demo-media-still {
+	display: none;
+}
+
+:root[data-animations='paused'] .demo-media-gif {
+	display: none;
+}
+
+:root[data-animations='paused'] .demo-media-still {
+	display: block;
 }
 
 figure.demo-figure figcaption {

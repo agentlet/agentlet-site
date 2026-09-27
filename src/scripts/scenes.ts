@@ -3,6 +3,21 @@
 // play state as scenes enter/leave the viewport, (b) drives the hero
 // story's step timer, and (c) drives the capability explorer's tabs. No
 // animation logic lives here, no library, kept deliberately small.
+//
+// The site-wide "Pause animations" toggle (src/components/landing/
+// AnimationsToggle.astro) sets html[data-animations="paused"|"playing"]
+// and dispatches "agentlet:animations-change" on document. Every scene
+// without its own timer (capability explorer, deployment modes) is
+// paused purely by CSS (see the html[data-animations="paused"] rule in
+// scenes.css), so it needs no JS here at all: becoming visible, or a
+// tab switch calling restartScene, cannot un-pause it while that
+// attribute is set. The hero story is the one scene with a JS-driven
+// timer (StoryController below), so it listens for that event itself.
+
+/** True while the site-wide "Pause animations" toggle is pressed. */
+function isAnimationsPaused(): boolean {
+	return document.documentElement.dataset.animations === 'paused';
+}
 
 /** Force a CSS animation to restart from 0% on its next running frame. */
 function restartScene(scene: Element | null): void {
@@ -39,6 +54,15 @@ function observeScenes(root: ParentNode): void {
  * unless the user paused; it does not pause on hover. Plays the same
  * way regardless of prefers-reduced-motion, by product decision: Pause
  * and Replay (always visible) are the user's way to stop it.
+ *
+ * Interplay with the site-wide "Pause animations" toggle: pressing it
+ * always pauses the hero too, and this button's own label and aria
+ * switch to their "Play" state to match, discarding any earlier local
+ * choice. From there, clicking this button (or Replay) is a local,
+ * this-page-view-only override: it plays (or re-pauses) the hero
+ * alone, independent of the global toggle, until the global toggle is
+ * pressed or released again, which always wins and resets the hero
+ * back to following it.
  */
 class StoryController {
 	private scene: HTMLElement | null;
@@ -50,7 +74,15 @@ class StoryController {
 	private replay: HTMLButtonElement | null;
 	private index = 0;
 	private timer: number | null = null;
-	private userPaused = false;
+	/** The site-wide "Pause animations" toggle's current state. */
+	private globalPaused = isAnimationsPaused();
+	/**
+	 * A local choice that overrides globalPaused for this story only:
+	 * true forces it to play, false forces it to pause, null means
+	 * "follow globalPaused" (the default, and what pressing or
+	 * releasing the global toggle resets it back to).
+	 */
+	private localOverride: boolean | null = null;
 	private offscreen = true;
 	/** Time left in the current step; the full duration on a fresh step,
 	 * reduced by however long it already ran each time it is paused. */
@@ -87,13 +119,28 @@ class StoryController {
 		);
 		observer.observe(root);
 		document.addEventListener('visibilitychange', () => this.applyRunState());
+		document.addEventListener('agentlet:animations-change', (event) => {
+			this.globalPaused = (event as CustomEvent<{ paused: boolean }>).detail.paused;
+			// Pressing or releasing the global toggle always wins: drop any
+			// earlier local choice so this story goes back to following it.
+			this.localOverride = null;
+			this.updateToggleLabel();
+			this.applyRunState();
+		});
 
 		this.goToStep(0);
 		this.updateToggleLabel();
 	}
 
+	/** Paused if either the global toggle or this story's own local
+	 * choice says so; the local choice, once made, wins over the
+	 * global toggle until the global toggle itself changes again. */
+	private get effectivePaused(): boolean {
+		return this.localOverride === null ? this.globalPaused : !this.localOverride;
+	}
+
 	private get shouldRun(): boolean {
-		return !this.userPaused && !this.offscreen && document.visibilityState === 'visible';
+		return !this.effectivePaused && !this.offscreen && document.visibilityState === 'visible';
 	}
 
 	/** Advance to a fresh step: full duration, every segment reset. */
@@ -120,8 +167,16 @@ class StoryController {
 	 * (re)arms the timeout and the active segment's fill for whatever is
 	 * left of remainingMs; stopping computes how much of that just
 	 * elapsed and freezes the fill in place.
+	 *
+	 * Also toggles .force-playing on the scene root: while the local
+	 * override is running the hero despite a global pause, this scene's
+	 * own step-scoped keyframe animations (the caret blink, click
+	 * pulses, the upload modal) would otherwise stay frozen, since they
+	 * are only exempt from html[data-animations="paused"] through this
+	 * class (see scenes.css), never through the step timer alone.
 	 */
 	private applyRunState() {
+		this.scene?.classList.toggle('force-playing', this.shouldRun);
 		const wasRunning = this.timer !== null;
 		this.clearTimer();
 		if (this.shouldRun) {
@@ -163,13 +218,17 @@ class StoryController {
 		fill.style.transform = current;
 	}
 
+	/** Flips whatever is currently in effect: a local override that
+	 * plays the story if it was paused, or pauses it if it was
+	 * playing, regardless of why (the global toggle or an earlier
+	 * local choice). */
 	private toggleUserPause() {
-		this.userPaused = !this.userPaused;
+		this.localOverride = this.effectivePaused;
 		this.updateToggleLabel();
 		this.applyRunState();
 	}
 
-	/** Jump to a step from its progress segment. Keeps the user's pause
+	/** Jump to a step from its progress segment. Keeps the current pause
 	 * state: a paused story shows the step and stays paused there. */
 	private jumpTo(i: number) {
 		if (i === this.index && this.scene) {
@@ -181,16 +240,20 @@ class StoryController {
 		this.goToStep(i);
 	}
 
+	/** Replay is an explicit request to play from the start, so it also
+	 * locally overrides the global toggle if that is what is currently
+	 * pausing the story. */
 	private restart() {
-		this.userPaused = false;
+		this.localOverride = true;
 		this.updateToggleLabel();
 		this.goToStep(0);
 	}
 
 	private updateToggleLabel() {
 		if (!this.toggle) return;
-		this.toggle.setAttribute('aria-label', this.userPaused ? 'Play animation' : 'Pause animation');
-		this.toggle.classList.toggle('is-paused', this.userPaused);
+		const paused = this.effectivePaused;
+		this.toggle.setAttribute('aria-label', paused ? 'Play animation' : 'Pause animation');
+		this.toggle.classList.toggle('is-paused', paused);
 	}
 }
 
