@@ -67,10 +67,20 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		isDemo: false,
 	},
 
-	// Demo agentlets (expense receipt to form, docs companion, page audit,
-	// and more) are added here, one manifest entry per module, by later
-	// work. Nothing else in the build pipeline or the launcher needs to
-	// change for a new entry to appear and work.
+	{
+		id: 'expense-receipt',
+		file: 'expense-receipt',
+		className: 'ExpenseReceiptModule',
+		title: 'Receipt to expense report',
+		description: 'Reads a sample receipt and fills an expense report form for you to review.',
+		audience: 'business',
+		isDemo: true,
+	},
+
+	// More demo agentlets (docs companion, page audit, and more) are added
+	// here, one manifest entry per module, by later work. Nothing else in
+	// the build pipeline or the launcher needs to change for a new entry to
+	// appear and work.
 ];
 
 /** Demo entries only, in manifest order: what the launcher lists. */

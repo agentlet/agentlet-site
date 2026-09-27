@@ -126,10 +126,25 @@ class AgentletLauncherModule extends window.agentlet.Module {
 	 * of the shipped ModuleRegistryAPI type). That only matters once there are
 	 * enough demos that eagerly downloading all of them at init is wasteful;
 	 * see the build report for the precise gap to file against agentlet-core.
+	 *
+	 * Looks the instance up on `moduleRegistry`, not on `window.agentlet.modules`
+	 * (a core bug/gap worked around here, found while wiring up the first real
+	 * demo agentlet: GlobalAPI.ts's `window.agentlet.modules.get()` reads from
+	 * `core.moduleManager` when one exists, falling back to `moduleRegistry`
+	 * only when it does not. AgentletCore always constructs a `moduleManager`,
+	 * so that fallback never triggers - but `ModuleRegistry.loadAgentletModule()`
+	 * (the path every registry-script-loaded agentlet, including every demo
+	 * here, goes through) only ever calls `this.register()` on itself, never
+	 * on `moduleManager`. So `window.agentlet.modules.get(id)` returns
+	 * `undefined` for every module loaded this way, even right after the
+	 * registry logged it as registered. `moduleRegistry.get()` is part of the
+	 * shipped `ModuleRegistryAPI` type and reads from the map that actually
+	 * holds these instances, so it works. See the build report for the exact
+	 * repro to file against agentlet-core.
 	 */
 	private _activate(id: string): void {
 		const registry = window.agentlet?.moduleRegistry;
-		const instance = window.agentlet?.modules.get(id);
+		const instance = registry?.get(id);
 		if (!registry || !instance) {
 			window.agentlet?.utils.MessageBubble.error(
 				`This demo could not be loaded (${id}). Reload the page and try again.`,
