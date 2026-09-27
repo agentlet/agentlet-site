@@ -163,3 +163,51 @@ export const SHOW_LAUNCHER_EVENT = 'agentlet:show-launcher';
 export function requestShowLauncher(): void {
 	window.dispatchEvent(new CustomEvent(SHOW_LAUNCHER_EVENT));
 }
+
+/**
+ * Core bug worked around here (found while wiring up the first demo
+ * agentlet, expense-receipt.ts, not fixable from a module's own patterns):
+ * `ModuleRegistry.checkUrlChange()` (agentlet-core src/core/ModuleRegistry.ts)
+ * polls every second and activates `findMatchingModule(currentUrl)` whenever
+ * it differs from `activeModule` - even when the URL has not changed at all
+ * (`urlChanged` only controls whether `lastUrl`/`url:changed` are updated,
+ * not whether the module switch happens). `findMatchingModule()` returns the
+ * first registered module whose pattern matches, and the launcher is always
+ * registered first (see manifest.ts) with a pattern that matches every
+ * non-docs page. So about one second after any demo agentlet is manually
+ * activated from the launcher on a page the launcher itself also matches
+ * (today, every demo), the poll finds "launcher" instead, sees a mismatch,
+ * and force-activates the launcher back, unmounting the demo's panel out
+ * from under the visitor.
+ *
+ * `stopUrlMonitoring()`/`startUrlMonitoring()` are real, idempotent methods
+ * on the concrete ModuleRegistry class (guarded by its own
+ * `_urlMonitoringActive` flag), but are not part of the shipped
+ * `ModuleRegistryAPI` type, so they are reached here through a narrow local
+ * cast rather than added to that type. This site never does client-side
+ * routing (every navigation is a full page load, see CLAUDE.md), so the
+ * monitoring these two functions suspend has no real navigation to detect
+ * for the lifetime of one page view: every demo agentlet should call
+ * `suspendUrlMonitoring()` from its `activateModule()` and
+ * `resumeUrlMonitoring()` from its `cleanupModule()`, which scopes the
+ * workaround to exactly the window where the bug would otherwise fire, and
+ * restores normal behavior for whatever module becomes active next.
+ */
+interface ModuleRegistryUrlMonitoring {
+	stopUrlMonitoring(): void;
+	startUrlMonitoring(): void;
+}
+
+function urlMonitoring(): ModuleRegistryUrlMonitoring | undefined {
+	return window.agentlet?.moduleRegistry as unknown as ModuleRegistryUrlMonitoring | undefined;
+}
+
+/** Call from a demo agentlet's `activateModule()`. See the comment above `ModuleRegistryUrlMonitoring`. */
+export function suspendUrlMonitoring(): void {
+	urlMonitoring()?.stopUrlMonitoring();
+}
+
+/** Call from a demo agentlet's `cleanupModule()`. See the comment above `ModuleRegistryUrlMonitoring`. */
+export function resumeUrlMonitoring(): void {
+	urlMonitoring()?.startUrlMonitoring();
+}

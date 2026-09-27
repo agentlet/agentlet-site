@@ -1,5 +1,5 @@
 import type { AIFormExport, FormFillValue, PageHighlighterHighlightControl, PDFProcessorAPI } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
+import { AGENTLET_BASE_STYLES, resumeUrlMonitoring, sourceLinkHtml, suspendUrlMonitoring } from './shared';
 
 /**
  * "Receipt to expense report": reads the site's own sample receipt, shows
@@ -17,42 +17,6 @@ import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
  * docs page).
  */
 const HOME_PAGE_PATTERN = '^https?:\\/\\/[^/]+\\/?(?:[?#].*)?$';
-
-/**
- * Core bug worked around here (found while wiring up this agentlet, not
- * fixable from this module's own patterns): `ModuleRegistry.checkUrlChange()`
- * (agentlet-core src/core/ModuleRegistry.ts) polls every second and
- * activates `findMatchingModule(currentUrl)` whenever it differs from
- * `activeModule` - even when the URL has not changed at all (`urlChanged`
- * only controls whether `lastUrl`/`url:changed` are updated, not whether the
- * module switch happens). `findMatchingModule()` returns the first
- * registered module whose pattern matches, and the launcher is always
- * registered first (see manifest.ts) with a pattern that matches every
- * non-docs page, this one included. So one second after this agentlet is
- * manually activated from the launcher, the poll finds "launcher" instead of
- * "expense-receipt", sees a mismatch, and force-activates the launcher back,
- * unmounting this panel out from under the visitor. This reproduces for any
- * demo agentlet manually activated on a page the launcher itself also
- * matches, which today is every demo (see the build report for the exact
- * repro to file against agentlet-core).
- *
- * `stopUrlMonitoring()`/`startUrlMonitoring()` are real, idempotent methods
- * on the concrete ModuleRegistry class (guarded by its own
- * `_urlMonitoringActive` flag), but are not part of the shipped
- * `ModuleRegistryAPI` type, so they are reached here through a narrow local
- * cast rather than added to that type. This site never does client-side
- * routing (every navigation is a full page load, see CLAUDE.md), so the
- * monitoring this suspends has no real navigation to detect for the
- * lifetime of one page view; suspending it only while this agentlet is the
- * active module, and resuming it in cleanupModule() below, keeps the
- * workaround scoped to exactly the window where the bug would otherwise
- * fire, and restores normal behavior for whatever module becomes active
- * next.
- */
-interface ModuleRegistryUrlMonitoring {
-	stopUrlMonitoring(): void;
-	startUrlMonitoring(): void;
-}
 
 const FILE = 'expense-receipt';
 const RECEIPT_PDF_URL = '/demo/receipt.pdf';
@@ -273,18 +237,14 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 		this._container = null;
 	}
 
-	/** See the ModuleRegistryUrlMonitoring comment above: suspends the core's URL-change polling for as long as this agentlet stays active. */
+	/** See shared.ts's ModuleRegistryUrlMonitoring comment: suspends the core's URL-change polling for as long as this agentlet stays active. */
 	async activateModule(): Promise<void> {
-		this._urlMonitoring()?.stopUrlMonitoring();
+		suspendUrlMonitoring();
 	}
 
 	async cleanupModule(): Promise<void> {
 		this._clearHighlights();
-		this._urlMonitoring()?.startUrlMonitoring();
-	}
-
-	private _urlMonitoring(): ModuleRegistryUrlMonitoring | undefined {
-		return window.agentlet?.moduleRegistry as unknown as ModuleRegistryUrlMonitoring | undefined;
+		resumeUrlMonitoring();
 	}
 
 	private _formElement(): HTMLFormElement | null {
