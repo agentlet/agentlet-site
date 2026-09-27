@@ -38,6 +38,20 @@ This is a small demo audit, not a replacement for a real accessibility audit: it
 
 Source: [`src/agentlets/page-audit.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/page-audit.ts).
 
+### Documentation companion
+
+Active on `/docs/` and below only: navigate there and it takes over from the launcher automatically, through the core's own URL pattern matching, no special-casing needed. Clicking "Try it" for it from the launcher on a non-docs page explains that and offers a link to the docs instead of activating it where it does not apply.
+
+Open its command palette with `Alt`+`Shift`+`D` or the panel's own button, then type one of:
+
+- **excel**: exports the tables of the current page to one `.xlsx` workbook, one sheet per table, using `window.agentlet.tables`.
+- **copy**: copies every code example on the page to the clipboard, separated and counted.
+- **next**: follows Starlight's pagination "Next" link.
+
+A second panel section tracks reading progress with `window.agentlet.storage`: which docs pages you visited during this demo session and how far into each you scrolled, against the total page count read from the sidebar, with a "Reset progress" action.
+
+Source: [`src/agentlets/docs-companion.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/docs-companion.ts).
+
 ## How it loads
 
 Nothing related to the demo is downloaded until you click the button, not even the loader that drives the rest of the process. On click, the page loads:

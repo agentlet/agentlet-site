@@ -25,12 +25,12 @@ test.describe('Hero live demo button', () => {
 		expect(coreRequest.url()).toContain('/cdn/v1/agentlet-core.min.js');
 
 		// #agentlet-container lives inside the panel's open shadow root;
-		// Playwright's locators pierce open shadow DOM by default. The empty
-		// state ("The first demos are on their way.") is gone now that a real
-		// demo agentlet exists; see tests/e2e/expense-receipt.spec.ts for that
-		// demo's own coverage.
+		// Playwright's locators pierce open shadow DOM by default. This text
+		// is rendered regardless of how many demos the launcher lists (see
+		// _render() in src/agentlets/launcher.ts), so it does not need
+		// updating as demos are added or removed.
 		await expect(page.locator('#agentlet-container')).toBeVisible();
-		await expect(page.locator('[data-demo="expense-receipt"]')).toBeVisible();
+		await expect(page.getByText('Pick a demo agentlet below.')).toBeVisible();
 
 		// getPanelTitle() (src/agentlets/launcher.ts) labels the header "Live
 		// demo" instead of the core's own fallback, the module's raw name
@@ -59,7 +59,7 @@ test.describe('Demo session flag', () => {
 
 		await page.goto('/try/bookmarklet/');
 		await expect(page.locator('#agentlet-container')).toBeVisible();
-		await expect(page.locator('[data-demo="expense-receipt"]')).toBeVisible();
+		await expect(page.getByText('Pick a demo agentlet below.')).toBeVisible();
 
 		// The real close button (agentlet-core's own createDiscreteCloseButton())
 		// calls the core's cleanup(), which emits `core:cleanup`; that event is

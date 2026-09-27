@@ -87,10 +87,19 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		isDemo: true,
 	},
 
-	// More demo agentlets (docs companion and more) are added here, one
-	// manifest entry per module, by later work. Nothing else in the build
-	// pipeline or the launcher needs to change for a new entry to appear and
-	// work.
+	{
+		id: 'docs-companion',
+		file: 'docs-companion',
+		className: 'AgentletDocsCompanionModule',
+		title: 'Documentation companion',
+		description: 'Exports tables, copies code examples, and tracks your reading progress on the docs.',
+		audience: 'developers',
+		isDemo: true,
+	},
+
+	// More demo agentlets are added here, one manifest entry per module.
+	// Nothing else in the build pipeline or the launcher needs to change
+	// for a new entry to appear and work.
 ];
 
 /** Demo entries only, in manifest order: what the launcher lists. */

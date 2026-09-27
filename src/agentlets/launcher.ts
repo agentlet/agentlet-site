@@ -35,10 +35,13 @@ class AgentletLauncherModule extends window.agentlet.Module {
 		// Site-owned convention, not a core API: any module can ask to bring
 		// the launcher back by dispatching SHOW_LAUNCHER_EVENT on window (see
 		// shared.ts). There is no public way to reach "the launcher" other
-		// than window.agentlet.modules.get('launcher'), which this closes over.
+		// than by name, which this closes over. See the comment on
+		// _activate() below for why that lookup goes through
+		// window.agentlet.moduleRegistry.get() rather than the documented
+		// window.agentlet.modules.get().
 		this._onShowLauncher = () => {
 			const registry = window.agentlet?.moduleRegistry;
-			const self = window.agentlet?.modules.get(this.name);
+			const self = registry?.get(this.name);
 			if (registry && self) void registry.activateModule(self);
 		};
 		window.addEventListener(SHOW_LAUNCHER_EVENT, this._onShowLauncher);
@@ -151,6 +154,33 @@ class AgentletLauncherModule extends window.agentlet.Module {
 			);
 			return;
 		}
+
+		// The launcher's own pattern excludes /docs/ (NOT_DOCS_PATTERN above),
+		// so it can only ever be open on a page some other demo's pattern
+		// might not match too (the docs companion in particular: its pattern
+		// is /docs/ and below only, the exact pages the launcher never shows
+		// on). Rather than activating a module on a page it was not built
+		// for, check its own Module.checkPattern() (the same check
+		// ModuleRegistry.findMatchingModule() runs) and offer to go to a page
+		// where it does apply instead.
+		if (!instance.checkPattern(window.location.href)) {
+			const entry = AGENTLET_MANIFEST.find((candidate) => candidate.id === id);
+			window.agentlet?.utils.Dialog.showInfo(
+				{
+					title: entry?.title ?? 'This demo',
+					message: `${entry?.title ?? 'This demo'} only runs on the documentation. Open the docs to try it.`,
+					buttons: [
+						{ text: 'Cancel', value: 'cancel' },
+						{ text: 'Go to the docs', value: 'go-to-docs', primary: true },
+					],
+				},
+				(value) => {
+					if (value === 'go-to-docs') window.location.href = '/docs/';
+				},
+			);
+			return;
+		}
+
 		void registry.activateModule(instance);
 	}
 }
