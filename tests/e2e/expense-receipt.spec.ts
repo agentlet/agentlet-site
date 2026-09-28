@@ -17,6 +17,12 @@ test.describe('Expense receipt sandbox (hand use, no agentlet)', () => {
 
 		await page.goto('/');
 
+		// The sandbox is a collapsed <details> by default (see
+		// tests/e2e/sandbox.spec.ts); open it by hand, the same way a visitor
+		// would, before interacting with the form inside it.
+		await page.locator('#sandbox summary').click();
+		await expect(page.locator('#expense-form')).toBeVisible();
+
 		await page.locator('#expense-vendor').fill('Test vendor');
 		await page.locator('#expense-date').fill('2026-01-15');
 		await page.locator('#expense-amount').fill('42.50');
@@ -34,6 +40,7 @@ test.describe('Expense receipt sandbox (hand use, no agentlet)', () => {
 
 	test('the three deliberate accessibility defects are present', async ({ page }) => {
 		await page.goto('/');
+		await page.locator('#sandbox summary').click();
 
 		const table = page.locator('[data-demo-defect="table-headers"]');
 		await expect(table).toBeVisible();
