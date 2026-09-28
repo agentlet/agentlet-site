@@ -59,9 +59,10 @@ Nothing related to the demo is downloaded until you click the button, not even t
 - The demo loader, from `/cdn/v1/demo-loader.js`.
 - `agentlet-core`, the framework itself, from `/cdn/v1/agentlet-core.min.js`.
 - The demo registry, from `/cdn/v1/agentlets-registry.js`.
-- The chosen demo agentlet's own script, from `/cdn/v1/agentlets/<name>.js`, once you pick it in the launcher.
+- The launcher's own script and the documentation companion's, both loaded eagerly as part of the registry (the companion needs to already be registered for the core's own URL detection to activate it on a direct visit to `/docs/`, not only from the launcher).
+- "Receipt to expense report" and "Page audit" are marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and load from `/cdn/v1/agentlets/<name>.js` only once you pick one in the launcher, via `moduleRegistry.loadModule()`.
 
-Because this site does a full page load on every navigation, a tiny inline script on every page (not a separate request) checks whether you left the panel open on a previous page and, if so, loads the demo loader to reopen it. That check itself downloads nothing on its own: it only loads the demo loader if the panel was open.
+Because this site does a full page load on every navigation, a tiny inline script on every page (not a separate request) checks whether you left the panel open on a previous page and, if so, loads the demo loader to reopen it. That check itself downloads nothing on its own: it only loads the demo loader if the panel was open, and loads a lazy demo's script again first if that is the one being restored.
 
 ## Rules the demos follow
 
