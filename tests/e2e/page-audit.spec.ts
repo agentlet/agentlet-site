@@ -74,6 +74,7 @@ test.describe('Page audit agentlet on the home page', () => {
 		await expect(page).toHaveURL(/#demo$/);
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 		expect(await health.cspViolations()).toEqual([]);
 	});
 
@@ -149,6 +150,7 @@ test.describe('Page audit agentlet on the bookmarklet page', () => {
 		await expect(page.locator('.audit-element')).toHaveCount(0);
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 		expect(await health.cspViolations()).toEqual([]);
 	});
 });

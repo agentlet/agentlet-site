@@ -39,6 +39,7 @@ test.describe('Theme switching', () => {
 			.not.toBe(backgroundBefore);
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 	});
 
 	test('opening the demo while the site is already in light theme gives a light panel', async ({ page }) => {
@@ -83,6 +84,7 @@ test.describe('Registry reliability', () => {
 		await page.waitForTimeout(11_000);
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 	});
 
 	// The launcher's own pattern excludes /docs/ (see src/agentlets/launcher.ts),
@@ -103,5 +105,6 @@ test.describe('Registry reliability', () => {
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Documentation companion');
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 	});
 });

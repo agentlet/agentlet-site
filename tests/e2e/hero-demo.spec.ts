@@ -38,6 +38,7 @@ test.describe('Hero live demo button', () => {
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Live demo');
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 		expect(await health.cspViolations()).toEqual([]);
 	});
 
