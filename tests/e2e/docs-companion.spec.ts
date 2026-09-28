@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { expect, test } from '@playwright/test';
-import { trackPageHealth } from './helpers';
+import { DEMO_FLAG_KEY, trackPageHealth } from './helpers';
 
 /**
  * A real doc page with at least one table and several code blocks
@@ -43,6 +43,47 @@ test.describe('Documentation companion: activation and handover', () => {
 
 		await page.goto('/');
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Live demo');
+
+		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
+		expect(await health.cspViolations()).toEqual([]);
+	});
+
+	test('the session flag reflects a URL-based switch, not whichever demo was active before it', async ({
+		page,
+	}) => {
+		// Regression test for the bug fixed in src/scripts/demo-loader.ts's
+		// wireLifecycle()/startCore(): the module:activated listener that keeps
+		// the sessionStorage flag in sync used to be attached only after
+		// core.init() resolved, missing the URL-based activation that init()
+		// itself triggers while registering the docs companion. The flag then
+		// kept saying "expense-receipt" (the last demo picked by hand) instead
+		// of "docs-companion" (the demo actually active after this navigation).
+		const health = await trackPageHealth(page);
+
+		await page.goto('/');
+		await page.getByRole('button', { name: 'Try it on this page' }).click();
+		await expect(page.locator('#agentlet-container')).toBeVisible();
+		await page.locator('[data-try="expense-receipt"]').click();
+		await expect(page.locator('#agentlet-app-name')).toHaveText('Receipt to expense report');
+
+		const flagAfterPick = await page.evaluate((key) => sessionStorage.getItem(key), DEMO_FLAG_KEY);
+		expect(flagAfterPick).toBe('expense-receipt');
+
+		// Full-page navigation into the docs: the core's own URL pattern
+		// matching activates the docs companion automatically (see
+		// docs-companion.ts's own doc comment), with no code here forcing it.
+		await page.goto(DOCS_PAGE);
+		await expect(page.locator('#agentlet-app-name')).toHaveText('Documentation companion');
+
+		const flagOnDocsPage = await page.evaluate((key) => sessionStorage.getItem(key), DEMO_FLAG_KEY);
+		expect(flagOnDocsPage).toBe('docs-companion');
+
+		// The round trip: reloading this same docs page must restore the docs
+		// companion, not fall back to the stale "expense-receipt" value the
+		// bug used to leave behind.
+		await page.reload();
+		await expect(page.locator('#agentlet-app-name')).toHaveText('Documentation companion');
 
 		expect(health.consoleErrors).toEqual([]);
 		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.

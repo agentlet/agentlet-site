@@ -160,6 +160,25 @@ function syncTheme(core: AgentletAPI): void {
  * on the event bus just before deleting `window.agentlet`
  * (agentlet-core src/index.ts). That is the signal this flag waits for,
  * rather than e.g. minimizing the panel, which leaves it running.
+ *
+ * Also keeps the flag in sync with whichever module is actually active, by
+ * listening for `module:activated`, not only for the explicit
+ * `openAgentletDemo()` call below. Must be attached before `core.init()` is
+ * called, not merely before it resolves: `core.eventBus` already exists
+ * once the instance is constructed (agentlet-core's AgentletCore
+ * constructor creates it before `init()` is ever called), but `init()`
+ * itself calls `moduleRegistry.initialize()`, which registers every eager
+ * module and, for each one, runs the very first URL-based detection
+ * (`ModuleRegistry.checkUrlChange()`, see the `trigger: 'moduleRegistration'`
+ * case in agentlet-core's source). That can activate a module and emit
+ * `module:activated` synchronously, before `init()`'s own promise settles.
+ * A previous version of this file attached this listener from inside
+ * `core.init().then(...)`, so it missed exactly that first, URL-based
+ * activation: on a docs page, for example, `init()` would activate the
+ * docs companion through its own pattern match, emit `module:activated` for
+ * it with no listener yet attached to hear it, and leave the flag holding
+ * whatever a previous page had last written (e.g. "expense-receipt"),
+ * rather than "docs-companion", the module that was actually now active.
  */
 function wireLifecycle(core: AgentletAPI): void {
 	core.eventBus.on('core:cleanup', () => {
@@ -177,13 +196,19 @@ function wireLifecycle(core: AgentletAPI): void {
 		const name = (data as { module?: unknown } | undefined)?.module;
 		if (typeof name === 'string') writeActive(name);
 	});
+}
 
-	// Attached only after init() resolves, so a site theme toggle that
-	// happens during the (network-bound) loading window fires no mutation
-	// this observer is around to see. syncTheme() is called again,
-	// unconditionally, right after this function returns (see startCore()),
-	// which re-reads the current site theme regardless of whether a
-	// mutation was missed here, closing that gap.
+/**
+ * Attached only after init() resolves, so a site theme toggle that happens
+ * during the (network-bound) loading window fires no mutation this observer
+ * is around to see. syncTheme() is called again, unconditionally, right
+ * after this function returns (see startCore()), which re-reads the current
+ * site theme regardless of whether a mutation was missed here, closing that
+ * gap. Unlike wireLifecycle() above, nothing here depends on catching an
+ * event emitted synchronously during init(), so this can stay attached only
+ * once init() has resolved.
+ */
+function watchTheme(core: AgentletAPI): void {
 	themeObserver = new MutationObserver(() => syncTheme(core));
 	themeObserver.observe(document.documentElement, {
 		attributes: true,
@@ -203,13 +228,16 @@ function startCore(): Promise<AgentletAPI> {
 				pdfWorkerUrl: PDF_WORKER_URL,
 				theme: themeFor(currentSiteTheme()),
 			});
+			// Before init(): see wireLifecycle()'s own doc comment for why this
+			// cannot wait until init() resolves.
+			wireLifecycle(core);
 			return core.init().then(() => {
 				lastAppliedTheme = currentSiteTheme();
-				wireLifecycle(core);
+				watchTheme(core);
 				// Re-sync once more, now that the observer is live: catches a site
 				// theme toggle that happened during the loading window above,
 				// which the observer (just attached) could not have seen. See its
-				// doc comment in wireLifecycle().
+				// doc comment in watchTheme().
 				syncTheme(core);
 				return core;
 			});
