@@ -1,5 +1,5 @@
 import type { DialogButton, PageHighlighterHighlightControl, TableData } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
+import { AGENTLET_BASE_STYLES, backToLauncherHtml, sourceLinkHtml, wireBackToLauncher } from './shared';
 
 /**
  * "Compare and export": reads the home page's "Compared to robots" table
@@ -305,6 +305,7 @@ class CompareExportModule extends window.agentlet.Module {
 						Go to the home page and open this demo again from there.
 					</p>
 					${sourceLinkHtml(FILE)}
+					${backToLauncherHtml()}
 				</div>
 			`;
 		}
@@ -321,6 +322,7 @@ class CompareExportModule extends window.agentlet.Module {
 				${this._renderSummary()}
 				${this._renderActions()}
 				${sourceLinkHtml(FILE)}
+				${backToLauncherHtml()}
 			</div>
 		`;
 	}
@@ -383,6 +385,7 @@ class CompareExportModule extends window.agentlet.Module {
 			this._clearHighlights();
 			this._rerender();
 		});
+		wireBackToLauncher(container);
 	}
 
 	/** See the module doc comment: works around DialogAPI.choice() hardcoding a clipboard emoji icon with no override, by calling showInfo() directly with icon: ''. */

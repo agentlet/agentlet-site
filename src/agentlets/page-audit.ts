@@ -1,5 +1,12 @@
 import type { PageHighlighterHighlightControl, TableData } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, openSandbox, showDemoClosingBubbleOnce, sourceLinkHtml } from './shared';
+import {
+	AGENTLET_BASE_STYLES,
+	backToLauncherHtml,
+	openSandbox,
+	showDemoClosingBubbleOnce,
+	sourceLinkHtml,
+	wireBackToLauncher,
+} from './shared';
 
 /**
  * "Page audit": a deterministic accessibility and structure audit of the
@@ -449,6 +456,7 @@ class PageAuditModule extends window.agentlet.Module {
 				${this._renderSummary()}
 				${this._renderActions()}
 				${sourceLinkHtml(FILE)}
+				${backToLauncherHtml()}
 			</div>
 		`;
 	}
@@ -505,6 +513,7 @@ class PageAuditModule extends window.agentlet.Module {
 			this._clearHighlights();
 			this._rerender();
 		});
+		wireBackToLauncher(container);
 	}
 
 	private async _runAudit(): Promise<void> {

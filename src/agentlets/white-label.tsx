@@ -1,7 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { AgentletAPI, AgentletTheme, EventBusAPI, ModuleMountContext } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, sourceUrl } from './shared';
+import { AGENTLET_BASE_STYLES, isDocsPage, requestShowLauncher, sourceUrl } from './shared';
 
 /**
  * "Live white label": rebrands the whole agentlet panel (header, accent,
@@ -357,6 +357,13 @@ function WhiteLabelPanel({ activeCompanyId, siteMode, theme, onSelect, onReset }
 			<a className="agentlet-source-link" href={SOURCE_URL} target="_blank" rel="noopener noreferrer">
 				View the source of this agentlet
 			</a>
+			{isDocsPage() ? (
+				<p className="agentlet-back-to-demos-note">The full list of demos is on the rest of the site, not the docs.</p>
+			) : (
+				<button type="button" className="agentlet-back-to-demos" onClick={() => requestShowLauncher()}>
+					Back to all demos
+				</button>
+			)}
 		</div>
 	);
 }

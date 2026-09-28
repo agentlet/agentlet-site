@@ -1,4 +1,4 @@
-import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
+import { AGENTLET_BASE_STYLES, backToLauncherHtml, sourceLinkHtml, wireBackToLauncher } from './shared';
 
 /**
  * "Summarize and share a section": the visitor picks a section of the home
@@ -349,6 +349,7 @@ class SectionSummaryModule extends window.agentlet.Module {
 						the home page and open this demo again from there.
 					</p>
 					${sourceLinkHtml(FILE)}
+					${backToLauncherHtml()}
 				</div>
 			`;
 		}
@@ -368,6 +369,7 @@ class SectionSummaryModule extends window.agentlet.Module {
 					</button>
 				</div>
 				${sourceLinkHtml(FILE)}
+				${backToLauncherHtml()}
 			</div>
 		`;
 	}
@@ -387,6 +389,7 @@ class SectionSummaryModule extends window.agentlet.Module {
 		container.querySelector('[data-action="pick"]')?.addEventListener('click', () => {
 			this._startPick();
 		});
+		wireBackToLauncher(container);
 	}
 
 	private _startPick(): void {

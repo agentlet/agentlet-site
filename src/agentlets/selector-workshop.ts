@@ -1,6 +1,6 @@
 import type { ElementInfo, PageHighlighterHighlightControl, QuickExportField } from 'agentlet-core';
 import { buildRobustSelector } from './selector-builder';
-import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
+import { AGENTLET_BASE_STYLES, backToLauncherHtml, sourceLinkHtml, wireBackToLauncher } from './shared';
 
 /**
  * "Selector workshop": pick an element on the page, see a robust CSS
@@ -521,6 +521,7 @@ class SelectorWorkshopModule extends window.agentlet.Module {
 				${this._pickedInfo ? this._renderSnippets() : ''}
 				${this._pickedInfo ? this._renderActions() : ''}
 				${sourceLinkHtml(FILE)}
+				${backToLauncherHtml()}
 			</div>
 		`;
 	}
@@ -672,6 +673,7 @@ class SelectorWorkshopModule extends window.agentlet.Module {
 			const value = this._selectorInputEl?.value ?? this._selectorValue;
 			void this._copyText(this._snippetHighlight(value), 'Snippet copied to the clipboard.');
 		});
+		wireBackToLauncher(container);
 	}
 }
 

@@ -1,4 +1,4 @@
-import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
+import { AGENTLET_BASE_STYLES, backToLauncherHtml, sourceLinkHtml, wireBackToLauncher } from './shared';
 import { AUTH_CHANGED_EVENT, configureDemoAuth, getDemoAuthUser, signOut, startSignIn, type DemoAuthUser } from './auth-demo';
 
 /**
@@ -147,6 +147,7 @@ class EnterpriseSignInModule extends window.agentlet.Module {
 				</p>
 				${this._renderStatus(user)}
 				${sourceLinkHtml(FILE)}
+				${backToLauncherHtml()}
 			</div>
 		`;
 	}
@@ -185,6 +186,7 @@ class EnterpriseSignInModule extends window.agentlet.Module {
 		container.querySelector('[data-action="sign-out"]')?.addEventListener('click', () => {
 			signOut();
 		});
+		wireBackToLauncher(container);
 	}
 }
 

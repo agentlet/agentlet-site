@@ -142,6 +142,7 @@ The home page's hero also has a draggable "agentlet demo" chip, next to the "Try
 - **No demo submits a form.** A demo may read a page's form, or fill one in locally so you can see the result, but it never submits it or sends data to a live backend.
 - **Recorded AI response.** Any demo that shows an AI-generated reply labels it "Recorded AI response". The demos on this site do not call a live AI provider: what you see is a fixed answer recorded in advance, not a model reasoning about the specific page or file you gave it.
 - **Closing the panel clears the state.** Closing the panel (its close button, not minimizing it) fully tears the demo down. Reopening it starts fresh.
+- **Back to all demos.** Every demo panel except the launcher itself shows a small "Back to all demos" action that returns to the launcher's list. On a docs page, where the launcher never runs, it is a note pointing at the rest of the site instead.
 - **No real identity data.** "Enterprise sign-in (simulated)" and its fictitious identity provider never handle a real credential or a real company: only the one fixed demo account, and a fake, locally generated token that never leaves agentlet.io.
 
 ## Source
