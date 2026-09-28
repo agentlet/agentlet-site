@@ -104,6 +104,17 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 	},
 
 	{
+		id: 'selector-workshop',
+		file: 'selector-workshop',
+		className: 'SelectorWorkshopModule',
+		title: 'Selector workshop',
+		description: 'Pick an element and build, test, and edit a robust CSS selector for it.',
+		audience: 'developers',
+		isDemo: true,
+		lazy: true,
+	},
+
+	{
 		id: 'docs-companion',
 		file: 'docs-companion',
 		className: 'AgentletDocsCompanionModule',

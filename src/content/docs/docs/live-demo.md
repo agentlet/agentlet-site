@@ -66,6 +66,20 @@ The chosen profile is saved with `agentlet.storage.session` and preselected auto
 
 Source: [`src/agentlets/compare-export.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/compare-export.ts).
 
+### Selector workshop
+
+Pick "Selector workshop" in the launcher on any page (except the docs section), then click "Pick an element" to click-select any element on the page with `agentlet.utils.ElementSelector`. Once picked, it shows:
+
+- A robust CSS selector for the element: an `#id` if it has a unique one, otherwise a stable attribute (`data-*`, `name`, or `aria-label`) qualified with the tag name, otherwise the shortest tag and class path with `:nth-of-type()` added only where needed to stay unique. This is a purpose-built selector builder (`src/agentlets/selector-builder.ts`), not `ElementInfo.cssSelector`: the core's own selector always walks up to 5 ancestors, even when a much shorter one would already be unique.
+- How many elements that selector matches, with `document.querySelectorAll()`, and every match highlighted on the page with `agentlet.utils.PageHighlighter`.
+- An editable text field for the selector: change it and the match count and highlights update live (debounced). An invalid selector shows a clear message instead of throwing.
+- If the picked element is a form field, or inside a form, the form's structure via `agentlet.forms.quickExport()`, with a "Copy as JSON" action.
+- Ready-to-use snippets, `document.querySelector(...)` and the equivalent `agentlet.utils.PageHighlighter.highlight()` call, both copyable.
+
+A "Clear highlights" action removes the overlays without losing the current selector.
+
+Source: [`src/agentlets/selector-workshop.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/selector-workshop.ts) and [`src/agentlets/selector-builder.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/selector-builder.ts).
+
 ### Documentation companion
 
 Active on `/docs/` and below only: navigate there and it takes over from the launcher automatically, through the core's own URL pattern matching, no special-casing needed. Clicking "Try it" for it from the launcher on a non-docs page explains that and offers a link to the docs instead of activating it where it does not apply.
