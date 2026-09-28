@@ -40,6 +40,8 @@ It runs with a progress dialog, one step per check, via `agentlet.utils.Dialog.s
 
 This is a small demo audit, not a replacement for a real accessibility audit: it only runs the four checks above, only against the light DOM (it does not see into the agentlet panel's own shadow root), and does not check color contrast, keyboard navigation, or ARIA roles beyond what is listed here.
 
+Locked until you sign in: see "Enterprise sign-in (simulated)" below.
+
 Source: [`src/agentlets/page-audit.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/page-audit.ts).
 
 ### Summarize and share a section
@@ -80,6 +82,18 @@ A "Clear highlights" action removes the overlays without losing the current sele
 
 Source: [`src/agentlets/selector-workshop.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/selector-workshop.ts) and [`src/agentlets/selector-builder.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/selector-builder.ts).
 
+### Enterprise sign-in (simulated)
+
+Some demos read naturally as internal, IT-only tooling. Page audit is one: the launcher shows it locked, with a "Sign in to try" action instead of "Try it", until you sign in through a simulated company account.
+
+A "Sign in with your company account (simulated)" button, shown both on a locked card and once above the demo list, opens a popup pointing at this site's own fictitious identity provider (`/try/mock-idp/`, not indexed and not linked from anywhere else on the site). It clearly states it is fictitious and shows the one account it accepts: username `demo`, password `demo`. Signing in there hands off to `/try/mock-idp/callback/`, which posts a fake token back to the opener with `postMessage`, in the shape `window.agentlet.authManager` (agentlet-core's `AuthManager`) expects by default. No real company, no backend, and no network call ever leaves agentlet.io: the token is a base64-encoded JSON object generated entirely in the browser, carrying a `demo: true` flag alongside a fictitious name, email, and role.
+
+Pick "Enterprise sign-in (simulated)" itself in the launcher to see the same flow explained in its own panel, plus the current auth state and the fake token's decoded claims.
+
+`AuthManager` only ever keeps who is signed in in memory, cleared the moment its `AgentletCore` instance is torn down; since this site does a full page load on every navigation, this demo keeps its own copy of the signed-in state in `window.agentlet.storage.session` instead, which is what actually survives moving to another page. Signing out (from the launcher's banner or the panel's own button) clears that state and locks page audit again.
+
+Source: [`src/agentlets/enterprise-sign-in.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/enterprise-sign-in.ts), [`src/agentlets/auth-demo.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/auth-demo.ts).
+
 ### Documentation companion
 
 Active on `/docs/` and below only: navigate there and it takes over from the launcher automatically, through the core's own URL pattern matching, no special-casing needed. Clicking "Try it" for it from the launcher on a non-docs page explains that and offers a link to the docs instead of activating it where it does not apply.
@@ -115,7 +129,7 @@ Nothing related to the demo is downloaded until you click the button, not even t
 - `agentlet-core`, the framework itself, from `/cdn/v1/agentlet-core.min.js`.
 - The demo registry, from `/cdn/v1/agentlets-registry.js`.
 - The launcher's own script and the documentation companion's, both loaded eagerly as part of the registry (the companion needs to already be registered for the core's own URL detection to activate it on a direct visit to `/docs/`, not only from the launcher).
-- "Receipt to expense report", "Page audit", and "Summarize and share a section" are marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and load from `/cdn/v1/agentlets/<name>.js` only once you pick one in the launcher, via `moduleRegistry.loadModule()`.
+- Every other demo (receipt to expense report, page audit, summarize and share a section, compare and export, selector workshop, live white label, and enterprise sign-in) is marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and loads from `/cdn/v1/agentlets/<name>.js` only once you pick it in the launcher, via `moduleRegistry.loadModule()`.
 
 Because this site does a full page load on every navigation, a tiny inline script on every page (not a separate request) checks whether you left the panel open on a previous page and, if so, loads the demo loader to reopen it. That check itself downloads nothing on its own: it only loads the demo loader if the panel was open, and loads a lazy demo's script again first if that is the one being restored.
 
@@ -126,6 +140,7 @@ The home page's hero also has a draggable "agentlet demo" chip, next to the "Try
 - **No demo submits a form.** A demo may read a page's form, or fill one in locally so you can see the result, but it never submits it or sends data to a live backend.
 - **Recorded AI response.** Any demo that shows an AI-generated reply labels it "Recorded AI response". The demos on this site do not call a live AI provider: what you see is a fixed answer recorded in advance, not a model reasoning about the specific page or file you gave it.
 - **Closing the panel clears the state.** Closing the panel (its close button, not minimizing it) fully tears the demo down. Reopening it starts fresh.
+- **No real identity data.** "Enterprise sign-in (simulated)" and its fictitious identity provider never handle a real credential or a real company: only the one fixed demo account, and a fake, locally generated token that never leaves agentlet.io.
 
 ## Source
 
