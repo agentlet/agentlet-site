@@ -80,3 +80,52 @@ test.describe('Demo session flag', () => {
 		expect(cdnRequests).toEqual([]);
 	});
 });
+
+test.describe('Lazy demo loading', () => {
+	test('the expense-receipt and page-audit bundles are not requested until "Try it" is clicked', async ({
+		page,
+	}) => {
+		const agentletRequests: string[] = [];
+		page.on('request', (request) => {
+			if (request.url().includes('/cdn/v1/agentlets/')) agentletRequests.push(request.url());
+		});
+
+		await page.goto('/');
+		await page.getByRole('button', { name: 'Try it on this page' }).click();
+		await expect(page.locator('#agentlet-container')).toBeVisible();
+		await expect(page.getByText('Pick a demo agentlet below.')).toBeVisible();
+
+		// expense-receipt and page-audit are marked `lazy: true` in the
+		// manifest (src/agentlets/manifest.ts), so init()'s eager registry
+		// load must not have downloaded either bundle just to list them here.
+		// The launcher's own bundle (loaded eagerly, it is the module the
+		// loader activates by default) may already appear in agentletRequests;
+		// that is expected and not checked against.
+		expect(agentletRequests.some((url) => url.includes('expense-receipt.js'))).toBe(false);
+		expect(agentletRequests.some((url) => url.includes('page-audit.js'))).toBe(false);
+
+		await page.locator('[data-try="expense-receipt"]').click();
+		await expect(page.locator('#agentlet-app-name')).toHaveText('Receipt to expense report');
+
+		expect(agentletRequests.some((url) => url.includes('expense-receipt.js'))).toBe(true);
+		expect(agentletRequests.some((url) => url.includes('page-audit.js'))).toBe(false);
+	});
+
+	test('shows a clear error and leaves the button usable when a lazy demo fails to load', async ({ page }) => {
+		await page.goto('/');
+		await page.getByRole('button', { name: 'Try it on this page' }).click();
+		await expect(page.locator('#agentlet-container')).toBeVisible();
+
+		await page.route('**/cdn/v1/agentlets/expense-receipt.js', (route) => route.abort());
+
+		const tryButton = page.locator('[data-try="expense-receipt"]');
+		await tryButton.click();
+
+		await expect(page.getByText(/Could not load this demo \(expense-receipt\)/)).toBeVisible();
+		await expect(tryButton).toBeEnabled();
+		await expect(tryButton).toHaveText('Try it');
+		// The launcher itself is still the active module: the failed load did
+		// not leave the panel in a broken, half-activated state.
+		await expect(page.locator('#agentlet-app-name')).toHaveText('Live demo');
+	});
+});

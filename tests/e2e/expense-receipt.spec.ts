@@ -162,10 +162,28 @@ test.describe('Expense receipt agentlet', () => {
 		// The launcher's own pattern excludes /docs/, so nothing auto-activates
 		// there; activate this agentlet directly through the module registry
 		// to exercise its own defensive check (see the doc comment on
-		// ExpenseReceiptModule in expense-receipt.ts).
+		// ExpenseReceiptModule in expense-receipt.ts). It is also a lazy
+		// registry entry (manifest.ts's `lazy` field), so it must be loaded
+		// with loadModule() first, the same way launcher.ts's "Try it" does,
+		// before it can be activated.
 		await page.evaluate(async () => {
-			const registry = (window as unknown as { agentlet: { moduleRegistry: { get(name: string): unknown; activateModule(m: unknown): Promise<void> } } }).agentlet.moduleRegistry;
-			const instance = registry.get('expense-receipt');
+			const registry = (
+				window as unknown as {
+					agentlet: {
+						moduleRegistry: {
+							get(name: string): unknown;
+							getRegistryEntries(): Array<{ name: string; url: string; module: string; lazy?: boolean }>;
+							loadModule(entry: { name: string; url: string; module: string; lazy?: boolean }): Promise<unknown>;
+							activateModule(m: unknown): Promise<void>;
+						};
+					};
+				}
+			).agentlet.moduleRegistry;
+			let instance = registry.get('expense-receipt');
+			if (!instance) {
+				const entry = registry.getRegistryEntries().find((candidate) => candidate.name === 'expense-receipt');
+				if (entry) instance = await registry.loadModule(entry);
+			}
 			if (instance) await registry.activateModule(instance);
 		});
 

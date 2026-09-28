@@ -237,20 +237,30 @@ window.__openAgentletDemo = openAgentletDemo;
 const previouslyActive = readActive();
 if (previouslyActive) {
 	startCore()
-		.then((core) => {
+		.then(async (core) => {
 			core.show();
 			if (previouslyActive !== DEFAULT_MODULE) {
-				// core.modules.get() (the documented ModulesAPI, agentlet-core
-				// src/core/GlobalAPI.ts) always returns undefined for a module
-				// loaded through registryUrl, the only loading mode this site
-				// uses: it prefers core.moduleManager.get(), which registry
-				// loading never populates, over core.moduleRegistry.get(),
-				// which it does. core.moduleRegistry.get() is equally public
-				// (ModuleRegistryAPI) and reads from the registry that is
-				// actually populated here. See src/agentlets/launcher.ts's
-				// _activate() for the same workaround, and the build report
-				// for the precise gap to file against agentlet-core.
-				const instance = core.moduleRegistry.get(previouslyActive);
+				// core.moduleRegistry (ModuleRegistryAPI), not core.modules: both
+				// agree on every registered module, but only moduleRegistry also
+				// exposes loadModule()/getRegistryEntries(), needed just below for
+				// a lazy demo entry (src/agentlets/manifest.ts's `lazy` field).
+				let instance = core.moduleRegistry.get(previouslyActive);
+				if (!instance) {
+					// The previously active module may be a lazy entry
+					// (src/agentlets/launcher.ts's "Try it" loads one the same
+					// way): init()'s eager registry load skipped it, so it is
+					// not registered yet on this fresh page load. Load it before
+					// deciding whether to restore it; getRegistryEntries() lists
+					// every entry the registry has seen, loaded or not.
+					const entry = core.moduleRegistry.getRegistryEntries().find((candidate) => candidate.name === previouslyActive);
+					if (entry) {
+						try {
+							instance = await core.moduleRegistry.loadModule(entry);
+						} catch (error) {
+							console.error(`Could not load the previously active demo (${previouslyActive}).`, error);
+						}
+					}
+				}
 				// Only force the previously active module back if its own
 				// patterns still match this page. ModuleRegistry registers
 				// every module from the registry during core.init() above, and
