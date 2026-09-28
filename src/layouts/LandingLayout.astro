@@ -6,6 +6,7 @@ import '@fontsource/ibm-plex-mono/latin-400.css';
 import '@fontsource/ibm-plex-mono/latin-500.css';
 import '../styles/landing.css';
 import '../styles/scenes.css';
+import { AGENTLET_REOPEN_SCRIPT } from '../scripts/agentlet-inline-snippets.mjs';
 
 interface Props {
 	title: string;
@@ -74,6 +75,15 @@ const pageUrl = new URL(Astro.url.pathname, Astro.site);
 				document.documentElement.dataset.animations = storedAnimations === 'paused' ? 'paused' : 'playing';
 			})();
 		</script>
+		{
+			/* Reopens the live demo only if a previous page left it open
+			   (sessionStorage flag); downloads nothing otherwise. Tiny and
+			   inline on purpose, see /docs/live-demo/ and
+			   src/pages/try/bookmarklet.astro. The same script (byte for
+			   byte) is injected on every Starlight docs page too, via the
+			   starlight.head option in astro.config.mjs. */
+		}
+		<script is:inline set:html={AGENTLET_REOPEN_SCRIPT} />
 	</head>
 	<body>
 		<a class="skip-link" href="#main">Skip to content</a>

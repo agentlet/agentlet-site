@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
+import { AGENTLET_REOPEN_SCRIPT } from './src/scripts/agentlet-inline-snippets.mjs';
 
 export default defineConfig({
   site: 'https://agentlet.io',
@@ -36,10 +37,17 @@ export default defineConfig({
           tag: 'meta',
           attrs: { name: 'twitter:image', content: 'https://agentlet.io/brand/agentlet-social-1280x640.png' },
         },
+        // Reopens the live demo only if a previous page left it open
+        // (sessionStorage flag); downloads nothing otherwise. Tiny and
+        // inline on purpose, see src/scripts/agentlet-inline-snippets.mjs.
+        // The landing layout injects the exact same script, see
+        // src/layouts/LandingLayout.astro.
+        { tag: 'script', content: AGENTLET_REOPEN_SCRIPT },
       ],
       plugins: [starlightLinksValidator()],
       sidebar: [
         { label: 'Introduction', slug: 'docs' },
+        { label: 'Live demo', slug: 'docs/live-demo' },
         {
           label: 'Getting started',
           items: [

@@ -34,3 +34,9 @@ jobs:
 
       - name: Check internal links in built pages
         run: node scripts/check-links.mjs dist
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: npm run test:e2e
