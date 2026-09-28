@@ -1,5 +1,5 @@
 import type { AIFormExport, FormFillValue, PageHighlighterHighlightControl } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, openSandbox, sourceLinkHtml } from './shared';
+import { AGENTLET_BASE_STYLES, backToLauncherHtml, openSandbox, sourceLinkHtml, wireBackToLauncher } from './shared';
 
 /**
  * "Receipt to expense report": reads the site's own sample receipt, shows
@@ -280,6 +280,7 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 						form live. Go to the home page and open this demo again from there.
 					</p>
 					${sourceLinkHtml(FILE)}
+					${backToLauncherHtml()}
 				</div>
 			`;
 		}
@@ -298,6 +299,7 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 				${this._renderActions()}
 
 				${sourceLinkHtml(FILE)}
+				${backToLauncherHtml()}
 			</div>
 		`;
 	}
@@ -393,6 +395,7 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 		container.querySelector('[data-action="restart"]')?.addEventListener('click', () => {
 			this._restart();
 		});
+		wireBackToLauncher(container);
 	}
 
 	private async _runStep(): Promise<void> {

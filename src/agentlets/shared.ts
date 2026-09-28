@@ -12,14 +12,20 @@
  */
 export const SITE_REPO_URL = 'https://github.com/agentlet/agentlet-site';
 
-/** Href for the "View the source of this agentlet" link, for a given src/agentlets/<file>.ts. */
-export function sourceUrl(file: string): string {
-	return `${SITE_REPO_URL}/blob/main/src/agentlets/${file}.ts`;
+/**
+ * Href for the "View the source of this agentlet" link, for a given
+ * src/agentlets/<file>.<ext>. `ext` defaults to `ts`, the extension every
+ * demo but one (white-label.tsx) uses; pass a manifest entry's own
+ * `fileExt` for the rest, so a `.tsx` module still links to the file that
+ * actually exists.
+ */
+export function sourceUrl(file: string, ext: 'ts' | 'tsx' = 'ts'): string {
+	return `${SITE_REPO_URL}/blob/main/src/agentlets/${file}.${ext}`;
 }
 
 /** Markup for the "View the source of this agentlet" link, consistent across every agentlet's panel. */
-export function sourceLinkHtml(file: string): string {
-	return `<a class="agentlet-source-link" href="${sourceUrl(file)}" target="_blank" rel="noopener noreferrer">View the source of this agentlet</a>`;
+export function sourceLinkHtml(file: string, ext: 'ts' | 'tsx' = 'ts'): string {
+	return `<a class="agentlet-source-link" href="${sourceUrl(file, ext)}" target="_blank" rel="noopener noreferrer">View the source of this agentlet</a>`;
 }
 
 /**
@@ -163,6 +169,30 @@ export const AGENTLET_BASE_STYLES = `
 	text-decoration-thickness: 2px;
 	text-underline-offset: 3px;
 }
+
+.agentlet-back-to-demos {
+	appearance: none;
+	border: none;
+	background: none;
+	padding: 0;
+	margin: 0;
+	font: inherit;
+	font-size: 0.82rem;
+	font-weight: 600;
+	color: var(--color-heading, var(--sl-color-white, #0f3350));
+	text-decoration: underline;
+	text-decoration-color: var(--color-accent, #f4a261);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 3px;
+	cursor: pointer;
+	align-self: flex-start;
+}
+
+.agentlet-back-to-demos-note {
+	margin: 0;
+	font-size: 0.82rem;
+	color: var(--color-text-muted, var(--sl-color-gray-3, #5b6b78));
+}
 `;
 
 /**
@@ -178,6 +208,69 @@ export const SHOW_LAUNCHER_EVENT = 'agentlet:show-launcher';
 
 export function requestShowLauncher(): void {
 	window.dispatchEvent(new CustomEvent(SHOW_LAUNCHER_EVENT));
+}
+
+/**
+ * True on `/docs/` and below, the one place the launcher itself never runs
+ * (its own pattern excludes it, see launcher.ts's NOT_DOCS_PATTERN, so it
+ * cannot be reached with requestShowLauncher() there either).
+ */
+export function isDocsPage(): boolean {
+	return /\/docs(\/|$)/.test(window.location.pathname);
+}
+
+const BACK_TO_LAUNCHER_ACTION = 'show-launcher';
+
+/**
+ * Markup for the "Back to all demos" action shown at the end of every demo
+ * panel except the launcher itself: a small button that calls
+ * requestShowLauncher() (see wireBackToLauncher()) to bring the launcher's
+ * list back. On a docs page the launcher never runs (isDocsPage() above),
+ * so a button here would go nowhere; this renders an explanatory note
+ * instead, pointing back at the rest of the site.
+ */
+export function backToLauncherHtml(): string {
+	if (isDocsPage()) {
+		return '<p class="agentlet-back-to-demos-note">The full list of demos is on the rest of the site, not the docs.</p>';
+	}
+	return `<button type="button" class="agentlet-back-to-demos" data-action="${BACK_TO_LAUNCHER_ACTION}">Back to all demos</button>`;
+}
+
+/**
+ * Wires the click handler for backToLauncherHtml()'s button. A no-op on a
+ * docs page (and anywhere else the button was not rendered), where
+ * backToLauncherHtml() returned the plain note instead.
+ */
+export function wireBackToLauncher(container: ParentNode): void {
+	container.querySelector(`[data-action="${BACK_TO_LAUNCHER_ACTION}"]`)?.addEventListener('click', () => {
+		requestShowLauncher();
+	});
+}
+
+const CLOSING_BUBBLE_ONCE_KEY = 'agentlet-demo:closing-bubble-shown';
+const DEMO_SECTION_URL = '/#demo';
+
+/**
+ * Shows the "This ran on agentlet.io..." closing nudge, but only once across
+ * the whole demo session, no matter which demo triggers it first. Page audit
+ * requires signing in first (manifest.ts's `requiresSignIn`), so its own
+ * closing bubble and "Enterprise sign-in (simulated)"'s are the two most
+ * likely to fire in the same session; both call this shared helper instead
+ * of building their own persistent (`duration: 0`) MessageBubble, so a
+ * visitor who does both in one visit sees the nudge once, not two
+ * identically worded bubbles stacked on top of each other.
+ */
+export function showDemoClosingBubbleOnce(): void {
+	const alreadyShown = window.agentlet?.storage.session.get(CLOSING_BUBBLE_ONCE_KEY);
+	if (alreadyShown) return;
+	window.agentlet?.storage.session.set(CLOSING_BUBBLE_ONCE_KEY, '1');
+	window.agentlet?.utils.MessageBubble.show({
+		type: 'info',
+		message: `This ran on agentlet.io. <a href="${DEMO_SECTION_URL}" style="color: inherit;">See it on a real business app</a>.`,
+		allowHtml: true,
+		duration: 0,
+		closable: true,
+	});
 }
 
 /**

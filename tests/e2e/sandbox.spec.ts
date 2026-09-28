@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { trackPageHealth } from './helpers';
+import { signInThroughPopup, trackPageHealth } from './helpers';
 
 /**
  * The home page's demo sandbox (src/components/landing/TrySandbox.astro): a
@@ -67,6 +67,10 @@ test.describe('Demo sandbox', () => {
 		await page.getByRole('button', { name: 'Try it on this page' }).click();
 		await expect(page.locator('#agentlet-container')).toBeVisible();
 
+		// page-audit is locked until sign-in (manifest.ts's requiresSignIn,
+		// see tests/e2e/enterprise-sign-in.spec.ts for the lock/unlock flow
+		// itself).
+		await signInThroughPopup(page, page.getByRole('button', { name: 'Sign in with your company account (simulated)' }));
 		await page.locator('[data-try="page-audit"]').click();
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Page audit');
 

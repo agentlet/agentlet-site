@@ -64,10 +64,22 @@ const LIGHT_THEME: Partial<AgentletTheme> = {
 	// headerBackground/headerTextColor whenever the dialog-specific keys are
 	// left unset, so every dialog's header already reads the same as the
 	// panel's own header without repeating the two colours above.
-	actionButtonBackground: '#f4a261',
-	actionButtonBorder: '#f4a261',
-	actionButtonHover: '#f7b47c',
-	actionButtonText: '#0f3350',
+	//
+	// actionButtonBackground/Border/Text/Hover style every button in the
+	// panel's footer actions bar (agentlet-core's UIManager.createActionsArea()
+	// and createActionButton()/createDiscreteCloseButton(): they all share the
+	// same .agentlet-action-btn class, with no separate token for the close
+	// button). Settings and help are turned off below (showSettingsButton/
+	// showHelpButton), leaving only the close button here, so these tokens
+	// only ever apply to it in practice. A quiet icon button (transparent
+	// background, the panel's own border and text colours) reads as chrome,
+	// not a second call to action next to the accent-orange "Try it" buttons
+	// the panel content uses; the accent colour used to double as this
+	// button's fill too, which made it compete with those.
+	actionButtonBackground: 'transparent',
+	actionButtonBorder: '#d9e0e6',
+	actionButtonHover: '#f4f6f8',
+	actionButtonText: '#3d4f5e',
 	borderRadius: '8px',
 	fontFamily: FONT_FAMILY,
 };
@@ -84,10 +96,14 @@ const DARK_THEME: Partial<AgentletTheme> = {
 	// See the comment on LIGHT_THEME's own headerBackground/headerTextColor
 	// above: the dialog-specific colours are inherited from these, no need
 	// to repeat them here either.
-	actionButtonBackground: '#f4a261',
-	actionButtonBorder: '#f4a261',
-	actionButtonHover: '#f7b47c',
-	actionButtonText: '#0f3350',
+	//
+	// See the comment on LIGHT_THEME's own actionButtonBackground/Border/
+	// Text/Hover above for why these are a quiet icon button rather than
+	// the accent colour.
+	actionButtonBackground: 'transparent',
+	actionButtonBorder: '#24394d',
+	actionButtonHover: '#16293a',
+	actionButtonText: '#e6edf2',
 	borderRadius: '8px',
 	fontFamily: FONT_FAMILY,
 };
@@ -227,6 +243,14 @@ function startCore(): Promise<AgentletAPI> {
 				registryUrl: REGISTRY_URL,
 				pdfWorkerUrl: PDF_WORKER_URL,
 				theme: themeFor(currentSiteTheme()),
+				// Both default to true in agentlet-core (UIManager.createActionsArea()):
+				// they open the core's own generic settings/help screens, which have
+				// nothing to configure or explain for a demo that is not a real
+				// installed agentlet. showRefreshButton/showEnvVarsButton are not
+				// set here: both already default to false, so there is nothing to
+				// turn off for them.
+				showSettingsButton: false,
+				showHelpButton: false,
 			});
 			// Before init(): see wireLifecycle()'s own doc comment for why this
 			// cannot wait until init() resolves.

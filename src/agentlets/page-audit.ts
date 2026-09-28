@@ -1,5 +1,12 @@
 import type { PageHighlighterHighlightControl, TableData } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, openSandbox, sourceLinkHtml } from './shared';
+import {
+	AGENTLET_BASE_STYLES,
+	backToLauncherHtml,
+	openSandbox,
+	showDemoClosingBubbleOnce,
+	sourceLinkHtml,
+	wireBackToLauncher,
+} from './shared';
 
 /**
  * "Page audit": a deterministic accessibility and structure audit of the
@@ -18,7 +25,6 @@ import { AGENTLET_BASE_STYLES, openSandbox, sourceLinkHtml } from './shared';
  * hidden *page* content needs an explicit check (see `isHidden()`).
  */
 const FILE = 'page-audit';
-const DEMO_SECTION_URL = '/#demo';
 const NOT_DOCS_PATTERN = '^(?!.*\\/docs(?:\\/|$)).*$';
 
 type CheckId = 'image-alt' | 'heading-hierarchy' | 'table-headers' | 'form-label';
@@ -450,6 +456,7 @@ class PageAuditModule extends window.agentlet.Module {
 				${this._renderSummary()}
 				${this._renderActions()}
 				${sourceLinkHtml(FILE)}
+				${backToLauncherHtml()}
 			</div>
 		`;
 	}
@@ -506,6 +513,7 @@ class PageAuditModule extends window.agentlet.Module {
 			this._clearHighlights();
 			this._rerender();
 		});
+		wireBackToLauncher(container);
 	}
 
 	private async _runAudit(): Promise<void> {
@@ -575,14 +583,15 @@ class PageAuditModule extends window.agentlet.Module {
 				}
 				// The scenario ends here either way: whether the report was
 				// dismissed with Close or with a specific "Show on page".
+				// showDemoClosingBubbleOnce() (shared.ts) also gates
+				// "Enterprise sign-in (simulated)"'s own closing bubble: page
+				// audit requires signing in first (manifest.ts's
+				// requiresSignIn), so without a shared gate a visitor who
+				// signs in and then completes an audit in the same session
+				// would see two identically worded bubbles stacked at once
+				// (review round 1).
 				window.setTimeout(() => {
-					window.agentlet?.utils.MessageBubble.show({
-						type: 'info',
-						message: `This ran on agentlet.io. <a href="${DEMO_SECTION_URL}" style="color: inherit;">See it on a real business app</a>.`,
-						allowHtml: true,
-						duration: 0,
-						closable: true,
-					});
+					showDemoClosingBubbleOnce();
 				}, 800);
 			},
 		);

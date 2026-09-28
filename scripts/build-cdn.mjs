@@ -91,17 +91,28 @@ function copyCoreAssets() {
  * (erased at build time) and extends `window.agentlet.Module` at runtime,
  * the global the core sets up before this bundle is loaded. No `external`
  * option is therefore needed to keep the core out of the bundle.
+ *
+ * A manifest entry's own `fileExt` (currently only white-label.tsx, which
+ * mounts a React tree via the mount API) picks a `.tsx` entry point instead
+ * of the default `.ts`, the same field src/agentlets/shared.ts's sourceUrl()
+ * reads to build a working "View the source of this agentlet" link. `jsx:
+ * 'automatic'` makes esbuild inject `react/jsx-runtime` itself for any file
+ * that actually contains JSX, bundled the same as any other dependency since
+ * React is never external here; it is a no-op for every other, non-JSX
+ * module, so nothing else's bundle changes.
  */
 async function buildAgentletBundles(manifest) {
 	mkdirSync(join(CDN_OUT, 'agentlets'), { recursive: true });
 	for (const entry of manifest) {
+		const entryPoint = join(AGENTLETS_SRC, `${entry.file}.${entry.fileExt ?? 'ts'}`);
 		await build({
-			entryPoints: [join(AGENTLETS_SRC, `${entry.file}.ts`)],
+			entryPoints: [entryPoint],
 			bundle: true,
 			minify: true,
 			format: 'iife',
 			platform: 'browser',
 			target: 'es2020',
+			jsx: 'automatic',
 			outfile: join(CDN_OUT, 'agentlets', `${entry.id}.js`),
 			logLevel: 'warning',
 		});

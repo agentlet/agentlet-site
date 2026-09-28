@@ -1,0 +1,175 @@
+---
+import '@fontsource/ibm-plex-sans/latin-400.css';
+import '@fontsource/ibm-plex-sans/latin-600.css';
+
+// The callback half of the fictitious identity provider: reads the fake
+// token from the URL fragment left by /try/mock-idp/ (see its own comment)
+// and posts it back to the window that opened the popup, in the shape
+// agentlet-core's AuthManager expects by default (src/utils/system/
+// AuthManager.ts's handleAuthMessage(): `{ type: 'auth_result', success,
+// token, userInfo }`). No backend, no network call carrying the token: the
+// fragment never left the browser, and this page only ever reads it back
+// out of `location.hash`.
+//
+// Not indexed and not linked from any navigation, same as /try/mock-idp/.
+const title = 'Completing sign-in (simulated)';
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<title>{title}</title>
+	</head>
+	<body>
+		<main class="wrap">
+			<p class="fictitious-banner">Fictitious identity provider for the agentlet.io demo.</p>
+			<div class="card">
+				<h1 id="mock-idp-status">Completing sign-in...</h1>
+				<p id="mock-idp-detail">You can close this window if it does not close on its own.</p>
+			</div>
+		</main>
+
+		<script is:inline>
+			(function () {
+				const status = document.getElementById('mock-idp-status');
+				const detail = document.getElementById('mock-idp-detail');
+
+				function fail(message) {
+					status.textContent = 'Sign-in could not be completed';
+					detail.textContent = message;
+				}
+
+				if (!window.opener) {
+					fail('This page expects to be opened as a popup from the sign-in flow.');
+					return;
+				}
+
+				const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+				const token = hashParams.get('token');
+
+				if (!token) {
+					fail('No sign-in token was found. Go back and try signing in again.');
+					return;
+				}
+
+				let userInfo = null;
+				try {
+					userInfo = JSON.parse(atob(token));
+				} catch {
+					// Falls through with userInfo left null; the token string
+					// itself is still forwarded below.
+				}
+
+				try {
+					window.opener.postMessage(
+						{ type: 'auth_result', success: true, token: token, userInfo: userInfo },
+						window.location.origin,
+					);
+				} catch {
+					fail('Could not reach the window that opened this popup.');
+					return;
+				}
+
+				document.body.dataset.completed = 'true';
+				status.textContent = 'Signed in';
+				detail.textContent = 'You can close this window.';
+				window.setTimeout(function () {
+					window.close();
+				}, 400);
+			})();
+		</script>
+
+		<style>
+			:root {
+				color-scheme: light dark;
+				--mock-idp-bg: #f4f6f8;
+				--mock-idp-card-bg: #ffffff;
+				--mock-idp-border: #d9e0e6;
+				--mock-idp-heading: #0f3350;
+				--mock-idp-text: #3d4f5e;
+				--mock-idp-muted: #5b6b78;
+				--mock-idp-accent: #f4a261;
+			}
+
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--mock-idp-bg: #0b1a26;
+					--mock-idp-card-bg: #16293a;
+					--mock-idp-border: #24394d;
+					--mock-idp-heading: #e6edf2;
+					--mock-idp-text: #e6edf2;
+					--mock-idp-muted: #a9bccb;
+				}
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: var(--mock-idp-bg);
+				color: var(--mock-idp-text);
+				font-family:
+					'IBM Plex Sans',
+					system-ui,
+					-apple-system,
+					'Segoe UI',
+					Roboto,
+					Helvetica,
+					Arial,
+					sans-serif;
+			}
+
+			.wrap {
+				width: 100%;
+				max-width: 26rem;
+				padding: 1.5rem;
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+			}
+
+			.fictitious-banner {
+				margin: 0;
+				padding: 0.75rem 1rem;
+				border-radius: 8px;
+				background: var(--mock-idp-accent);
+				color: #0f3350;
+				font-weight: 600;
+				font-size: 0.85rem;
+				text-align: center;
+			}
+
+			.card {
+				background: var(--mock-idp-card-bg);
+				border: 1px solid var(--mock-idp-border);
+				border-radius: 12px;
+				padding: 1.5rem;
+				text-align: center;
+				display: flex;
+				flex-direction: column;
+				gap: 0.6rem;
+			}
+
+			h1 {
+				margin: 0;
+				font-size: 1.2rem;
+				color: var(--mock-idp-heading);
+			}
+
+			p {
+				margin: 0;
+				color: var(--mock-idp-muted);
+				font-size: 0.9rem;
+			}
+		</style>
+	</body>
+</html>

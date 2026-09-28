@@ -42,6 +42,38 @@ test.describe('Theme switching', () => {
 		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 	});
 
+	test('the panel footer shows only a quiet close button, in both themes', async ({ page }) => {
+		// showSettingsButton/showHelpButton (src/scripts/demo-loader.ts) turn
+		// off agentlet-core's own generic settings/help screens, which have
+		// nothing to configure or explain for a demo that is not a real
+		// installed agentlet (UIManager.createActionsArea() titles them
+		// "Settings"/"Help"). Only the close button should remain.
+		//
+		// Wide viewport: same reason as the test above (the theme toggle is
+		// covered by the open panel below roughly 1500px).
+		await page.setViewportSize({ width: 1920, height: 1000 });
+		await page.goto('/');
+		await page.getByRole('button', { name: 'Try it on this page' }).click();
+		await expect(page.locator('#agentlet-container')).toBeVisible();
+
+		await expect(page.getByTitle('Settings')).toHaveCount(0);
+		await expect(page.getByTitle('Help')).toHaveCount(0);
+		const closeButton = page.locator('#agentlet-close-btn');
+		await expect(closeButton).toBeVisible();
+
+		// Quiet icon button, not the accent-orange fill every "Try it" button
+		// in the panel content uses (src/scripts/demo-loader.ts's
+		// actionButtonBackground): transparent in both themes, so it never
+		// resolves to the accent orange rgb(244, 162, 97).
+		const lightBackground = await closeButton.evaluate((element) => getComputedStyle(element).backgroundColor);
+		expect(lightBackground).not.toBe('rgb(244, 162, 97)');
+
+		await page.getByRole('button', { name: 'Toggle color theme' }).click();
+		await expect
+			.poll(() => closeButton.evaluate((element) => getComputedStyle(element).backgroundColor))
+			.not.toBe('rgb(244, 162, 97)');
+	});
+
 	test('opening the demo while the site is already in light theme gives a light panel', async ({ page }) => {
 		await page.addInitScript(() => {
 			try {

@@ -31,8 +31,19 @@ export const AUDIENCE_LABELS: Record<AgentletAudience, string> = {
 export interface AgentletManifestEntry {
 	/** Unique id: the registry entry name and the module's own `name`. */
 	id: string;
-	/** Source file under src/agentlets/, without the .ts extension. */
+	/** Source file under src/agentlets/, without its extension. */
 	file: string;
+	/**
+	 * The source file's extension, without the leading dot. Left unset for
+	 * a plain `.ts` module (every demo but one); set to `tsx` for a module
+	 * that mounts a React tree through the mount API (see white-label.tsx).
+	 * scripts/build-cdn.mjs reads this to pick the right esbuild entry
+	 * point, and src/agentlets/shared.ts's sourceUrl()/sourceLinkHtml()
+	 * read it to build a working "View the source of this agentlet" link;
+	 * both used to hardcode `.ts`, which pointed white-label's link at a
+	 * file that does not exist.
+	 */
+	fileExt?: 'ts' | 'tsx';
 	/** Global class name the built bundle attaches to the page (window[className]). */
 	className: string;
 	/**
@@ -69,6 +80,17 @@ export interface AgentletManifestEntry {
 	 * directly, not only via "Try it".
 	 */
 	lazy?: boolean;
+	/**
+	 * True for a demo that stays locked in the launcher until the visitor
+	 * signs in through the simulated company sign-in flow (src/agentlets/
+	 * auth-demo.ts, src/agentlets/launcher.ts). The launcher shows it with a
+	 * lock and a "Sign in to try" action instead of "Try it" while
+	 * auth-demo.ts's getDemoAuthUser() returns no signed-in user, and as a
+	 * normal entry once it does. Left unset (false) for every other demo;
+	 * the module itself needs no change, the gate lives entirely in the
+	 * launcher.
+	 */
+	requiresSignIn?: boolean;
 }
 
 export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
@@ -80,6 +102,12 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		description: 'Lists the demo agentlets available to try on this site.',
 		isDemo: false,
 	},
+
+	// Demo entries below are grouped by audience, in the order a visitor
+	// reads them: business first, then developers, then IT and security.
+	// This is also the order the launcher lists them in and the order
+	// live-demo.md documents them in (see that file's own comment on
+	// keeping the two in step).
 
 	{
 		id: 'expense-receipt',
@@ -93,12 +121,46 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 	},
 
 	{
-		id: 'page-audit',
-		file: 'page-audit',
-		className: 'PageAuditModule',
-		title: 'Page audit',
-		description: 'Runs a deterministic accessibility and structure audit of the current page.',
-		audience: 'it-and-security',
+		id: 'section-summary',
+		file: 'section-summary',
+		className: 'SectionSummaryModule',
+		title: 'Summarize and share a section',
+		description: 'Picks a section of the home page and shows a recorded summary you can copy or share as an image.',
+		audience: 'business',
+		isDemo: true,
+		lazy: true,
+	},
+
+	{
+		id: 'compare-export',
+		file: 'compare-export',
+		className: 'CompareExportModule',
+		title: 'Compare and export',
+		description: 'Highlights the comparison rows that matter to a reader profile and exports the table with that relevance marked.',
+		audience: 'business',
+		isDemo: true,
+		lazy: true,
+	},
+
+	{
+		id: 'white-label',
+		file: 'white-label',
+		fileExt: 'tsx',
+		className: 'WhiteLabelModule',
+		title: 'Live white label',
+		description: 'Switches the whole agentlet panel between fictitious company brand themes.',
+		audience: 'business',
+		isDemo: true,
+		lazy: true,
+	},
+
+	{
+		id: 'selector-workshop',
+		file: 'selector-workshop',
+		className: 'SelectorWorkshopModule',
+		title: 'Selector workshop',
+		description: 'Pick an element and build, test, and edit a robust CSS selector for it.',
+		audience: 'developers',
 		isDemo: true,
 		lazy: true,
 	},
@@ -111,6 +173,32 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		description: 'Exports tables, copies code examples, and tracks your reading progress on the docs.',
 		audience: 'developers',
 		isDemo: true,
+	},
+
+	{
+		id: 'enterprise-sign-in',
+		file: 'enterprise-sign-in',
+		className: 'EnterpriseSignInModule',
+		title: 'Enterprise sign-in (simulated)',
+		description: 'Simulates a company sign-in through a popup identity provider, then unlocks the demos that need it.',
+		audience: 'it-and-security',
+		isDemo: true,
+		lazy: true,
+	},
+
+	{
+		id: 'page-audit',
+		file: 'page-audit',
+		className: 'PageAuditModule',
+		title: 'Page audit',
+		description: 'Runs a deterministic accessibility and structure audit of the current page.',
+		audience: 'it-and-security',
+		isDemo: true,
+		lazy: true,
+		// Reads naturally as an internal IT tool: locked until the visitor
+		// signs in through "Enterprise sign-in (simulated)" above. See
+		// src/agentlets/launcher.ts and src/agentlets/auth-demo.ts.
+		requiresSignIn: true,
 	},
 
 	// More demo agentlets are added here, one manifest entry per module.

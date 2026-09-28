@@ -13,6 +13,8 @@ Clicking "Try it on this page" opens a launcher panel listing the demo agentlets
 
 On the home page, right after the hero, a "Demo sandbox" section shows a fictitious receipt (a PDF, with a preview image) and a small expense report form. It is collapsed by default, kept visually separate from the rest of the page (its own border and background), and opens with a click or the keyboard, like any native disclosure widget. The form works by hand, with no agentlet: filling it in and pressing Submit shows an inline "Demo form. Nothing was sent." status instead of sending anything.
 
+The sections below are listed in the same order the launcher itself lists them: business demos first, then developers, then IT and security.
+
 ### Receipt to expense report
 
 Pick "Receipt to expense report" in the launcher to watch an agentlet do the same job the sandbox form above does by hand. Activating it opens the sandbox and scrolls it into view automatically, then:
@@ -24,6 +26,83 @@ Pick "Receipt to expense report" in the launcher to watch an agentlet do the sam
 Filling the form highlights the changed fields with `agentlet.utils.PageHighlighter`, and a "Start over" action clears both the form and the highlights. The agentlet never clicks Submit itself.
 
 Source: [`src/agentlets/expense-receipt.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/expense-receipt.ts).
+
+### Summarize and share a section
+
+On the home page, pick "Summarize and share a section" and click "Pick a section", then click any part of the page. The click activates `agentlet.utils.ElementSelector`, restricted to `section, header, footer` so whatever is clicked resolves to the enclosing home page section, header, or footer, not something nested inside it.
+
+That section is captured as an image with `agentlet.utils.ScreenCapture.captureElement()`, then shown in a fullscreen dialog next to a summary labeled "Recorded AI response": a short, factual summary written in advance for each of the home page's main sections (hero, definition, demo sandbox, see it in action, deployment modes, capabilities, principles, comparison, get started), keyed by the section's own id or heading rather than its position on the page. Picking the header or the footer, which have no recorded summary, shows an honest message saying so instead of guessing.
+
+The dialog offers "Copy the summary" (to the clipboard, confirmed with a bubble) and "Download the image" (a PNG, built from the same captured image with `ScreenCapture.canvasToBlob()` and a same-origin blob link).
+
+Two of the home page's decorative background layers (the hero's animated story and one of the capabilities tabs) use a CSS `color-mix()` background that this browser resolves to the CSS Color 4 `color()` function. The html2canvas build vendored inside agentlet-core cannot parse `color()` and would otherwise fail the whole capture; this agentlet works around it with an `onclone` callback that replaces just that background with a plain, parseable color, only inside the offscreen copy html2canvas renders from, never on the live page.
+
+Source: [`src/agentlets/section-summary.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/section-summary.ts).
+
+### Compare and export
+
+On the home page, the "Compared to robots" table compares a fully autonomous robot to the three agentlet deployment modes across ten aspects (installation, autonomy, security, and so on). Pick "Compare and export" in the launcher to read that table for a specific kind of reader:
+
+1. **Choose a reader profile.** A dialog offers three predefined profiles: "Finance team", "Cautious IT department", and "Product team". Each one is a fixed, in-code mapping of which rows matter to that reader and one honest reason per row, drawn from what the table itself already says.
+2. **Highlight the relevant rows.** The matching rows are highlighted on the page with `agentlet.utils.PageHighlighter`, the table scrolls into view, and the same rows and reasons are listed in the panel.
+3. **Export to Excel.** Downloads the table plus two extra columns, "Relevant for &lt;profile&gt;" (yes or no) and "Why", via `agentlet.tables.extract()` and `agentlet.tables.download()`.
+
+The chosen profile is saved with `agentlet.storage.session` and preselected automatically if the demo panel reopens later in the same session (for example after a page reload). "Change profile" opens the same dialog again, and "Clear highlights" removes the highlights without forgetting the chosen profile. This demo is fully deterministic: no AI call is involved anywhere in it.
+
+Source: [`src/agentlets/compare-export.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/compare-export.ts).
+
+### Live white label
+
+Pick "Live white label" in the launcher on any page (except the docs section) to see the whole agentlet panel, header, accent colour, font, corner radius, and a small logo, rebrand itself between three fictitious companies. Fictitious Freight Co, Example Health Group, and Sample Bank are made up for this demo; they are not real businesses, and each has its own light and dark variant.
+
+The panel content itself is a React component, mounted through the [mount API](/docs/guides/mount-api/) (`mount()`/`unmount()`) rather than the default HTML-string rendering: React and ReactDOM are bundled into this one agentlet's script, not loaded as a page-level library, so no other demo grows because of it.
+
+- Picking a company applies its theme with `agentlet.setTheme()`, which the panel picks up by subscribing to the core's `theme:changed` event and re-rendering.
+- The chosen company is saved with `agentlet.storage.local` and reapplied automatically the next time you open this demo.
+- Switching the site's own light/dark toggle re-applies the matching variant of whichever company is active, coordinating with the loader that also reacts to that toggle (see the source comment on `_handleThemeChanged` for how the two avoid fighting over the panel's colours).
+- Leaving this demo (another module, the launcher, or closing the panel) restores the agentlet brand theme automatically; "Reset to agentlet brand" does the same without leaving.
+
+Source: [`src/agentlets/white-label.tsx`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/white-label.tsx).
+
+### Selector workshop
+
+Pick "Selector workshop" in the launcher on any page (except the docs section), then click "Pick an element" to click-select any element on the page with `agentlet.utils.ElementSelector`. Once picked, it shows:
+
+- A robust CSS selector for the element: an `#id` if it has a unique one, otherwise a stable attribute (`data-*`, `name`, or `aria-label`) qualified with the tag name, otherwise the shortest tag and class path with `:nth-of-type()` added only where needed to stay unique. This is a purpose-built selector builder (`src/agentlets/selector-builder.ts`), not `ElementInfo.cssSelector`: the core's own selector always walks up to 5 ancestors, even when a much shorter one would already be unique.
+- How many elements that selector matches, with `document.querySelectorAll()`, and every match highlighted on the page with `agentlet.utils.PageHighlighter`.
+- An editable text field for the selector: change it and the match count and highlights update live (debounced). An invalid selector shows a clear message instead of throwing.
+- If the picked element is a form field, or inside a form, the form's structure via `agentlet.forms.quickExport()`, with a "Copy as JSON" action.
+- Ready-to-use snippets, `document.querySelector(...)` and the equivalent `agentlet.utils.PageHighlighter.highlight()` call, both copyable.
+
+A "Clear highlights" action removes the overlays without losing the current selector.
+
+Source: [`src/agentlets/selector-workshop.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/selector-workshop.ts) and [`src/agentlets/selector-builder.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/selector-builder.ts).
+
+### Documentation companion
+
+Active on `/docs/` and below only: navigate there and it takes over from the launcher automatically, through the core's own URL pattern matching, no special-casing needed. Clicking "Try it" for it from the launcher on a non-docs page explains that and offers a link to the docs instead of activating it where it does not apply.
+
+Open its command palette with `Alt`+`Shift`+`D` or the panel's own button, then type one of:
+
+- **excel**: exports the tables of the current page to one `.xlsx` workbook, one sheet per table, using `window.agentlet.tables`.
+- **copy**: copies every code example on the page to the clipboard, separated and counted.
+- **next**: follows Starlight's pagination "Next" link.
+
+A second panel section tracks reading progress with `window.agentlet.storage`: which docs pages you visited during this demo session and how far into each you scrolled, against the total page count read from the sidebar, with a "Reset progress" action.
+
+Source: [`src/agentlets/docs-companion.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/docs-companion.ts).
+
+### Enterprise sign-in (simulated)
+
+Some demos read naturally as internal, IT-only tooling. Page audit is one: the launcher shows it locked, with a "Sign in to try" action instead of "Try it", until you sign in through a simulated company account.
+
+A "Sign in with your company account (simulated)" button, shown both on a locked card and once above the demo list, opens a popup pointing at this site's own fictitious identity provider (`/try/mock-idp/`, not indexed and not linked from anywhere else on the site). It clearly states it is fictitious and shows the one account it accepts: username `demo`, password `demo`. Signing in there hands off to `/try/mock-idp/callback/`, which posts a fake token back to the opener with `postMessage`, in the shape `window.agentlet.authManager` (agentlet-core's `AuthManager`) expects by default. No real company, no backend, and no network call ever leaves agentlet.io: the token is a base64-encoded JSON object generated entirely in the browser, carrying a `demo: true` flag alongside a fictitious name, email, and role.
+
+Pick "Enterprise sign-in (simulated)" itself in the launcher to see the same flow explained in its own panel, plus the current auth state and the fake token's decoded claims.
+
+`AuthManager` only ever keeps who is signed in in memory, cleared the moment its `AgentletCore` instance is torn down; since this site does a full page load on every navigation, this demo keeps its own copy of the signed-in state in `window.agentlet.storage.session` instead, which is what actually survives moving to another page. Signing out (from the launcher's banner or the panel's own button) clears that state and locks page audit again.
+
+Source: [`src/agentlets/enterprise-sign-in.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/enterprise-sign-in.ts), [`src/agentlets/auth-demo.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/auth-demo.ts).
 
 ### Page audit
 
@@ -40,21 +119,9 @@ It runs with a progress dialog, one step per check, via `agentlet.utils.Dialog.s
 
 This is a small demo audit, not a replacement for a real accessibility audit: it only runs the four checks above, only against the light DOM (it does not see into the agentlet panel's own shadow root), and does not check color contrast, keyboard navigation, or ARIA roles beyond what is listed here.
 
+Locked until you sign in: see "Enterprise sign-in (simulated)" above.
+
 Source: [`src/agentlets/page-audit.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/page-audit.ts).
-
-### Documentation companion
-
-Active on `/docs/` and below only: navigate there and it takes over from the launcher automatically, through the core's own URL pattern matching, no special-casing needed. Clicking "Try it" for it from the launcher on a non-docs page explains that and offers a link to the docs instead of activating it where it does not apply.
-
-Open its command palette with `Alt`+`Shift`+`D` or the panel's own button, then type one of:
-
-- **excel**: exports the tables of the current page to one `.xlsx` workbook, one sheet per table, using `window.agentlet.tables`.
-- **copy**: copies every code example on the page to the clipboard, separated and counted.
-- **next**: follows Starlight's pagination "Next" link.
-
-A second panel section tracks reading progress with `window.agentlet.storage`: which docs pages you visited during this demo session and how far into each you scrolled, against the total page count read from the sidebar, with a "Reset progress" action.
-
-Source: [`src/agentlets/docs-companion.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/docs-companion.ts).
 
 ## How it loads
 
@@ -64,7 +131,7 @@ Nothing related to the demo is downloaded until you click the button, not even t
 - `agentlet-core`, the framework itself, from `/cdn/v1/agentlet-core.min.js`.
 - The demo registry, from `/cdn/v1/agentlets-registry.js`.
 - The launcher's own script and the documentation companion's, both loaded eagerly as part of the registry (the companion needs to already be registered for the core's own URL detection to activate it on a direct visit to `/docs/`, not only from the launcher).
-- "Receipt to expense report" and "Page audit" are marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and load from `/cdn/v1/agentlets/<name>.js` only once you pick one in the launcher, via `moduleRegistry.loadModule()`.
+- Every other demo (receipt to expense report, summarize and share a section, compare and export, live white label, selector workshop, enterprise sign-in, and page audit) is marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and loads from `/cdn/v1/agentlets/<name>.js` only once you pick it in the launcher, via `moduleRegistry.loadModule()`.
 
 Because this site does a full page load on every navigation, a tiny inline script on every page (not a separate request) checks whether you left the panel open on a previous page and, if so, loads the demo loader to reopen it. That check itself downloads nothing on its own: it only loads the demo loader if the panel was open, and loads a lazy demo's script again first if that is the one being restored.
 
@@ -75,6 +142,8 @@ The home page's hero also has a draggable "agentlet demo" chip, next to the "Try
 - **No demo submits a form.** A demo may read a page's form, or fill one in locally so you can see the result, but it never submits it or sends data to a live backend.
 - **Recorded AI response.** Any demo that shows an AI-generated reply labels it "Recorded AI response". The demos on this site do not call a live AI provider: what you see is a fixed answer recorded in advance, not a model reasoning about the specific page or file you gave it.
 - **Closing the panel clears the state.** Closing the panel (its close button, not minimizing it) fully tears the demo down. Reopening it starts fresh.
+- **Back to all demos.** Every demo panel except the launcher itself shows a small "Back to all demos" action that returns to the launcher's list. On a docs page, where the launcher never runs, it is a note pointing at the rest of the site instead.
+- **No real identity data.** "Enterprise sign-in (simulated)" and its fictitious identity provider never handle a real credential or a real company: only the one fixed demo account, and a fake, locally generated token that never leaves agentlet.io.
 
 ## Source
 

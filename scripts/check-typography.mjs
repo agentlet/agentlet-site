@@ -40,6 +40,7 @@ const CHECKED_EXTENSIONS = new Set([
 	'.mjs',
 	'.svg',
 	'.ts',
+	'.tsx',
 	'.txt',
 	'.webmanifest',
 	'.xml',

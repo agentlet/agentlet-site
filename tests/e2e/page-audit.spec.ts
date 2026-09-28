@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import * as XLSX from 'xlsx';
-import { trackPageHealth } from './helpers';
+import { signInThroughPopup, trackPageHealth } from './helpers';
 
 /**
  * The page-audit demo agentlet (src/agentlets/page-audit.ts): a deterministic
@@ -13,6 +13,13 @@ import { trackPageHealth } from './helpers';
  * (image-alt, table-headers, input-label). Checks run in this order (see
  * the CHECKS array in page-audit.ts): images, headings, tables, forms - so
  * findings are produced in that same order.
+ *
+ * page-audit is one of the demos locked behind "Enterprise sign-in
+ * (simulated)" (src/agentlets/manifest.ts's `requiresSignIn`, src/agentlets/
+ * launcher.ts): every test below signs in through the popup first (see
+ * signInThroughPopup() in ./helpers) before it can click "Try it". The
+ * sign-in flow itself is covered separately, in
+ * tests/e2e/enterprise-sign-in.spec.ts.
  */
 
 test.describe('Page audit agentlet on the home page', () => {
@@ -22,6 +29,7 @@ test.describe('Page audit agentlet on the home page', () => {
 
 		await page.getByRole('button', { name: 'Try it on this page' }).click();
 		await expect(page.locator('#agentlet-container')).toBeVisible();
+		await signInThroughPopup(page, page.getByRole('button', { name: 'Sign in with your company account (simulated)' }));
 		await page.locator('[data-try="page-audit"]').click();
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Page audit');
 
@@ -81,6 +89,7 @@ test.describe('Page audit agentlet on the home page', () => {
 	test('closing the report highlights every finding, and Clear highlights removes them', async ({ page }) => {
 		await page.goto('/');
 		await page.getByRole('button', { name: 'Try it on this page' }).click();
+		await signInThroughPopup(page, page.getByRole('button', { name: 'Sign in with your company account (simulated)' }));
 		await page.locator('[data-try="page-audit"]').click();
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Page audit');
 
@@ -101,6 +110,7 @@ test.describe('Page audit agentlet on the home page', () => {
 	test('exports the report to Excel with one row per finding plus the header', async ({ page }) => {
 		await page.goto('/');
 		await page.getByRole('button', { name: 'Try it on this page' }).click();
+		await signInThroughPopup(page, page.getByRole('button', { name: 'Sign in with your company account (simulated)' }));
 		await page.locator('[data-try="page-audit"]').click();
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Page audit');
 
@@ -136,6 +146,7 @@ test.describe('Page audit agentlet on the bookmarklet page', () => {
 		// same way tests/e2e/bookmarklet.spec.ts opens the demo on this page.
 		await page.locator('#bookmarklet-link').click();
 		await expect(page.locator('#agentlet-container')).toBeVisible();
+		await signInThroughPopup(page, page.getByRole('button', { name: 'Sign in with your company account (simulated)' }));
 		await page.locator('[data-try="page-audit"]').click();
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Page audit');
 

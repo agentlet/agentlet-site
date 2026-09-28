@@ -1,5 +1,5 @@
 import { AGENTLET_MANIFEST } from './manifest';
-import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
+import { AGENTLET_BASE_STYLES, backToLauncherHtml, sourceLinkHtml, wireBackToLauncher } from './shared';
 
 const DOCS_COMPANION_FILE = 'docs-companion';
 const DOCS_COMPANION_TITLE =
@@ -252,6 +252,7 @@ class AgentletDocsCompanionModule extends window.agentlet.Module {
 					<button type="button" class="docs-companion-reset" data-action="reset">Reset progress</button>
 				</div>
 				${sourceLinkHtml(DOCS_COMPANION_FILE)}
+				${backToLauncherHtml()}
 			</div>
 		`;
 	}
@@ -294,6 +295,7 @@ class AgentletDocsCompanionModule extends window.agentlet.Module {
 		container.querySelector('[data-action="reset"]')?.addEventListener('click', () => {
 			this._resetProgress();
 		});
+		wireBackToLauncher(container);
 	}
 
 	// -- progress storage ---------------------------------------------------

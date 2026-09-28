@@ -1,0 +1,330 @@
+---
+import '@fontsource/ibm-plex-sans/latin-400.css';
+import '@fontsource/ibm-plex-sans/latin-600.css';
+
+// The sign-in half of the fictitious identity provider behind "Enterprise
+// sign-in (simulated)" (src/agentlets/enterprise-sign-in.ts, src/agentlets/
+// auth-demo.ts, src/agentlets/launcher.ts). Adapted from agentlet-core's own
+// mock-oidc-provider.html example, split into two pages the way a real OIDC
+// redirect flow works: this page authenticates, then hands off to
+// /try/mock-idp/callback/, which is the one that actually posts the result
+// back to the opener. Deliberately not wrapped in LandingLayout: it must
+// read as a distinct, separate service, not another page of this site, and
+// it has no reason to carry the site's header, footer, or "reopen the demo"
+// script.
+//
+// Plain Astro page, no backend: the "sign in" below only ever runs in the
+// browser, never sends the typed username or password anywhere (the form's
+// submit is intercepted in JS, see the inline script), and only ever
+// accepts the one fixed demo account shown on the page.
+//
+// Not indexed and not linked from any navigation: only reachable by knowing
+// the URL, or as the popup AuthManager opens (see auth-demo.ts's
+// configureDemoAuth()).
+const title = 'Sign in (simulated)';
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<title>{title}</title>
+	</head>
+	<body>
+		<main class="wrap">
+			<p class="fictitious-banner">
+				Fictitious identity provider for the agentlet.io demo. Do not enter real credentials.
+			</p>
+
+			<div class="card">
+				<h1>{title}</h1>
+				<p class="intro">This popup is standing in for a company's real sign-in page. Nothing typed here is sent anywhere.</p>
+
+				<p class="demo-credentials">Demo account: username <code>demo</code>, password <code>demo</code>.</p>
+
+				<form id="mock-idp-form" novalidate>
+					<div class="field">
+						<label for="mock-idp-username">Username</label>
+						<input type="text" id="mock-idp-username" name="username" autocomplete="off" required />
+					</div>
+					<div class="field">
+						<label for="mock-idp-password">Password</label>
+						<input type="password" id="mock-idp-password" name="password" autocomplete="off" required />
+					</div>
+
+					<p id="mock-idp-error" class="error" role="alert" hidden></p>
+
+					<button type="submit" id="mock-idp-submit" class="button-primary">Sign in</button>
+				</form>
+
+				<button type="button" id="mock-idp-cancel" class="cancel-link">Cancel and close</button>
+			</div>
+		</main>
+
+		<script is:inline>
+			(function () {
+				const form = document.getElementById('mock-idp-form');
+				const username = document.getElementById('mock-idp-username');
+				const password = document.getElementById('mock-idp-password');
+				const submit = document.getElementById('mock-idp-submit');
+				const error = document.getElementById('mock-idp-error');
+				const cancel = document.getElementById('mock-idp-cancel');
+
+				function showError(message) {
+					error.textContent = message;
+					error.hidden = false;
+				}
+
+				function sendCancel() {
+					if (!window.opener) return;
+					try {
+						window.opener.postMessage({ type: 'auth_cancel' }, window.location.origin);
+					} catch {
+						// Opener may already be gone; nothing more to do.
+					}
+				}
+
+				cancel.addEventListener('click', function () {
+					document.body.dataset.navigating = 'true';
+					sendCancel();
+					window.close();
+				});
+
+				// A visitor closing the popup with the browser's own close
+				// button (not the "Cancel" button above) still counts as a
+				// cancel. Skipped when this page itself is navigating away on
+				// success (see the submit handler below): that redirect also
+				// fires beforeunload, and it is not a cancellation.
+				window.addEventListener('beforeunload', function () {
+					if (document.body.dataset.navigating !== 'true') sendCancel();
+				});
+
+				form.addEventListener('submit', function (event) {
+					event.preventDefault();
+					error.hidden = true;
+
+					const enteredUsername = username.value.trim();
+					const enteredPassword = password.value;
+
+					if (enteredUsername !== 'demo' || enteredPassword !== 'demo') {
+						showError('Invalid username or password. Use demo / demo.');
+						return;
+					}
+
+					if (!window.opener) {
+						showError('This page expects to be opened as a popup from the sign-in flow.');
+						return;
+					}
+
+					submit.disabled = true;
+					submit.textContent = 'Signing in...';
+
+					const now = Math.floor(Date.now() / 1000);
+					const claims = {
+						demo: true,
+						sub: 'demo-user-001',
+						name: 'Demo user',
+						email: 'demo@example.com',
+						role: 'IT admin (simulated)',
+						iat: now,
+						exp: now + 3600,
+					};
+					const token = btoa(JSON.stringify(claims));
+
+					// Same-origin redirect, not a network call carrying the
+					// token anywhere: a URL fragment is never sent in the HTTP
+					// request for the page it points to, only read by that
+					// page's own script (see callback/index.astro).
+					document.body.dataset.navigating = 'true';
+					window.location.href = '/try/mock-idp/callback/#token=' + encodeURIComponent(token);
+				});
+			})();
+		</script>
+
+		<style>
+			:root {
+				color-scheme: light dark;
+				--mock-idp-bg: #f4f6f8;
+				--mock-idp-card-bg: #ffffff;
+				--mock-idp-border: #d9e0e6;
+				--mock-idp-heading: #0f3350;
+				--mock-idp-text: #3d4f5e;
+				--mock-idp-muted: #5b6b78;
+				--mock-idp-accent: #f4a261;
+				--mock-idp-error-bg: rgba(192, 57, 43, 0.08);
+				--mock-idp-error-text: #c0392b;
+				/* Kept separate from --mock-idp-heading: that one flips to a
+				   light color in dark mode (for heading text against a dark
+				   card), which would leave the button below reading as
+				   near-white text on a near-white background if it shared it. */
+				--mock-idp-button-bg: #0f3350;
+				--mock-idp-button-text: #ffffff;
+			}
+
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--mock-idp-bg: #0b1a26;
+					--mock-idp-card-bg: #16293a;
+					--mock-idp-border: #24394d;
+					--mock-idp-heading: #e6edf2;
+					--mock-idp-text: #e6edf2;
+					--mock-idp-muted: #a9bccb;
+					--mock-idp-button-bg: #f4a261;
+					--mock-idp-button-text: #0f3350;
+				}
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: var(--mock-idp-bg);
+				color: var(--mock-idp-text);
+				font-family:
+					'IBM Plex Sans',
+					system-ui,
+					-apple-system,
+					'Segoe UI',
+					Roboto,
+					Helvetica,
+					Arial,
+					sans-serif;
+			}
+
+			.wrap {
+				width: 100%;
+				max-width: 26rem;
+				padding: 1.5rem;
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+			}
+
+			.fictitious-banner {
+				margin: 0;
+				padding: 0.75rem 1rem;
+				border-radius: 8px;
+				background: var(--mock-idp-accent);
+				color: #0f3350;
+				font-weight: 600;
+				font-size: 0.85rem;
+				text-align: center;
+			}
+
+			.card {
+				background: var(--mock-idp-card-bg);
+				border: 1px solid var(--mock-idp-border);
+				border-radius: 12px;
+				padding: 1.5rem;
+				display: flex;
+				flex-direction: column;
+				gap: 0.9rem;
+			}
+
+			h1 {
+				margin: 0;
+				font-size: 1.3rem;
+				color: var(--mock-idp-heading);
+			}
+
+			.intro {
+				margin: 0;
+				color: var(--mock-idp-muted);
+				font-size: 0.9rem;
+			}
+
+			.demo-credentials {
+				margin: 0;
+				font-size: 0.85rem;
+				color: var(--mock-idp-muted);
+			}
+
+			.demo-credentials code {
+				font-family: 'IBM Plex Mono', ui-monospace, monospace;
+				background: var(--mock-idp-bg);
+				border: 1px solid var(--mock-idp-border);
+				border-radius: 4px;
+				padding: 0.05rem 0.35rem;
+			}
+
+			form {
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+			}
+
+			.field {
+				display: flex;
+				flex-direction: column;
+				gap: 0.3rem;
+			}
+
+			label {
+				font-size: 0.85rem;
+				font-weight: 600;
+				color: var(--mock-idp-heading);
+			}
+
+			input {
+				padding: 0.55rem 0.65rem;
+				border: 1.5px solid var(--mock-idp-border);
+				border-radius: 6px;
+				font: inherit;
+				background: var(--mock-idp-card-bg);
+				color: var(--mock-idp-text);
+			}
+
+			input:focus {
+				outline: 2px solid var(--mock-idp-accent);
+				outline-offset: 1px;
+			}
+
+			.error {
+				margin: 0;
+				padding: 0.6rem 0.75rem;
+				border-radius: 6px;
+				background: var(--mock-idp-error-bg);
+				color: var(--mock-idp-error-text);
+				font-size: 0.85rem;
+			}
+
+			.button-primary {
+				appearance: none;
+				border: none;
+				border-radius: 8px;
+				background: var(--mock-idp-button-bg);
+				color: var(--mock-idp-button-text);
+				font: inherit;
+				font-weight: 600;
+				padding: 0.65rem 1rem;
+				cursor: pointer;
+			}
+
+			.button-primary:disabled {
+				opacity: 0.7;
+				cursor: not-allowed;
+			}
+
+			.cancel-link {
+				appearance: none;
+				background: none;
+				border: none;
+				padding: 0;
+				font: inherit;
+				font-size: 0.85rem;
+				color: var(--mock-idp-muted);
+				text-decoration: underline;
+				cursor: pointer;
+				align-self: center;
+			}
+		</style>
+	</body>
+</html>
