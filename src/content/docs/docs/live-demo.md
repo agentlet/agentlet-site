@@ -54,6 +54,18 @@ Two of the home page's decorative background layers (the hero's animated story a
 
 Source: [`src/agentlets/section-summary.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/section-summary.ts).
 
+### Compare and export
+
+On the home page, the "Compared to robots" table compares a fully autonomous robot to the three agentlet deployment modes across ten aspects (installation, autonomy, security, and so on). Pick "Compare and export" in the launcher to read that table for a specific kind of reader:
+
+1. **Choose a reader profile.** A dialog offers three predefined profiles: "Finance team", "Cautious IT department", and "Product team". Each one is a fixed, in-code mapping of which rows matter to that reader and one honest reason per row, drawn from what the table itself already says.
+2. **Highlight the relevant rows.** The matching rows are highlighted on the page with `agentlet.utils.PageHighlighter`, the table scrolls into view, and the same rows and reasons are listed in the panel.
+3. **Export to Excel.** Downloads the table plus two extra columns, "Relevant for &lt;profile&gt;" (yes or no) and "Why", via `agentlet.tables.extract()` and `agentlet.tables.download()`.
+
+The chosen profile is saved with `agentlet.storage.session` and preselected automatically if the demo panel reopens later in the same session (for example after a page reload). "Change profile" opens the same dialog again, and "Clear highlights" removes the highlights without forgetting the chosen profile. This demo is fully deterministic: no AI call is involved anywhere in it.
+
+Source: [`src/agentlets/compare-export.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/compare-export.ts).
+
 ### Documentation companion
 
 Active on `/docs/` and below only: navigate there and it takes over from the launcher automatically, through the core's own URL pattern matching, no special-casing needed. Clicking "Try it" for it from the launcher on a non-docs page explains that and offers a link to the docs instead of activating it where it does not apply.

@@ -124,6 +124,17 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		lazy: true,
 	},
 
+	{
+		id: 'compare-export',
+		file: 'compare-export',
+		className: 'CompareExportModule',
+		title: 'Compare and export',
+		description: 'Highlights the comparison rows that matter to a reader profile and exports the table with that relevance marked.',
+		audience: 'business',
+		isDemo: true,
+		lazy: true,
+	},
+
 	// More demo agentlets are added here, one manifest entry per module.
 	// Nothing else in the build pipeline or the launcher needs to change
 	// for a new entry to appear and work.
