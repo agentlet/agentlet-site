@@ -180,6 +180,32 @@ export function requestShowLauncher(): void {
 	window.dispatchEvent(new CustomEvent(SHOW_LAUNCHER_EVENT));
 }
 
+const CLOSING_BUBBLE_ONCE_KEY = 'agentlet-demo:closing-bubble-shown';
+const DEMO_SECTION_URL = '/#demo';
+
+/**
+ * Shows the "This ran on agentlet.io..." closing nudge, but only once across
+ * the whole demo session, no matter which demo triggers it first. Page audit
+ * requires signing in first (manifest.ts's `requiresSignIn`), so its own
+ * closing bubble and "Enterprise sign-in (simulated)"'s are the two most
+ * likely to fire in the same session; both call this shared helper instead
+ * of building their own persistent (`duration: 0`) MessageBubble, so a
+ * visitor who does both in one visit sees the nudge once, not two
+ * identically worded bubbles stacked on top of each other.
+ */
+export function showDemoClosingBubbleOnce(): void {
+	const alreadyShown = window.agentlet?.storage.session.get(CLOSING_BUBBLE_ONCE_KEY);
+	if (alreadyShown) return;
+	window.agentlet?.storage.session.set(CLOSING_BUBBLE_ONCE_KEY, '1');
+	window.agentlet?.utils.MessageBubble.show({
+		type: 'info',
+		message: `This ran on agentlet.io. <a href="${DEMO_SECTION_URL}" style="color: inherit;">See it on a real business app</a>.`,
+		allowHtml: true,
+		duration: 0,
+		closable: true,
+	});
+}
+
 /**
  * The home page's demo sandbox (src/components/landing/TrySandbox.astro) is
  * a native `<details id="sandbox">`, collapsed by default and styled as its

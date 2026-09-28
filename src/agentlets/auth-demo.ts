@@ -1,4 +1,5 @@
 import type { AuthManagerConfig, AuthResult } from 'agentlet-core';
+import { showDemoClosingBubbleOnce } from './shared';
 
 /**
  * Shared helpers behind "Enterprise sign-in (simulated)" (src/agentlets/
@@ -35,8 +36,6 @@ import type { AuthManagerConfig, AuthResult } from 'agentlet-core';
 
 const MOCK_IDP_PATH = '/try/mock-idp/';
 const AUTH_USER_STORAGE_KEY = 'agentlet-demo:enterprise-auth-user';
-const CLOSING_BUBBLE_SHOWN_KEY = 'agentlet-demo:enterprise-auth-closing-shown';
-const DEMO_SECTION_URL = '/#demo';
 
 /**
  * Fired on `window` whenever the persisted sign-in state changes (sign-in
@@ -89,25 +88,18 @@ function extractUser(result: AuthResult): DemoAuthUser | null {
 }
 
 /**
- * Shown once per session, the first time sign-in succeeds (CLAUDE.md: "the
- * scenario ends with the MessageBubble ... after the first successful sign
- * in"). Delayed so it never stacks with the panel's own re-render at the
- * same instant, the same pattern expense-receipt.ts and page-audit.ts use
- * for their own closing bubble.
+ * The first time sign-in succeeds (CLAUDE.md: "the scenario ends with the
+ * MessageBubble ... after the first successful sign in"), delayed so it
+ * never stacks with the panel's own re-render at the same instant. Calls
+ * shared.ts's showDemoClosingBubbleOnce(), which also gates page-audit.ts's
+ * own closing bubble: page audit requires signing in first, so without a
+ * shared gate a visitor who signs in and then completes an audit in the
+ * same session would see two identically worded bubbles stacked at once
+ * (review round 1).
  */
 function showClosingBubbleOnce(): void {
-	const alreadyShown = window.agentlet?.storage.session.get(CLOSING_BUBBLE_SHOWN_KEY);
-	if (alreadyShown) return;
-	window.agentlet?.storage.session.set(CLOSING_BUBBLE_SHOWN_KEY, '1');
-
 	window.setTimeout(() => {
-		window.agentlet?.utils.MessageBubble.show({
-			type: 'info',
-			message: `This ran on agentlet.io. <a href="${DEMO_SECTION_URL}" style="color: inherit;">See it on a real business app</a>.`,
-			allowHtml: true,
-			duration: 0,
-			closable: true,
-		});
+		showDemoClosingBubbleOnce();
 	}, 2000);
 }
 
