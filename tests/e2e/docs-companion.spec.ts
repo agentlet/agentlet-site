@@ -45,6 +45,7 @@ test.describe('Documentation companion: activation and handover', () => {
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Live demo');
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 		expect(await health.cspViolations()).toEqual([]);
 	});
 });
@@ -89,6 +90,7 @@ test.describe('Documentation companion: command palette', () => {
 
 		await expect(page.getByText('Exported 1 table to docs-guides-mount-api-tables.xlsx.')).toBeVisible();
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 		expect(await health.cspViolations()).toEqual([]);
 	});
 
@@ -109,6 +111,7 @@ test.describe('Documentation companion: command palette', () => {
 		expect(clipboardText).toContain('// ----------');
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 		expect(await health.cspViolations()).toEqual([]);
 	});
 
@@ -122,6 +125,7 @@ test.describe('Documentation companion: command palette', () => {
 
 		await expect(page).toHaveURL(new RegExp(`${NEXT_DOCS_PAGE}$`));
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 	});
 });
 

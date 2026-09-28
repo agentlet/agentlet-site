@@ -55,6 +55,20 @@ export interface AgentletManifestEntry {
 	 * own list). True for demo agentlets, which the launcher lists.
 	 */
 	isDemo: boolean;
+	/**
+	 * True to have scripts/build-cdn.mjs mark this entry `lazy: true` in the
+	 * generated registry (see buildRegistry()), so agentlet-core's
+	 * ModuleRegistry.initialize() skips loading its bundle at startup.
+	 * src/agentlets/launcher.ts loads it on demand instead, the first time
+	 * its "Try it" button is clicked, via `moduleRegistry.loadModule()`.
+	 *
+	 * Leave unset (eager) for a demo the core itself must have already
+	 * registered before this site's own URL-based activation can pick it
+	 * up, without a visit to the launcher first: only the documentation
+	 * companion needs that today, since it activates by visiting /docs/
+	 * directly, not only via "Try it".
+	 */
+	lazy?: boolean;
 }
 
 export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
@@ -75,6 +89,7 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		description: 'Reads a sample receipt and fills an expense report form for you to review.',
 		audience: 'business',
 		isDemo: true,
+		lazy: true,
 	},
 
 	{
@@ -85,6 +100,7 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		description: 'Runs a deterministic accessibility and structure audit of the current page.',
 		audience: 'it-and-security',
 		isDemo: true,
+		lazy: true,
 	},
 
 	{
