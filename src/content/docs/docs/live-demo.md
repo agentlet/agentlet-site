@@ -13,6 +13,8 @@ Clicking "Try it on this page" opens a launcher panel listing the demo agentlets
 
 On the home page, right after the hero, a "Demo sandbox" section shows a fictitious receipt (a PDF, with a preview image) and a small expense report form. It is collapsed by default, kept visually separate from the rest of the page (its own border and background), and opens with a click or the keyboard, like any native disclosure widget. The form works by hand, with no agentlet: filling it in and pressing Submit shows an inline "Demo form. Nothing was sent." status instead of sending anything.
 
+The sections below are listed in the same order the launcher itself lists them: business demos first, then developers, then IT and security.
+
 ### Receipt to expense report
 
 Pick "Receipt to expense report" in the launcher to watch an agentlet do the same job the sandbox form above does by hand. Activating it opens the sandbox and scrolls it into view automatically, then:
@@ -24,25 +26,6 @@ Pick "Receipt to expense report" in the launcher to watch an agentlet do the sam
 Filling the form highlights the changed fields with `agentlet.utils.PageHighlighter`, and a "Start over" action clears both the form and the highlights. The agentlet never clicks Submit itself.
 
 Source: [`src/agentlets/expense-receipt.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/expense-receipt.ts).
-
-### Page audit
-
-Pick "Page audit" in the launcher on any page (except the docs section) to run a small, deterministic accessibility and structure audit of the page you are on. On the home page, activating it opens the demo sandbox above and scrolls it into view, the same way "Receipt to expense report" does: a closed sandbox would hide its own deliberate defects from the checks below, since a collapsed section is not visible to them. The panel's summary says so once an audit has run there.
-
-It checks for:
-
-- Images with no `alt` attribute, or an `alt` that looks like a leftover file name (for example ending in `.png`).
-- Heading hierarchy problems: more than one `<h1>`, a heading level skipped on the way down, or an empty heading.
-- Tables with no header cells (`<th>` or `role="columnheader"`), ignoring tables explicitly marked `role="presentation"`.
-- Form fields with no accessible label: no `<label for>`, no wrapping `<label>`, no `aria-label`, and no `aria-labelledby`. A placeholder alone does not count.
-
-It runs with a progress dialog, one step per check, via `agentlet.utils.Dialog.showProgressWithSteps()`, then shows the findings in a fullscreen dialog via `agentlet.utils.Dialog.show('fullscreen', ...)`. Each finding has a "Show on page" action that scrolls to and highlights the element with `agentlet.utils.PageHighlighter`; closing the report highlights every finding at once, with a "Clear highlights" action in the panel. "Export to Excel" downloads the full report (check, severity, element, detail, page URL) with `agentlet.tables.download()`.
-
-This is a small demo audit, not a replacement for a real accessibility audit: it only runs the four checks above, only against the light DOM (it does not see into the agentlet panel's own shadow root), and does not check color contrast, keyboard navigation, or ARIA roles beyond what is listed here.
-
-Locked until you sign in: see "Enterprise sign-in (simulated)" below.
-
-Source: [`src/agentlets/page-audit.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/page-audit.ts).
 
 ### Summarize and share a section
 
@@ -68,6 +51,19 @@ The chosen profile is saved with `agentlet.storage.session` and preselected auto
 
 Source: [`src/agentlets/compare-export.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/compare-export.ts).
 
+### Live white label
+
+Pick "Live white label" in the launcher on any page (except the docs section) to see the whole agentlet panel, header, accent colour, font, corner radius, and a small logo, rebrand itself between three fictitious companies. Fictitious Freight Co, Example Health Group, and Sample Bank are made up for this demo; they are not real businesses, and each has its own light and dark variant.
+
+The panel content itself is a React component, mounted through the [mount API](/docs/guides/mount-api/) (`mount()`/`unmount()`) rather than the default HTML-string rendering: React and ReactDOM are bundled into this one agentlet's script, not loaded as a page-level library, so no other demo grows because of it.
+
+- Picking a company applies its theme with `agentlet.setTheme()`, which the panel picks up by subscribing to the core's `theme:changed` event and re-rendering.
+- The chosen company is saved with `agentlet.storage.local` and reapplied automatically the next time you open this demo.
+- Switching the site's own light/dark toggle re-applies the matching variant of whichever company is active, coordinating with the loader that also reacts to that toggle (see the source comment on `_handleThemeChanged` for how the two avoid fighting over the panel's colours).
+- Leaving this demo (another module, the launcher, or closing the panel) restores the agentlet brand theme automatically; "Reset to agentlet brand" does the same without leaving.
+
+Source: [`src/agentlets/white-label.tsx`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/white-label.tsx).
+
 ### Selector workshop
 
 Pick "Selector workshop" in the launcher on any page (except the docs section), then click "Pick an element" to click-select any element on the page with `agentlet.utils.ElementSelector`. Once picked, it shows:
@@ -81,18 +77,6 @@ Pick "Selector workshop" in the launcher on any page (except the docs section), 
 A "Clear highlights" action removes the overlays without losing the current selector.
 
 Source: [`src/agentlets/selector-workshop.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/selector-workshop.ts) and [`src/agentlets/selector-builder.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/selector-builder.ts).
-
-### Enterprise sign-in (simulated)
-
-Some demos read naturally as internal, IT-only tooling. Page audit is one: the launcher shows it locked, with a "Sign in to try" action instead of "Try it", until you sign in through a simulated company account.
-
-A "Sign in with your company account (simulated)" button, shown both on a locked card and once above the demo list, opens a popup pointing at this site's own fictitious identity provider (`/try/mock-idp/`, not indexed and not linked from anywhere else on the site). It clearly states it is fictitious and shows the one account it accepts: username `demo`, password `demo`. Signing in there hands off to `/try/mock-idp/callback/`, which posts a fake token back to the opener with `postMessage`, in the shape `window.agentlet.authManager` (agentlet-core's `AuthManager`) expects by default. No real company, no backend, and no network call ever leaves agentlet.io: the token is a base64-encoded JSON object generated entirely in the browser, carrying a `demo: true` flag alongside a fictitious name, email, and role.
-
-Pick "Enterprise sign-in (simulated)" itself in the launcher to see the same flow explained in its own panel, plus the current auth state and the fake token's decoded claims.
-
-`AuthManager` only ever keeps who is signed in in memory, cleared the moment its `AgentletCore` instance is torn down; since this site does a full page load on every navigation, this demo keeps its own copy of the signed-in state in `window.agentlet.storage.session` instead, which is what actually survives moving to another page. Signing out (from the launcher's banner or the panel's own button) clears that state and locks page audit again.
-
-Source: [`src/agentlets/enterprise-sign-in.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/enterprise-sign-in.ts), [`src/agentlets/auth-demo.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/auth-demo.ts).
 
 ### Documentation companion
 
@@ -108,18 +92,36 @@ A second panel section tracks reading progress with `window.agentlet.storage`: w
 
 Source: [`src/agentlets/docs-companion.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/docs-companion.ts).
 
-### Live white label
+### Enterprise sign-in (simulated)
 
-Pick "Live white label" in the launcher on any page (except the docs section) to see the whole agentlet panel, header, accent colour, font, corner radius, and a small logo, rebrand itself between three fictitious companies. Fictitious Freight Co, Example Health Group, and Sample Bank are made up for this demo; they are not real businesses, and each has its own light and dark variant.
+Some demos read naturally as internal, IT-only tooling. Page audit is one: the launcher shows it locked, with a "Sign in to try" action instead of "Try it", until you sign in through a simulated company account.
 
-The panel content itself is a React component, mounted through the [mount API](/docs/guides/mount-api/) (`mount()`/`unmount()`) rather than the default HTML-string rendering: React and ReactDOM are bundled into this one agentlet's script, not loaded as a page-level library, so no other demo grows because of it.
+A "Sign in with your company account (simulated)" button, shown both on a locked card and once above the demo list, opens a popup pointing at this site's own fictitious identity provider (`/try/mock-idp/`, not indexed and not linked from anywhere else on the site). It clearly states it is fictitious and shows the one account it accepts: username `demo`, password `demo`. Signing in there hands off to `/try/mock-idp/callback/`, which posts a fake token back to the opener with `postMessage`, in the shape `window.agentlet.authManager` (agentlet-core's `AuthManager`) expects by default. No real company, no backend, and no network call ever leaves agentlet.io: the token is a base64-encoded JSON object generated entirely in the browser, carrying a `demo: true` flag alongside a fictitious name, email, and role.
 
-- Picking a company applies its theme with `agentlet.setTheme()`, which the panel picks up by subscribing to the core's `theme:changed` event and re-rendering.
-- The chosen company is saved with `agentlet.storage.local` and reapplied automatically the next time you open this demo.
-- Switching the site's own light/dark toggle re-applies the matching variant of whichever company is active, coordinating with the loader that also reacts to that toggle (see the source comment on `_handleThemeChanged` for how the two avoid fighting over the panel's colours).
-- Leaving this demo (another module, the launcher, or closing the panel) restores the agentlet brand theme automatically; "Reset to agentlet brand" does the same without leaving.
+Pick "Enterprise sign-in (simulated)" itself in the launcher to see the same flow explained in its own panel, plus the current auth state and the fake token's decoded claims.
 
-Source: [`src/agentlets/white-label.tsx`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/white-label.tsx).
+`AuthManager` only ever keeps who is signed in in memory, cleared the moment its `AgentletCore` instance is torn down; since this site does a full page load on every navigation, this demo keeps its own copy of the signed-in state in `window.agentlet.storage.session` instead, which is what actually survives moving to another page. Signing out (from the launcher's banner or the panel's own button) clears that state and locks page audit again.
+
+Source: [`src/agentlets/enterprise-sign-in.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/enterprise-sign-in.ts), [`src/agentlets/auth-demo.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/auth-demo.ts).
+
+### Page audit
+
+Pick "Page audit" in the launcher on any page (except the docs section) to run a small, deterministic accessibility and structure audit of the page you are on. On the home page, activating it opens the demo sandbox above and scrolls it into view, the same way "Receipt to expense report" does: a closed sandbox would hide its own deliberate defects from the checks below, since a collapsed section is not visible to them. The panel's summary says so once an audit has run there.
+
+It checks for:
+
+- Images with no `alt` attribute, or an `alt` that looks like a leftover file name (for example ending in `.png`).
+- Heading hierarchy problems: more than one `<h1>`, a heading level skipped on the way down, or an empty heading.
+- Tables with no header cells (`<th>` or `role="columnheader"`), ignoring tables explicitly marked `role="presentation"`.
+- Form fields with no accessible label: no `<label for>`, no wrapping `<label>`, no `aria-label`, and no `aria-labelledby`. A placeholder alone does not count.
+
+It runs with a progress dialog, one step per check, via `agentlet.utils.Dialog.showProgressWithSteps()`, then shows the findings in a fullscreen dialog via `agentlet.utils.Dialog.show('fullscreen', ...)`. Each finding has a "Show on page" action that scrolls to and highlights the element with `agentlet.utils.PageHighlighter`; closing the report highlights every finding at once, with a "Clear highlights" action in the panel. "Export to Excel" downloads the full report (check, severity, element, detail, page URL) with `agentlet.tables.download()`.
+
+This is a small demo audit, not a replacement for a real accessibility audit: it only runs the four checks above, only against the light DOM (it does not see into the agentlet panel's own shadow root), and does not check color contrast, keyboard navigation, or ARIA roles beyond what is listed here.
+
+Locked until you sign in: see "Enterprise sign-in (simulated)" above.
+
+Source: [`src/agentlets/page-audit.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/page-audit.ts).
 
 ## How it loads
 
@@ -129,7 +131,7 @@ Nothing related to the demo is downloaded until you click the button, not even t
 - `agentlet-core`, the framework itself, from `/cdn/v1/agentlet-core.min.js`.
 - The demo registry, from `/cdn/v1/agentlets-registry.js`.
 - The launcher's own script and the documentation companion's, both loaded eagerly as part of the registry (the companion needs to already be registered for the core's own URL detection to activate it on a direct visit to `/docs/`, not only from the launcher).
-- Every other demo (receipt to expense report, page audit, summarize and share a section, compare and export, selector workshop, live white label, and enterprise sign-in) is marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and loads from `/cdn/v1/agentlets/<name>.js` only once you pick it in the launcher, via `moduleRegistry.loadModule()`.
+- Every other demo (receipt to expense report, summarize and share a section, compare and export, live white label, selector workshop, enterprise sign-in, and page audit) is marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and loads from `/cdn/v1/agentlets/<name>.js` only once you pick it in the launcher, via `moduleRegistry.loadModule()`.
 
 Because this site does a full page load on every navigation, a tiny inline script on every page (not a separate request) checks whether you left the panel open on a previous page and, if so, loads the demo loader to reopen it. That check itself downloads nothing on its own: it only loads the demo loader if the panel was open, and loads a lazy demo's script again first if that is the one being restored.
 
