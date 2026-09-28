@@ -1,5 +1,5 @@
 import type { PageHighlighterHighlightControl, TableData } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, resumeUrlMonitoring, sourceLinkHtml, suspendUrlMonitoring } from './shared';
+import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
 
 /**
  * "Page audit": a deterministic accessibility and structure audit of the
@@ -392,14 +392,8 @@ class PageAuditModule extends window.agentlet.Module {
 		this._container = null;
 	}
 
-	/** See shared.ts's ModuleRegistryUrlMonitoring comment: suspends the core's URL-change polling for as long as this agentlet stays active. */
-	async activateModule(): Promise<void> {
-		suspendUrlMonitoring();
-	}
-
 	async cleanupModule(): Promise<void> {
 		this._clearHighlights();
-		resumeUrlMonitoring();
 	}
 
 	private _clearHighlights(): void {

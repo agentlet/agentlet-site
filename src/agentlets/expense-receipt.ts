@@ -1,5 +1,5 @@
-import type { AIFormExport, FormFillValue, PageHighlighterHighlightControl, PDFProcessorAPI } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, resumeUrlMonitoring, sourceLinkHtml, suspendUrlMonitoring } from './shared';
+import type { AIFormExport, FormFillValue, PageHighlighterHighlightControl } from 'agentlet-core';
+import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
 
 /**
  * "Receipt to expense report": reads the site's own sample receipt, shows
@@ -22,13 +22,6 @@ const FILE = 'expense-receipt';
 const RECEIPT_PDF_URL = '/demo/receipt.pdf';
 const FORM_SELECTOR = '#expense-form';
 const DEMO_SECTION_URL = '/#demo';
-
-/**
- * Must match src/scripts/demo-loader.ts's own `PDF_WORKER_URL` (not
- * exported from there, so duplicated here; see the comment on
- * `_ensurePdfWorker()` below for why this module also needs it directly).
- */
-const PDF_WORKER_URL = '/cdn/v1/pdf.worker.min.mjs';
 
 /**
  * Recorded response for the one receipt this agentlet supports (public/demo/
@@ -237,14 +230,8 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 		this._container = null;
 	}
 
-	/** See shared.ts's ModuleRegistryUrlMonitoring comment: suspends the core's URL-change polling for as long as this agentlet stays active. */
-	async activateModule(): Promise<void> {
-		suspendUrlMonitoring();
-	}
-
 	async cleanupModule(): Promise<void> {
 		this._clearHighlights();
-		resumeUrlMonitoring();
 	}
 
 	private _formElement(): HTMLFormElement | null {
@@ -423,38 +410,17 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 	}
 
 	/**
-	 * Second core bug worked around here: `LibrarySetup.setupPDFJS()`
-	 * (agentlet-core src/libraries/LibrarySetup.ts) only configures
-	 * `pdfjsLib.GlobalWorkerOptions.workerSrc` from `config.pdfWorkerUrl`
-	 * inside a guard, `if (typeof globals.pdfjsLib === 'undefined')`. In
-	 * this build, `window.pdfjsLib` is already defined by the time that
-	 * runs (`window.agentlet.config.pdfWorkerUrl` correctly holds
-	 * `/cdn/v1/pdf.worker.min.mjs` the whole time, confirmed at runtime),
-	 * so the guard is false and the worker URL is never applied: the very
-	 * first PDF conversion fails with pdf.js's own `No
-	 * "GlobalWorkerOptions.workerSrc" specified.` error. PDFProcessor's own
-	 * catch block then "helpfully" retries once against a hardcoded
-	 * `cdnjs.cloudflare.com` worker URL, which this site's CSP (`script-src
-	 * 'self' ...`, no `cdnjs.cloudflare.com`) blocks outright, so even the
-	 * automatic fallback cannot succeed here. Worked around by calling the
-	 * real, public `window.agentlet.configurePDFWorker()` (part of the
-	 * shipped `AgentletAPI`) ourselves, once pdf.js is confirmed loaded, so
-	 * the worker URL is set correctly before the first conversion ever
-	 * runs. See the build report for the exact repro to file against
-	 * agentlet-core.
+	 * Step 1: fetch the sample receipt (same origin) and convert it to a
+	 * thumbnail image. `pdfWorkerUrl` is set on the core config (see
+	 * src/scripts/demo-loader.ts) and always applied by agentlet-core, so no
+	 * extra setup is needed here beyond confirming pdf.js itself loaded.
 	 */
-	private async _ensurePdfWorker(processor: PDFProcessorAPI): Promise<void> {
-		const available = await processor.ensurePDFJS();
-		if (!available) throw new Error('PDF.js could not be loaded in this browser.');
-		window.agentlet?.configurePDFWorker(PDF_WORKER_URL);
-	}
-
-	/** Step 1: fetch the sample receipt (same origin) and convert it to a thumbnail image. */
 	private async _handleRead(): Promise<void> {
 		const processor = window.agentlet?.utils.PDFProcessor;
 		if (!processor) throw new Error('The PDF processor is not available in this browser.');
 
-		await this._ensurePdfWorker(processor);
+		const available = await processor.ensurePDFJS();
+		if (!available) throw new Error('PDF.js could not be loaded in this browser.');
 
 		const images = await processor.convertPDFFromURL(RECEIPT_PDF_URL, { scale: 1.5 });
 		if (images.length === 0) throw new Error('The sample receipt could not be converted to an image.');

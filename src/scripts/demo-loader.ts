@@ -59,19 +59,11 @@ const LIGHT_THEME: Partial<AgentletTheme> = {
 	borderColor: '#d9e0e6',
 	headerBackground: '#0f3350',
 	headerTextColor: '#ffffff',
-	// agentlet-core's ThemeManager default theme (agentlet-core
-	// src/core/ThemeManager.ts) always sets dialogHeaderTextColor
-	// ('#333333') and dialogHeaderBackground ('#ffffff'), and every dialog
-	// type (info/wait/command/fullscreen, see
-	// src/utils/ui/dialog/*.ts) reads theme.dialogHeaderTextColor before
-	// ever falling back to headerTextColor, so leaving these two unset
-	// here does not fall back to the brand colours above: it always wins
-	// with the framework's own default, unreadable dark gray text on this
-	// theme's navy header. Set explicitly to match headerBackground/
-	// headerTextColor so every dialog's header reads the same as the
-	// panel's own header.
-	dialogHeaderBackground: '#0f3350',
-	dialogHeaderTextColor: '#ffffff',
+	// No dialogHeaderBackground/dialogHeaderTextColor here: agentlet-core's
+	// ThemeManager.processThemeConfig() now inherits both from
+	// headerBackground/headerTextColor whenever the dialog-specific keys are
+	// left unset, so every dialog's header already reads the same as the
+	// panel's own header without repeating the two colours above.
 	actionButtonBackground: '#f4a261',
 	actionButtonBorder: '#f4a261',
 	actionButtonHover: '#f7b47c',
@@ -89,12 +81,9 @@ const DARK_THEME: Partial<AgentletTheme> = {
 	borderColor: '#24394d',
 	headerBackground: '#f4a261',
 	headerTextColor: '#0f3350',
-	// See the comment on LIGHT_THEME's own dialogHeaderBackground/
-	// dialogHeaderTextColor above: without these, every dialog header
-	// falls back to the framework's default dark gray text on white,
-	// not this theme's orange/navy header.
-	dialogHeaderBackground: '#f4a261',
-	dialogHeaderTextColor: '#0f3350',
+	// See the comment on LIGHT_THEME's own headerBackground/headerTextColor
+	// above: the dialog-specific colours are inherited from these, no need
+	// to repeat them here either.
 	actionButtonBackground: '#f4a261',
 	actionButtonBorder: '#f4a261',
 	actionButtonHover: '#f7b47c',

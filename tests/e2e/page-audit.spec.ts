@@ -25,10 +25,12 @@ test.describe('Page audit agentlet on the home page', () => {
 		await page.locator('[data-try="page-audit"]').click();
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Page audit');
 
-		// Regression check for the core's URL-monitoring bug worked around in
-		// src/agentlets/shared.ts (suspendUrlMonitoring()/resumeUrlMonitoring()):
-		// without it, ModuleRegistry's 1s poll re-activates the launcher about a
-		// second after this agentlet is activated by hand.
+		// Regression check for agentlet-core's own URL-change fix
+		// (ModuleRegistry.checkUrlChange() in agentlet-core): the active
+		// module now stays active across the 1s poll as long as its own
+		// pattern still matches, instead of the poll re-deriving the match
+		// from scratch and re-activating the launcher a second after this
+		// agentlet was activated by hand.
 		await page.waitForTimeout(2_500);
 		await expect(page.locator('#agentlet-app-name')).toHaveText('Page audit');
 
