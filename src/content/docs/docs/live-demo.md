@@ -68,6 +68,8 @@ Nothing related to the demo is downloaded until you click the button, not even t
 
 Because this site does a full page load on every navigation, a tiny inline script on every page (not a separate request) checks whether you left the panel open on a previous page and, if so, loads the demo loader to reopen it. That check itself downloads nothing on its own: it only loads the demo loader if the panel was open, and loads a lazy demo's script again first if that is the one being restored.
 
+The home page's hero also has a draggable "agentlet demo" chip, next to the "Try it on this page" button, that does the same thing as [the bookmarklet page](/try/bookmarklet/): drag it to your bookmarks bar, or click it directly, to load the demo loader on whichever agentlet.io page you are currently on. Both build their `javascript:` code from the same source (`src/scripts/bookmarklet.ts`), so they stay in sync.
+
 ## Rules the demos follow
 
 - **No demo submits a form.** A demo may read a page's form, or fill one in locally so you can see the result, but it never submits it or sends data to a live backend.

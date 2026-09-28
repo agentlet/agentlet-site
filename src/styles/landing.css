@@ -456,7 +456,7 @@ section.alt {
 
 /* Hero demo button: the only thing on the home page that can start
    downloading agentlet-core, and only on click (see Hero.astro's script).
-   Both it and the bookmarklet link are hidden below 768px in favour of a
+   Both it and the bookmarklet chip are hidden below 768px in favour of a
    plain text hint: the demo (a side panel over the page) needs width a
    small screen does not have, and a bookmarklet is not draggable to a
    bookmarks bar on a phone either. */
@@ -475,13 +475,55 @@ section.alt {
 	font-size: 0.85rem;
 }
 
-.hero-bookmarklet-link {
-	font-size: 0.9rem;
+.hero-bookmarklet {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+.hero-bookmarklet-chip {
+	display: inline-flex;
+	align-self: flex-start;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.5rem 0.9rem;
+	border-radius: 999px;
+	border: 1px dashed var(--color-accent);
+	background: var(--color-bg);
+	color: var(--color-heading);
+	font-size: 0.85rem;
+	font-weight: 600;
+	text-decoration: none;
+	cursor: grab;
+}
+
+.hero-bookmarklet-chip:hover {
+	border-style: solid;
+	background: var(--color-badge-bg);
+}
+
+.hero-bookmarklet-chip:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+
+.hero-bookmarklet-chip:active {
+	cursor: grabbing;
+}
+
+.hero-bookmarklet-hint {
+	margin: 0;
+	font-size: 0.78rem;
+	color: var(--color-text-muted);
+}
+
+.hero-bookmarklet-hint .text-link {
+	font-size: inherit;
 }
 
 @media (max-width: 767px) {
 	.hero-demo-button,
-	.hero-bookmarklet-link {
+	.hero-bookmarklet {
 		display: none;
 	}
 

@@ -2,15 +2,10 @@
 import LandingLayout from '../../layouts/LandingLayout.astro';
 import Header from '../../components/landing/Header.astro';
 import Footer from '../../components/landing/Footer.astro';
-import { LOADER_URL } from '../../scripts/agentlet-inline-snippets.mjs';
+import { BOOKMARKLET_FALLBACK_ORIGIN, buildBookmarkletHref } from '../../scripts/bookmarklet';
 
 const title = 'Try the agentlet bookmarklet';
 const description = 'A bookmarklet that loads the agentlet live demo on agentlet.io from any of its pages.';
-
-// Static fallback for when JavaScript does not run: the production origin.
-// The inline script below rewrites this to location.origin once it runs, so
-// the link also works from a local dev server or a preview deployment.
-const fallbackOrigin = 'https://agentlet.io';
 ---
 
 <LandingLayout title={title} description={description}>
@@ -20,15 +15,16 @@ const fallbackOrigin = 'https://agentlet.io';
 			<div class="wrap bookmarklet-page">
 				<h1>Try the agentlet bookmarklet</h1>
 				<p>
-					Drag the button below to your bookmarks bar. Clicking it loads the same live demo as the{' '}
-					<a href="/">home page</a>'s "Try it on this page" button, on whichever agentlet.io page you are
-					currently viewing.
+					Drag the button below to your bookmarks bar, or grab the "agentlet demo" chip next to the
+					button in the <a href="/">home page</a>'s hero. Clicking either loads the same live demo as
+					that page's "Try it on this page" button, on whichever agentlet.io page you are currently
+					viewing.
 				</p>
 				<p>
 					<a
 						class="button button-primary bookmarklet-link"
 						id="bookmarklet-link"
-						href={`javascript:(function(){var s=document.createElement('script');s.type='module';s.src='${fallbackOrigin}${LOADER_URL}';s.onload=function(){window.__openAgentletDemo&&window.__openAgentletDemo()};document.head.appendChild(s)})()`}
+						href={buildBookmarkletHref(BOOKMARKLET_FALLBACK_ORIGIN)}
 					>
 						Agentlet demo
 					</a>
@@ -92,11 +88,12 @@ const fallbackOrigin = 'https://agentlet.io';
 	}
 </style>
 
-<script define:vars={{ fallbackOrigin, LOADER_URL }}>
+<script>
+	import { BOOKMARKLET_FALLBACK_ORIGIN, buildBookmarkletHref } from '../../scripts/bookmarklet';
+
 	const link = document.getElementById('bookmarklet-link');
 	if (link) {
-		const origin = window.location.origin || fallbackOrigin;
-		const code = `(function(){var s=document.createElement('script');s.type='module';s.src='${origin}${LOADER_URL}';s.onload=function(){window.__openAgentletDemo&&window.__openAgentletDemo()};document.head.appendChild(s)})()`;
-		link.setAttribute('href', `javascript:${code}`);
+		const origin = window.location.origin || BOOKMARKLET_FALLBACK_ORIGIN;
+		link.setAttribute('href', buildBookmarkletHref(origin));
 	}
 </script>

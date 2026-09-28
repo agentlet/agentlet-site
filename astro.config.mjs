@@ -44,7 +44,12 @@ export default defineConfig({
         // src/layouts/LandingLayout.astro.
         { tag: 'script', content: AGENTLET_REOPEN_SCRIPT },
       ],
-      plugins: [starlightLinksValidator()],
+      plugins: [
+        // /try/bookmarklet/ is a plain Astro page, not part of the docs
+        // content collection, so this plugin cannot resolve it as a slug;
+        // excluded rather than dropping the link from docs/live-demo.md.
+        starlightLinksValidator({ exclude: ['/try/bookmarklet/'] }),
+      ],
       sidebar: [
         { label: 'Introduction', slug: 'docs' },
         { label: 'Live demo', slug: 'docs/live-demo' },

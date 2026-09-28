@@ -42,13 +42,45 @@ test.describe('Hero live demo button', () => {
 		expect(await health.cspViolations()).toEqual([]);
 	});
 
-	test('the mobile hint replaces the button and the bookmarklet link below 768px wide', async ({ page }) => {
+	test('the mobile hint replaces the button and the bookmarklet chip below 768px wide', async ({ page }) => {
 		await page.setViewportSize({ width: 500, height: 800 });
 		await page.goto('/');
 
 		await expect(page.getByRole('button', { name: 'Try it on this page' })).toBeHidden();
-		await expect(page.getByRole('link', { name: 'Or try it on any page' })).toBeHidden();
+		await expect(page.getByRole('link', { name: 'agentlet demo bookmarklet' })).toBeHidden();
 		await expect(page.getByText('Best on desktop')).toBeVisible();
+	});
+});
+
+test.describe('Hero bookmarklet chip', () => {
+	test('has a javascript: href built from the page origin', async ({ page, baseURL }) => {
+		await page.goto('/');
+		const chip = page.getByRole('link', { name: 'agentlet demo bookmarklet, drag to your bookmarks bar' });
+		const href = await chip.getAttribute('href');
+		expect(href).toBeTruthy();
+		expect(href).toMatch(/^javascript:/);
+		expect(href).toContain(new URL(baseURL ?? 'http://localhost').origin);
+	});
+
+	test('clicking it opens the demo with no CSP violation (Chromium only, real click through CSP)', async ({
+		page,
+	}) => {
+		// See tests/e2e/bookmarklet.spec.ts for why this must be a real,
+		// trusted click rather than page.evaluate().
+		const health = await trackPageHealth(page);
+		await page.goto('/');
+
+		await page.getByRole('link', { name: 'agentlet demo bookmarklet, drag to your bookmarks bar' }).click();
+		await expect(page.locator('#agentlet-container')).toBeVisible();
+
+		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
+		expect(await health.cspViolations()).toEqual([]);
+	});
+
+	test('has a "How it works" link to the bookmarklet page', async ({ page }) => {
+		await page.goto('/');
+		await expect(page.getByRole('link', { name: 'How it works' })).toHaveAttribute('href', '/try/bookmarklet/');
 	});
 });
 
