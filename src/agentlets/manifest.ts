@@ -69,6 +69,17 @@ export interface AgentletManifestEntry {
 	 * directly, not only via "Try it".
 	 */
 	lazy?: boolean;
+	/**
+	 * True for a demo that stays locked in the launcher until the visitor
+	 * signs in through the simulated company sign-in flow (src/agentlets/
+	 * auth-demo.ts, src/agentlets/launcher.ts). The launcher shows it with a
+	 * lock and a "Sign in to try" action instead of "Try it" while
+	 * auth-demo.ts's getDemoAuthUser() returns no signed-in user, and as a
+	 * normal entry once it does. Left unset (false) for every other demo;
+	 * the module itself needs no change, the gate lives entirely in the
+	 * launcher.
+	 */
+	requiresSignIn?: boolean;
 }
 
 export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
@@ -101,6 +112,10 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		audience: 'it-and-security',
 		isDemo: true,
 		lazy: true,
+		// Reads naturally as an internal IT tool: locked until the visitor
+		// signs in through "Enterprise sign-in (simulated)" below. See
+		// src/agentlets/launcher.ts and src/agentlets/auth-demo.ts.
+		requiresSignIn: true,
 	},
 
 	{
@@ -153,6 +168,17 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		title: 'Live white label',
 		description: 'Switches the whole agentlet panel between fictitious company brand themes.',
 		audience: 'business',
+		isDemo: true,
+		lazy: true,
+	},
+
+	{
+		id: 'enterprise-sign-in',
+		file: 'enterprise-sign-in',
+		className: 'EnterpriseSignInModule',
+		title: 'Enterprise sign-in (simulated)',
+		description: 'Simulates a company sign-in through a popup identity provider, then unlocks the demos that need it.',
+		audience: 'it-and-security',
 		isDemo: true,
 		lazy: true,
 	},
