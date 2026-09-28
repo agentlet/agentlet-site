@@ -94,6 +94,19 @@ A second panel section tracks reading progress with `window.agentlet.storage`: w
 
 Source: [`src/agentlets/docs-companion.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/docs-companion.ts).
 
+### Live white label
+
+Pick "Live white label" in the launcher on any page (except the docs section) to see the whole agentlet panel, header, accent colour, font, corner radius, and a small logo, rebrand itself between three fictitious companies. Fictitious Freight Co, Example Health Group, and Sample Bank are made up for this demo; they are not real businesses, and each has its own light and dark variant.
+
+The panel content itself is a React component, mounted through the [mount API](/docs/guides/mount-api/) (`mount()`/`unmount()`) rather than the default HTML-string rendering: React and ReactDOM are bundled into this one agentlet's script, not loaded as a page-level library, so no other demo grows because of it.
+
+- Picking a company applies its theme with `agentlet.setTheme()`, which the panel picks up by subscribing to the core's `theme:changed` event and re-rendering.
+- The chosen company is saved with `agentlet.storage.local` and reapplied automatically the next time you open this demo.
+- Switching the site's own light/dark toggle re-applies the matching variant of whichever company is active, coordinating with the loader that also reacts to that toggle (see the source comment on `_handleThemeChanged` for how the two avoid fighting over the panel's colours).
+- Leaving this demo (another module, the launcher, or closing the panel) restores the agentlet brand theme automatically; "Reset to agentlet brand" does the same without leaving.
+
+Source: [`src/agentlets/white-label.tsx`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/white-label.tsx).
+
 ## How it loads
 
 Nothing related to the demo is downloaded until you click the button, not even the loader that drives the rest of the process. On click, the page loads:

@@ -146,6 +146,17 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		lazy: true,
 	},
 
+	{
+		id: 'white-label',
+		file: 'white-label',
+		className: 'WhiteLabelModule',
+		title: 'Live white label',
+		description: 'Switches the whole agentlet panel between fictitious company brand themes.',
+		audience: 'business',
+		isDemo: true,
+		lazy: true,
+	},
+
 	// More demo agentlets are added here, one manifest entry per module.
 	// Nothing else in the build pipeline or the launcher needs to change
 	// for a new entry to appear and work.
