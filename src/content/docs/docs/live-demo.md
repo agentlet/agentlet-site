@@ -42,6 +42,18 @@ This is a small demo audit, not a replacement for a real accessibility audit: it
 
 Source: [`src/agentlets/page-audit.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/page-audit.ts).
 
+### Summarize and share a section
+
+On the home page, pick "Summarize and share a section" and click "Pick a section", then click any part of the page. The click activates `agentlet.utils.ElementSelector`, restricted to `section, header, footer` so whatever is clicked resolves to the enclosing home page section, header, or footer, not something nested inside it.
+
+That section is captured as an image with `agentlet.utils.ScreenCapture.captureElement()`, then shown in a fullscreen dialog next to a summary labeled "Recorded AI response": a short, factual summary written in advance for each of the home page's main sections (hero, definition, demo sandbox, see it in action, deployment modes, capabilities, principles, comparison, get started), keyed by the section's own id or heading rather than its position on the page. Picking the header or the footer, which have no recorded summary, shows an honest message saying so instead of guessing.
+
+The dialog offers "Copy the summary" (to the clipboard, confirmed with a bubble) and "Download the image" (a PNG, built from the same captured image with `ScreenCapture.canvasToBlob()` and a same-origin blob link).
+
+Two of the home page's decorative background layers (the hero's animated story and one of the capabilities tabs) use a CSS `color-mix()` background that this browser resolves to the CSS Color 4 `color()` function. The html2canvas build vendored inside agentlet-core cannot parse `color()` and would otherwise fail the whole capture; this agentlet works around it with an `onclone` callback that replaces just that background with a plain, parseable color, only inside the offscreen copy html2canvas renders from, never on the live page.
+
+Source: [`src/agentlets/section-summary.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/section-summary.ts).
+
 ### Documentation companion
 
 Active on `/docs/` and below only: navigate there and it takes over from the launcher automatically, through the core's own URL pattern matching, no special-casing needed. Clicking "Try it" for it from the launcher on a non-docs page explains that and offers a link to the docs instead of activating it where it does not apply.
@@ -64,7 +76,7 @@ Nothing related to the demo is downloaded until you click the button, not even t
 - `agentlet-core`, the framework itself, from `/cdn/v1/agentlet-core.min.js`.
 - The demo registry, from `/cdn/v1/agentlets-registry.js`.
 - The launcher's own script and the documentation companion's, both loaded eagerly as part of the registry (the companion needs to already be registered for the core's own URL detection to activate it on a direct visit to `/docs/`, not only from the launcher).
-- "Receipt to expense report" and "Page audit" are marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and load from `/cdn/v1/agentlets/<name>.js` only once you pick one in the launcher, via `moduleRegistry.loadModule()`.
+- "Receipt to expense report", "Page audit", and "Summarize and share a section" are marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and load from `/cdn/v1/agentlets/<name>.js` only once you pick one in the launcher, via `moduleRegistry.loadModule()`.
 
 Because this site does a full page load on every navigation, a tiny inline script on every page (not a separate request) checks whether you left the panel open on a previous page and, if so, loads the demo loader to reopen it. That check itself downloads nothing on its own: it only loads the demo loader if the panel was open, and loads a lazy demo's script again first if that is the one being restored.
 

@@ -113,6 +113,17 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		isDemo: true,
 	},
 
+	{
+		id: 'section-summary',
+		file: 'section-summary',
+		className: 'SectionSummaryModule',
+		title: 'Summarize and share a section',
+		description: 'Picks a section of the home page and shows a recorded summary you can copy or share as an image.',
+		audience: 'business',
+		isDemo: true,
+		lazy: true,
+	},
+
 	// More demo agentlets are added here, one manifest entry per module.
 	// Nothing else in the build pipeline or the launcher needs to change
 	// for a new entry to appear and work.
