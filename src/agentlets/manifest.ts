@@ -103,6 +103,12 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		isDemo: false,
 	},
 
+	// Demo entries below are grouped by audience, in the order a visitor
+	// reads them: business first, then developers, then IT and security.
+	// This is also the order the launcher lists them in and the order
+	// live-demo.md documents them in (see that file's own comment on
+	// keeping the two in step).
+
 	{
 		id: 'expense-receipt',
 		file: 'expense-receipt',
@@ -112,42 +118,6 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		audience: 'business',
 		isDemo: true,
 		lazy: true,
-	},
-
-	{
-		id: 'page-audit',
-		file: 'page-audit',
-		className: 'PageAuditModule',
-		title: 'Page audit',
-		description: 'Runs a deterministic accessibility and structure audit of the current page.',
-		audience: 'it-and-security',
-		isDemo: true,
-		lazy: true,
-		// Reads naturally as an internal IT tool: locked until the visitor
-		// signs in through "Enterprise sign-in (simulated)" below. See
-		// src/agentlets/launcher.ts and src/agentlets/auth-demo.ts.
-		requiresSignIn: true,
-	},
-
-	{
-		id: 'selector-workshop',
-		file: 'selector-workshop',
-		className: 'SelectorWorkshopModule',
-		title: 'Selector workshop',
-		description: 'Pick an element and build, test, and edit a robust CSS selector for it.',
-		audience: 'developers',
-		isDemo: true,
-		lazy: true,
-	},
-
-	{
-		id: 'docs-companion',
-		file: 'docs-companion',
-		className: 'AgentletDocsCompanionModule',
-		title: 'Documentation companion',
-		description: 'Exports tables, copies code examples, and tracks your reading progress on the docs.',
-		audience: 'developers',
-		isDemo: true,
 	},
 
 	{
@@ -185,6 +155,27 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 	},
 
 	{
+		id: 'selector-workshop',
+		file: 'selector-workshop',
+		className: 'SelectorWorkshopModule',
+		title: 'Selector workshop',
+		description: 'Pick an element and build, test, and edit a robust CSS selector for it.',
+		audience: 'developers',
+		isDemo: true,
+		lazy: true,
+	},
+
+	{
+		id: 'docs-companion',
+		file: 'docs-companion',
+		className: 'AgentletDocsCompanionModule',
+		title: 'Documentation companion',
+		description: 'Exports tables, copies code examples, and tracks your reading progress on the docs.',
+		audience: 'developers',
+		isDemo: true,
+	},
+
+	{
 		id: 'enterprise-sign-in',
 		file: 'enterprise-sign-in',
 		className: 'EnterpriseSignInModule',
@@ -193,6 +184,21 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 		audience: 'it-and-security',
 		isDemo: true,
 		lazy: true,
+	},
+
+	{
+		id: 'page-audit',
+		file: 'page-audit',
+		className: 'PageAuditModule',
+		title: 'Page audit',
+		description: 'Runs a deterministic accessibility and structure audit of the current page.',
+		audience: 'it-and-security',
+		isDemo: true,
+		lazy: true,
+		// Reads naturally as an internal IT tool: locked until the visitor
+		// signs in through "Enterprise sign-in (simulated)" above. See
+		// src/agentlets/launcher.ts and src/agentlets/auth-demo.ts.
+		requiresSignIn: true,
 	},
 
 	// More demo agentlets are added here, one manifest entry per module.
