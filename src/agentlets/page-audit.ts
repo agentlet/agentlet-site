@@ -493,7 +493,7 @@ class PageAuditModule extends window.agentlet.Module {
 
 		const progress = dialog.showProgressWithSteps(
 			CHECKS.map((check) => check.label),
-			{ title: 'Running the page audit', autoClose: false },
+			{ title: 'Running the page audit', autoClose: false, icon: '' },
 		);
 
 		const findings: Finding[] = [];
@@ -523,6 +523,7 @@ class PageAuditModule extends window.agentlet.Module {
 			'fullscreen',
 			{
 				title: 'Page audit report',
+				icon: '',
 				customContent: this._buildReportContent(findings),
 				buttons: [{ text: 'Close', value: 'close', primary: true }],
 				scrollable: true,

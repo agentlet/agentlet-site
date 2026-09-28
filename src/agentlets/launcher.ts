@@ -168,6 +168,7 @@ class AgentletLauncherModule extends window.agentlet.Module {
 			window.agentlet?.utils.Dialog.showInfo(
 				{
 					title: entry?.title ?? 'This demo',
+					icon: '',
 					message: `${entry?.title ?? 'This demo'} only runs on the documentation. Open the docs to try it.`,
 					buttons: [
 						{ text: 'Cancel', value: 'cancel' },

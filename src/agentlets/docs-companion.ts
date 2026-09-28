@@ -50,7 +50,7 @@ const DOCS_COMPANION_TITLE =
  * window.agentletConfig are declared there), so this is a deliberate,
  * narrowly scoped exception, made safe because
  * window.agentlet.librarySetup.ensureLibrary('xlsx') (public, documented
- * API) confirms SheetJS is present first. agentlet-core 2.0.1 bundles
+ * API) confirms SheetJS is present first. agentlet-core 2.1.0 bundles
  * SheetJS directly into agentlet-core.min.js, so this never triggers a
  * network request. See the build report for the precise gap to file
  * against agentlet-core. When the page has exactly one table,
@@ -355,6 +355,7 @@ class AgentletDocsCompanionModule extends window.agentlet.Module {
 		window.agentlet?.utils.Dialog.showCommandPrompt(
 			{
 				title: DOCS_COMPANION_TITLE,
+				icon: '',
 				message: 'Type a command: excel, copy, or next.',
 				placeholder: 'excel, copy, or next',
 			},
