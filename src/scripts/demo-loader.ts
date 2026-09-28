@@ -59,6 +59,11 @@ const LIGHT_THEME: Partial<AgentletTheme> = {
 	borderColor: '#d9e0e6',
 	headerBackground: '#0f3350',
 	headerTextColor: '#ffffff',
+	// No dialogHeaderBackground/dialogHeaderTextColor here: agentlet-core's
+	// ThemeManager.processThemeConfig() now inherits both from
+	// headerBackground/headerTextColor whenever the dialog-specific keys are
+	// left unset, so every dialog's header already reads the same as the
+	// panel's own header without repeating the two colours above.
 	actionButtonBackground: '#f4a261',
 	actionButtonBorder: '#f4a261',
 	actionButtonHover: '#f7b47c',
@@ -76,6 +81,9 @@ const DARK_THEME: Partial<AgentletTheme> = {
 	borderColor: '#24394d',
 	headerBackground: '#f4a261',
 	headerTextColor: '#0f3350',
+	// See the comment on LIGHT_THEME's own headerBackground/headerTextColor
+	// above: the dialog-specific colours are inherited from these, no need
+	// to repeat them here either.
 	actionButtonBackground: '#f4a261',
 	actionButtonBorder: '#f4a261',
 	actionButtonHover: '#f7b47c',
@@ -229,11 +237,45 @@ window.__openAgentletDemo = openAgentletDemo;
 const previouslyActive = readActive();
 if (previouslyActive) {
 	startCore()
-		.then((core) => {
+		.then(async (core) => {
 			core.show();
 			if (previouslyActive !== DEFAULT_MODULE) {
-				const instance = core.modules.get(previouslyActive);
-				if (instance) void core.moduleRegistry.activateModule(instance);
+				// core.moduleRegistry (ModuleRegistryAPI), not core.modules: both
+				// agree on every registered module, but only moduleRegistry also
+				// exposes loadModule()/getRegistryEntries(), needed just below for
+				// a lazy demo entry (src/agentlets/manifest.ts's `lazy` field).
+				let instance = core.moduleRegistry.get(previouslyActive);
+				if (!instance) {
+					// The previously active module may be a lazy entry
+					// (src/agentlets/launcher.ts's "Try it" loads one the same
+					// way): init()'s eager registry load skipped it, so it is
+					// not registered yet on this fresh page load. Load it before
+					// deciding whether to restore it; getRegistryEntries() lists
+					// every entry the registry has seen, loaded or not.
+					const entry = core.moduleRegistry.getRegistryEntries().find((candidate) => candidate.name === previouslyActive);
+					if (entry) {
+						try {
+							instance = await core.moduleRegistry.loadModule(entry);
+						} catch (error) {
+							console.error(`Could not load the previously active demo (${previouslyActive}).`, error);
+						}
+					}
+				}
+				// Only force the previously active module back if its own
+				// patterns still match this page. ModuleRegistry registers
+				// every module from the registry during core.init() above, and
+				// each registration already runs checkUrlChange()
+				// (agentlet-core src/core/ModuleRegistry.ts), which activates
+				// whichever registered module's pattern matches the current
+				// URL (or none). Restoring blindly here would override that
+				// correct, pattern-based choice, e.g. keeping a non-docs demo
+				// active after navigating into /docs/ (or the docs companion
+				// active after navigating back out of /docs/), instead of
+				// letting that auto-detection hand control to the module that
+				// actually belongs on this page.
+				if (instance && instance.checkPattern(window.location.href)) {
+					void core.moduleRegistry.activateModule(instance);
+				}
 			}
 		})
 		.catch((error: unknown) => {

@@ -35,10 +35,15 @@ class AgentletLauncherModule extends window.agentlet.Module {
 		// Site-owned convention, not a core API: any module can ask to bring
 		// the launcher back by dispatching SHOW_LAUNCHER_EVENT on window (see
 		// shared.ts). There is no public way to reach "the launcher" other
-		// than window.agentlet.modules.get('launcher'), which this closes over.
+		// than by name, which this closes over. Goes through
+		// window.agentlet.moduleRegistry rather than the equivalent
+		// window.agentlet.modules: both agree on every registered module, but
+		// only moduleRegistry also exposes loadModule()/getRegistryEntries(),
+		// which _activate() below needs for the lazy demo entries, so this
+		// file sticks to one namespace throughout rather than mixing both.
 		this._onShowLauncher = () => {
 			const registry = window.agentlet?.moduleRegistry;
-			const self = window.agentlet?.modules.get(this.name);
+			const self = registry?.get(this.name);
 			if (registry && self) void registry.activateModule(self);
 		};
 		window.addEventListener(SHOW_LAUNCHER_EVENT, this._onShowLauncher);
@@ -103,39 +108,90 @@ class AgentletLauncherModule extends window.agentlet.Module {
 		container.querySelectorAll<HTMLButtonElement>('[data-try]').forEach((button) => {
 			button.addEventListener('click', () => {
 				const id = button.dataset.try;
-				if (id) this._activate(id);
+				if (id) void this._activate(id, button);
 			});
 		});
 	}
 
 	/**
-	 * "Load and activate": since this lot's registry lists every agentlet
-	 * (launcher and, later, each demo) as a top-level entry, AgentletCore's
-	 * own ModuleRegistry.initialize() already fetched and registered all of
-	 * them before this panel could even mount (see ModuleRegistry.loadFromRegistry()
-	 * in agentlet-core, awaited inside init()). So "activate" is the whole
-	 * job here, and window.agentlet.moduleRegistry.activateModule() is public,
-	 * part of the shipped ModuleRegistryAPI type, and does exactly this:
-	 * deactivates the launcher (unmounting this panel) and mounts the chosen
-	 * module instead.
+	 * "Load (if needed) and activate". The expense-receipt and page-audit
+	 * manifest entries are marked `lazy: true` (see manifest.ts and
+	 * scripts/build-cdn.mjs's buildRegistry()), so ModuleRegistry.initialize()
+	 * skips them at startup: registry.get(id) returns null for either until
+	 * something calls loadModule() on their registry entry. The docs
+	 * companion stays eager (it needs to be already registered for the
+	 * core's own URL-pattern detection to pick it up on a direct /docs/
+	 * visit, not only from this launcher), so registry.get() already
+	 * resolves it and the loading branch below is a no-op for it.
 	 *
-	 * There is no public API gap for this step. The gap is one step earlier:
-	 * ModuleRegistryAPI exposes no way to load a single extra module by name
-	 * or URL after init() has already run (loadFromRegistry/loadAgentletModule/
-	 * loadScript exist on the concrete ModuleRegistry class but are not part
-	 * of the shipped ModuleRegistryAPI type). That only matters once there are
-	 * enough demos that eagerly downloading all of them at init is wasteful;
-	 * see the build report for the precise gap to file against agentlet-core.
+	 * getRegistryEntries() lists every entry the registry has seen,
+	 * loaded or not, each annotated with `loaded`; that is where this reads
+	 * the `AgentletRegistryEntry` (name/url/module) loadModule() needs, so
+	 * no second copy of that shape has to live in this file.
 	 */
-	private _activate(id: string): void {
+	private async _activate(id: string, button: HTMLButtonElement): Promise<void> {
 		const registry = window.agentlet?.moduleRegistry;
-		const instance = window.agentlet?.modules.get(id);
-		if (!registry || !instance) {
+		if (!registry) {
 			window.agentlet?.utils.MessageBubble.error(
 				`This demo could not be loaded (${id}). Reload the page and try again.`,
 			);
 			return;
 		}
+
+		let instance = registry.get(id);
+
+		if (!instance) {
+			const entry = registry.getRegistryEntries().find((candidate) => candidate.name === id);
+			if (!entry) {
+				window.agentlet?.utils.MessageBubble.error(
+					`This demo could not be loaded (${id}). Reload the page and try again.`,
+				);
+				return;
+			}
+
+			const originalLabel = button.textContent;
+			button.disabled = true;
+			button.textContent = 'Loading...';
+			try {
+				instance = await registry.loadModule(entry);
+			} catch (error) {
+				button.disabled = false;
+				button.textContent = originalLabel;
+				const detail = error instanceof Error ? error.message : String(error);
+				window.agentlet?.utils.MessageBubble.error(`Could not load this demo (${id}). ${detail}`);
+				return;
+			}
+			button.disabled = false;
+			button.textContent = originalLabel;
+		}
+
+		// The launcher's own pattern excludes /docs/ (NOT_DOCS_PATTERN above),
+		// so it can only ever be open on a page some other demo's pattern
+		// might not match too (the docs companion in particular: its pattern
+		// is /docs/ and below only, the exact pages the launcher never shows
+		// on). Rather than activating a module on a page it was not built
+		// for, check its own Module.checkPattern() (the same check
+		// ModuleRegistry.findMatchingModule() runs) and offer to go to a page
+		// where it does apply instead.
+		if (!instance.checkPattern(window.location.href)) {
+			const entry = AGENTLET_MANIFEST.find((candidate) => candidate.id === id);
+			window.agentlet?.utils.Dialog.showInfo(
+				{
+					title: entry?.title ?? 'This demo',
+					icon: '',
+					message: `${entry?.title ?? 'This demo'} only runs on the documentation. Open the docs to try it.`,
+					buttons: [
+						{ text: 'Cancel', value: 'cancel' },
+						{ text: 'Go to the docs', value: 'go-to-docs', primary: true },
+					],
+				},
+				(value) => {
+					if (value === 'go-to-docs') window.location.href = '/docs/';
+				},
+			);
+			return;
+		}
+
 		void registry.activateModule(instance);
 	}
 }

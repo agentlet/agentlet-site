@@ -13,6 +13,7 @@
     "prebuild": "node scripts/build-cdn.mjs",
     "build": "astro build",
     "build:cdn": "node scripts/build-cdn.mjs",
+    "generate:demo-receipt": "node scripts/generate-demo-receipt.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "eslint . && node scripts/check-typography.mjs src public astro.config.mjs",
@@ -23,7 +24,7 @@
     "@astrojs/starlight": "^0.42.3",
     "@fontsource/ibm-plex-mono": "^5.3.0",
     "@fontsource/ibm-plex-sans": "^5.3.0",
-    "agentlet-core": "^2.0.1",
+    "agentlet-core": "^2.1.0",
     "astro": "^7.3.5",
     "starlight-links-validator": "^0.26.0"
   },
@@ -36,9 +37,9 @@
     "eslint": "^10.11.0",
     "eslint-plugin-astro": "^3.2.1",
     "husky": "^9.1.7",
-    "pdfjs-dist": "5.4.54",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.1",
-    "wrangler": "^4.42.4"
+    "wrangler": "^4.42.4",
+    "xlsx": "^0.18.5"
   }
 }

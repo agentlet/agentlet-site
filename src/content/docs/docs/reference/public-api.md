@@ -174,6 +174,10 @@ Convenience wrappers: `showInfo`, `showInput`, `showWait`, `showFullscreen`, `sh
 
 Progress control: `updateProgress(percentage, message?)`, `setStep(stepIndex, stepMessage?)`, `completeProgress(message?)`, each returning `this`. `hide(result?)` closes the active dialog; `updateMessage(newMessage)` updates a `'wait'`-type dialog's message only. `setRoot(root)`/`getRoot()` control the mount point; `isActive` reports whether a dialog is open.
 
+Every dialog type's `icon` option (info, wait, fullscreen, progress, command) defaults to its own built-in icon when left out, and accepts `''` or `null` to omit the icon entirely while keeping the rest of the header.
+
+A dialog header's background and text colour follow the theme's `headerBackground`/`headerTextColor` (the same pair the panel header uses) whenever `dialogHeaderBackground`/`dialogHeaderTextColor` are not set explicitly: `ThemeManager.processThemeConfig()` inherits the dialog-specific pair from the panel pair together, never mixed, and derives a readable text colour by luminance if only a background is given. An already-open dialog, and one opened after `setTheme()`, both restyle live: dialog inline styles reference the same `--agentlet-dialog-*` custom properties `setTheme()` updates.
+
 See [Dialogs and shortcuts](/docs/guides/dialogs-and-shortcuts/).
 
 ### MessageBubble (`utils.MessageBubble`)
@@ -264,7 +268,7 @@ Passed to `new AgentletCore(config)`. Each option is optional; additional keys a
 
 - **`enablePlugins`**: `boolean`
 - **`registryUrl`**: `string`. See [Script injection and registry](/docs/guides/script-injection/).
-- **`debugMode`**: `boolean`. Enables `window.agentlet.debug`.
+- **`debugMode`**: `boolean`. Enables `window.agentlet.debug`. Also gates the core's own informational logging: with `debugMode` unset or `false` (the default), agentlet-core writes nothing to the console beyond `console.warn`/`console.error` (never gated); the roughly 40 `console.log` calls the core used to make unconditionally on every `init()` are now routed through an internal logger that only writes when `debugMode` is `true`.
 - **`minimizeWithImage`**: `string | null`. Image shown when the panel is minimized.
 - **`startMinimized`**: `boolean`
 - **`showEnvVarsButton`**, **`showRefreshButton`**, **`showSettingsButton`**, **`showHelpButton`**: `boolean`. Panel header buttons.
@@ -278,7 +282,7 @@ Passed to `new AgentletCore(config)`. Each option is optional; additional keys a
 - **`env`**: `Record<string, string>`. Loaded at startup, merged over any existing values.
 - **`theme`**: `string | Partial<AgentletTheme>`
 - **`skipRegistryModuleRegistration`**: `boolean`
-- **`pdfWorkerUrl`**: `string`. Forwarded to PDF.js setup.
+- **`pdfWorkerUrl`**: `string`. URL of the `pdf.worker.min.mjs` file matching the bundled `pdfjs-dist` version. Always applied when set, in every build (not gated on whether `window.pdfjsLib` looks already configured). Without it, the worker resolves relative to the registry URL when `registryUrl` is set (including a relative one, resolved against the page), or otherwise to `'./pdf.worker.min.mjs'` relative to the page. There is no automatic third-party (CDN) fallback: if no worker is reachable, PDF conversion fails with an error naming this option and `configurePDFWorker()`. The npm package ships the matching worker at `dist/pdf.worker.min.mjs`, next to `dist/agentlet-core.min.js`.
 
 ## `window.agentlet.ui`
 
@@ -296,10 +300,28 @@ Passed to `new AgentletCore(config)`. Each option is optional; additional keys a
 
 ## `window.agentlet.modules`
 
-`get(name)`, `getAll()`, `register(module)`, `unregister(name)`. `window.agentlet.moduleManager` and `window.agentlet.moduleRegistry` expose lower-level equivalents used internally, including `activate(module, context?)`, `getStatistics()`, and `findMatchingModule(url?)`.
+`get(name)`, `getAll()`, `register(module)`, `unregister(name)`. Backed by the same underlying registry as `moduleManager`/`moduleRegistry` below, so all three agree on every registered module regardless of how it was registered (constructor, `register()`, an eager or lazy registry entry, or `moduleRegistry.loadModule()`).
+
+`window.agentlet.moduleManager` and `window.agentlet.moduleRegistry` expose lower-level equivalents used internally, including `activate(module, context?)`, `getStatistics()`, and `findMatchingModule(url?)`. `moduleRegistry` additionally exposes:
+
+- **`loadModule`**
+  ```ts
+  (entry: AgentletRegistryEntry) => Promise<AgentletModule>
+  ```
+  Loads a single registry entry on demand: fetches `entry.url`, reads `window[entry.module]`, instantiates and registers it, the same loading code the eager registry load uses, then resolves with the module instance. Unlike the eager load, this never activates the module, even if its pattern matches the current URL; call `activateModule()` explicitly afterwards. Resolves with the already-registered instance, without reloading, if `entry.name` is already loaded. `AgentletRegistryEntry` is `{ name, url, module, lazy? }`.
+
+- **`getRegistryEntries`**
+  ```ts
+  () => AgentletRegistryEntryStatus[]
+  ```
+  Lists every registry entry seen so far, eagerly loaded or `lazy: true`, in the order the registry declared them, each annotated with `loaded: boolean`. Empty when no `registryUrl` was configured, or before the registry has finished loading.
+
+A registry entry's **`lazy`** field (`boolean`, default `false`), set in the registry file itself (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)), skips that entry in `init()`'s eager registry load. It is still listed by `getRegistryEntries()` (with `loaded: false`), for building a "load more" or launcher-style UI, and can be loaded on demand with `loadModule()`. A lazy entry is not a candidate for URL-based module detection (`findMatchingModule()`, or the automatic re-detection on navigation) until it has actually been loaded.
+
+URL-based re-detection (`checkUrlChange()`, the core's 1-second poll and its `popstate`/`hashchange`/`pushState`/`replaceState` listeners) only re-derives the active module when the URL actually changed, or when nothing is active yet. On a URL change, an already-active module whose own pattern still matches the new URL is left running rather than re-evaluated from scratch, so a module activated explicitly (for example from a launcher-style module offering several choices on the same page) is not silently reverted by the next poll tick.
 
 ## `window.agentlet.debug`
 
 Only present when `AgentletCore` was constructed with `debugMode: true`: `getMetrics()`, `getConfig()`, `getStatistics()`, plus direct references `eventBus`, `envManager`, `cookieManager`, `storageManager`.
 
-Source: agentlet-core src/types/public-api.d.ts and CLAUDE.md, API Quick Reference, at 4a8aaab.
+Source: agentlet-core src/types/public-api.d.ts and CLAUDE.md, API Quick Reference, at 42b2a10 (agentlet-core 2.1.0).

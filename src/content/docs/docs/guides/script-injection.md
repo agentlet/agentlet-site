@@ -72,12 +72,42 @@ A registry file is a `.js` file that builds a registry object and dispatches it 
         agentlets: [{ name: 'hello-world', url: 'https://example.com/hello-world.js', module: 'HelloWorldModule' }],
     };
 
-    const event = new CustomEvent('agentletRegistryLoaded', { detail: registry });
-    setTimeout(() => window.dispatchEvent(event), 10);
+    // Dispatched synchronously, in the same task as this script's own
+    // execution: ModuleRegistry.loadRegistryScript() attaches its listener
+    // before the <script> element is even created, so a setTimeout before
+    // dispatching only adds a delay, never reliability. On a page busy
+    // enough to delay a queued timeout past ModuleRegistry's own 10-second
+    // timeout, that delay can make the registry arrive too late to be seen
+    // at all.
+    window.dispatchEvent(new CustomEvent('agentletRegistryLoaded', { detail: registry }));
 })();
 ```
 
 Loading proceeds in five steps: `ModuleRegistry` injects a `<script>` tag pointing at the registry URL, sets up a listener for the `agentletRegistryLoaded` event, applies a 10-second timeout to avoid hanging on a failed load, the registry script dispatches the event once loaded, and the event's `detail` is processed the same way a fetched JSON payload would have been.
+
+### Lazy entries
+
+Mark a registry entry `lazy: true` to have `init()`'s eager registry load skip it:
+
+```javascript title="agentlets-registry.js"
+const registry = {
+    agentlets: [
+        { name: 'hello-world', url: 'https://example.com/hello-world.js', module: 'HelloWorldModule' },
+        { name: 'heavy-demo', url: 'https://example.com/heavy-demo.js', module: 'HeavyDemoModule', lazy: true },
+    ],
+};
+```
+
+A lazy entry is still listed by `moduleRegistry.getRegistryEntries()` (each entry annotated with `loaded`), so a host can build a "more demos" list from it without downloading every bundle up front. Load one on demand, then activate it, with `moduleRegistry.loadModule(entry)`:
+
+```javascript
+const registry = window.agentlet.moduleRegistry;
+const entry = registry.getRegistryEntries().find((candidate) => candidate.name === 'heavy-demo');
+const instance = await registry.loadModule(entry);
+await registry.activateModule(instance);
+```
+
+`loadModule()` resolves with the already-registered instance, without reloading, if the entry was already loaded. A lazy entry is not a candidate for the core's own URL-based module detection until it has actually been loaded this way at least once.
 
 ### Configuration
 
@@ -124,4 +154,4 @@ Existing modules that only used DOM injection in a web page environment keep wor
 - **Content script injection timeout**: verify the background script is responding and that extension permissions are granted.
 - **DOM injection setup failed**: check for Content Security Policy restrictions and that `document.head` is available.
 
-Source: agentlet-core docs/registry-script-injection.md, docs/script-injection-migration.md, and src/types/public-api.d.ts at e3f78fa. `injectModule()`'s `validateSecurity` option, described in the migration source document, is not part of the current `ScriptInjectorAPI` type, so it was dropped from the examples here.
+Source: agentlet-core docs/registry-script-injection.md, docs/script-injection-migration.md, and src/types/public-api.d.ts at 42b2a10 (agentlet-core 2.1.0). `injectModule()`'s `validateSecurity` option, described in the migration source document, is not part of the current `ScriptInjectorAPI` type, so it was dropped from the examples here.

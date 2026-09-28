@@ -14,7 +14,9 @@ test.describe('Theme switching', () => {
 
 		await page.getByRole('button', { name: 'Try it on this page' }).click();
 		await expect(page.locator('#agentlet-container')).toBeVisible();
-		await expect(page.getByText('The first demos are on their way.')).toBeVisible();
+		// Rendered regardless of how many demos the launcher lists (see
+		// _render() in src/agentlets/launcher.ts).
+		await expect(page.getByText('Pick a demo agentlet below.')).toBeVisible();
 
 		const backgroundBefore = await page
 			.locator('#agentlet-container')
@@ -25,7 +27,7 @@ test.describe('Theme switching', () => {
 		// The launcher's content must survive the toggle: this is what broke
 		// before the fix in src/scripts/demo-loader.ts (syncTheme()/wireLifecycle()),
 		// where a theme change during the loading window was silently missed.
-		await expect(page.getByText('The first demos are on their way.')).toBeVisible();
+		await expect(page.getByText('Pick a demo agentlet below.')).toBeVisible();
 		await expect(page.getByText('No application detected')).toHaveCount(0);
 
 		await expect
@@ -37,6 +39,7 @@ test.describe('Theme switching', () => {
 			.not.toBe(backgroundBefore);
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 	});
 
 	test('opening the demo while the site is already in light theme gives a light panel', async ({ page }) => {
@@ -81,14 +84,17 @@ test.describe('Registry reliability', () => {
 		await page.waitForTimeout(11_000);
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 	});
 
 	// The launcher's own pattern excludes /docs/ (see src/agentlets/launcher.ts),
-	// so reopening on a docs page leaves no module active there by design; this
-	// only checks that showing that built-in state does not itself error, per
-	// the coordinator's review (point 9): acceptable until a docs-targeting
-	// demo agentlet exists.
-	test('reopening on a docs page shows the panel with no active module, without erroring', async ({ page }) => {
+	// so reopening on a docs page used to leave no module active there (the
+	// core's own "No application detected" state). src/agentlets/docs-companion.ts
+	// now matches /docs/ and below, so ModuleRegistry's own URL-pattern
+	// detection (see the module's doc comment) picks it up instead, with no
+	// special-casing needed here or in the loader. See
+	// tests/e2e/docs-companion.spec.ts for that module's own coverage.
+	test('reopening on a docs page activates the docs companion, without erroring', async ({ page }) => {
 		const health = await trackPageHealth(page);
 		await page.goto('/');
 		await page.getByRole('button', { name: 'Try it on this page' }).click();
@@ -96,8 +102,9 @@ test.describe('Registry reliability', () => {
 
 		await page.goto('/docs/live-demo/');
 		await expect(page.locator('#agentlet-container')).toBeVisible();
-		await expect(page.getByText('No application detected')).toBeVisible();
+		await expect(page.locator('#agentlet-app-name')).toHaveText('Documentation companion');
 
 		expect(health.consoleErrors).toEqual([]);
+		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 	});
 });
