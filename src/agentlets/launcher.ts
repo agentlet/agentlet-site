@@ -244,7 +244,7 @@ class AgentletLauncherModule extends window.agentlet.Module {
 				<p class="agentlet-demo-description">${entry.description}</p>
 				<div class="agentlet-demo-actions">
 					${primaryAction}
-					<a class="agentlet-demo-source-link" href="${sourceUrl(entry.file)}" target="_blank" rel="noopener noreferrer">View source</a>
+					<a class="agentlet-demo-source-link" href="${sourceUrl(entry.file, entry.fileExt)}" target="_blank" rel="noopener noreferrer">View source</a>
 				</div>
 			</li>
 		`;

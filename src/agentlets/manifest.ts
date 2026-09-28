@@ -31,8 +31,19 @@ export const AUDIENCE_LABELS: Record<AgentletAudience, string> = {
 export interface AgentletManifestEntry {
 	/** Unique id: the registry entry name and the module's own `name`. */
 	id: string;
-	/** Source file under src/agentlets/, without the .ts extension. */
+	/** Source file under src/agentlets/, without its extension. */
 	file: string;
+	/**
+	 * The source file's extension, without the leading dot. Left unset for
+	 * a plain `.ts` module (every demo but one); set to `tsx` for a module
+	 * that mounts a React tree through the mount API (see white-label.tsx).
+	 * scripts/build-cdn.mjs reads this to pick the right esbuild entry
+	 * point, and src/agentlets/shared.ts's sourceUrl()/sourceLinkHtml()
+	 * read it to build a working "View the source of this agentlet" link;
+	 * both used to hardcode `.ts`, which pointed white-label's link at a
+	 * file that does not exist.
+	 */
+	fileExt?: 'ts' | 'tsx';
 	/** Global class name the built bundle attaches to the page (window[className]). */
 	className: string;
 	/**
@@ -164,6 +175,7 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 	{
 		id: 'white-label',
 		file: 'white-label',
+		fileExt: 'tsx',
 		className: 'WhiteLabelModule',
 		title: 'Live white label',
 		description: 'Switches the whole agentlet panel between fictitious company brand themes.',

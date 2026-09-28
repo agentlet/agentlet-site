@@ -1,7 +1,7 @@
 import { useMemo, type ReactElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import type { AgentletAPI, AgentletTheme, EventBusAPI, ModuleMountContext } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, SITE_REPO_URL } from './shared';
+import { AGENTLET_BASE_STYLES, sourceUrl } from './shared';
 
 /**
  * "Live white label": rebrands the whole agentlet panel (header, accent,
@@ -19,11 +19,10 @@ import { AGENTLET_BASE_STYLES, SITE_REPO_URL } from './shared';
  */
 
 const FILE = 'white-label';
-// shared.ts's own sourceUrl()/sourceLinkHtml() hardcode a `.ts` extension
-// (every other agentlet module is a plain .ts file), so this module builds
-// its own link from the exported SITE_REPO_URL instead of changing that
-// shared, generic helper for the one file that needs `.tsx`.
-const SOURCE_URL = `${SITE_REPO_URL}/blob/main/src/agentlets/${FILE}.tsx`;
+// shared.ts's sourceUrl() defaults to a `.ts` extension (every other
+// agentlet module is a plain .ts file); pass the manifest's own `fileExt`
+// ('tsx') so this one still links to the file that actually exists.
+const SOURCE_URL = sourceUrl(FILE, 'tsx');
 const STORAGE_KEY = 'agentlet:white-label-company';
 const DEMO_SECTION_URL = '/#demo';
 

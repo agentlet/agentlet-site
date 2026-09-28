@@ -12,14 +12,20 @@
  */
 export const SITE_REPO_URL = 'https://github.com/agentlet/agentlet-site';
 
-/** Href for the "View the source of this agentlet" link, for a given src/agentlets/<file>.ts. */
-export function sourceUrl(file: string): string {
-	return `${SITE_REPO_URL}/blob/main/src/agentlets/${file}.ts`;
+/**
+ * Href for the "View the source of this agentlet" link, for a given
+ * src/agentlets/<file>.<ext>. `ext` defaults to `ts`, the extension every
+ * demo but one (white-label.tsx) uses; pass a manifest entry's own
+ * `fileExt` for the rest, so a `.tsx` module still links to the file that
+ * actually exists.
+ */
+export function sourceUrl(file: string, ext: 'ts' | 'tsx' = 'ts'): string {
+	return `${SITE_REPO_URL}/blob/main/src/agentlets/${file}.${ext}`;
 }
 
 /** Markup for the "View the source of this agentlet" link, consistent across every agentlet's panel. */
-export function sourceLinkHtml(file: string): string {
-	return `<a class="agentlet-source-link" href="${sourceUrl(file)}" target="_blank" rel="noopener noreferrer">View the source of this agentlet</a>`;
+export function sourceLinkHtml(file: string, ext: 'ts' | 'tsx' = 'ts'): string {
+	return `<a class="agentlet-source-link" href="${sourceUrl(file, ext)}" target="_blank" rel="noopener noreferrer">View the source of this agentlet</a>`;
 }
 
 /**
