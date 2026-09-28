@@ -149,6 +149,12 @@ test.describe('Page audit agentlet on the bookmarklet page', () => {
 		await expect(page.locator('.audit-empty')).toHaveText('No issues found by these checks.');
 		await expect(page.locator('.audit-element')).toHaveCount(0);
 
+		// No demo sandbox on this page, so the audit summary carries no note
+		// about opening it (see tests/e2e/sandbox.spec.ts for the home page
+		// case, where it does).
+		await page.getByRole('button', { name: 'Close' }).click();
+		await expect(page.locator('.audit-sandbox-note')).toHaveCount(0);
+
 		expect(health.consoleErrors).toEqual([]);
 		expect(health.consoleLogs).toEqual([]); // debugMode is off (see src/scripts/demo-loader.ts); the core must stay silent.
 		expect(await health.cspViolations()).toEqual([]);

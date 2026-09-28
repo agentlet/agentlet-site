@@ -1,5 +1,5 @@
 import type { PageHighlighterHighlightControl, TableData } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
+import { AGENTLET_BASE_STYLES, openSandbox, sourceLinkHtml } from './shared';
 
 /**
  * "Page audit": a deterministic accessibility and structure audit of the
@@ -44,6 +44,8 @@ interface AuditRun {
 	findings: Finding[];
 	ranAt: Date;
 	url: string;
+	/** True when this run opened the home page's demo sandbox to check it (see openSandbox() in shared.ts); false on every other page, which has none. */
+	sandboxOpened: boolean;
 }
 
 /**
@@ -253,6 +255,11 @@ const STYLES = `
 	color: var(--color-heading, #0f3350);
 }
 
+.audit-sandbox-note {
+	color: var(--color-text-muted, #5b6b78);
+	font-size: 0.82rem;
+}
+
 .audit-actions {
 	display: flex;
 	align-items: center;
@@ -381,6 +388,20 @@ class PageAuditModule extends window.agentlet.Module {
 		return 'Page audit';
 	}
 
+	/**
+	 * Runs on every page except /docs/ (see NOT_DOCS_PATTERN above), so this
+	 * is a no-op away from the home page (see shared.ts's openSandbox() doc
+	 * comment). On the home page, it opens the demo sandbox as soon as this
+	 * demo becomes active: _runAudit() below opens it again defensively
+	 * right before checking the page, in case a visitor closed it back up
+	 * by hand in between, but doing it here too means the sandbox is
+	 * already visible while the visitor reads this panel, before they even
+	 * click "Run the audit".
+	 */
+	async activateModule(): Promise<void> {
+		openSandbox();
+	}
+
 	async mount(container: HTMLElement): Promise<void> {
 		this.injectStyles(AGENTLET_BASE_STYLES + STYLES);
 		this._container = container;
@@ -438,14 +459,23 @@ class PageAuditModule extends window.agentlet.Module {
 			return '<div class="audit-summary"><p>No audit has run yet.</p></div>';
 		}
 
-		const { findings, ranAt } = this._lastRun;
+		const { findings, ranAt, sandboxOpened } = this._lastRun;
 		const rows = CHECKS.map((check) => {
 			const count = findings.filter((finding) => finding.check === check.id).length;
 			return `<p>${this._escape(check.label)}: ${count} finding${count === 1 ? '' : 's'}</p>`;
 		}).join('');
 
+		// Only shown when this run actually found and opened the home page's
+		// demo sandbox (see openSandbox() in shared.ts): its own defects would
+		// otherwise stay hidden and unreported, since a closed <details> hides
+		// its content from the checks below the same way display: none would.
+		const sandboxNote = sandboxOpened
+			? '<p class="audit-sandbox-note">Opened the demo sandbox below so its defects could be checked.</p>'
+			: '';
+
 		return `
 			<div class="audit-summary">
+				${sandboxNote}
 				<p class="audit-summary-total">${findings.length} finding${findings.length === 1 ? '' : 's'} at ${this._escape(ranAt.toLocaleTimeString())}</p>
 				${rows}
 			</div>
@@ -491,6 +521,13 @@ class PageAuditModule extends window.agentlet.Module {
 		this._clearHighlights();
 		this._rerender();
 
+		// Defensive re-open, in case a visitor closed the sandbox back up by
+		// hand since this demo activated (see activateModule() above): the
+		// checks below read the live DOM, and a closed <details> hides its
+		// content the same way display: none would, which would otherwise
+		// make the three deliberate defects it carries unreachable here.
+		const sandboxOpened = openSandbox();
+
 		const progress = dialog.showProgressWithSteps(
 			CHECKS.map((check) => check.label),
 			{ title: 'Running the page audit', autoClose: false, icon: '' },
@@ -508,7 +545,7 @@ class PageAuditModule extends window.agentlet.Module {
 		await new Promise((resolve) => window.setTimeout(resolve, 400));
 		dialog.hide();
 
-		this._lastRun = { findings, ranAt: new Date(), url: window.location.href };
+		this._lastRun = { findings, ranAt: new Date(), url: window.location.href, sandboxOpened };
 		this._busy = false;
 		this._rerender();
 

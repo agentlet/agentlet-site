@@ -1,5 +1,5 @@
 import type { AIFormExport, FormFillValue, PageHighlighterHighlightControl } from 'agentlet-core';
-import { AGENTLET_BASE_STYLES, sourceLinkHtml } from './shared';
+import { AGENTLET_BASE_STYLES, openSandbox, sourceLinkHtml } from './shared';
 
 /**
  * "Receipt to expense report": reads the site's own sample receipt, shows
@@ -216,6 +216,17 @@ class ExpenseReceiptModule extends window.agentlet.Module {
 
 	getPanelTitle(): string {
 		return 'Receipt to expense report';
+	}
+
+	/**
+	 * The sandbox this demo operates on (src/components/landing/
+	 * TrySandbox.astro) is collapsed by default; open it and bring it into
+	 * view as soon as this demo becomes active, rather than leaving the
+	 * visitor to scroll down and find it themselves. See shared.ts's
+	 * openSandbox() doc comment; a no-op away from the home page.
+	 */
+	async activateModule(): Promise<void> {
+		openSandbox();
 	}
 
 	async mount(container: HTMLElement): Promise<void> {

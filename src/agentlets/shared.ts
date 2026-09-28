@@ -179,3 +179,30 @@ export const SHOW_LAUNCHER_EVENT = 'agentlet:show-launcher';
 export function requestShowLauncher(): void {
 	window.dispatchEvent(new CustomEvent(SHOW_LAUNCHER_EVENT));
 }
+
+/**
+ * The home page's demo sandbox (src/components/landing/TrySandbox.astro) is
+ * a native `<details id="sandbox">`, collapsed by default and styled as its
+ * own visually separate zone, kept out of the way until a visitor actually
+ * wants it. Both the expense-receipt and page-audit demos operate on it, so
+ * this one helper opens it and scrolls it into view for either, rather than
+ * each module re-implementing the same two DOM calls.
+ *
+ * The page audit in particular depends on this: a closed `<details>` hides
+ * its non-summary content the same way `display: none` would (still in the
+ * DOM, but not visible, not part of the accessibility tree), so its three
+ * deliberate defects would otherwise never be found or reported, even
+ * though `document.querySelectorAll()` can still see the elements.
+ *
+ * A no-op returning false on any page without a sandbox (every page except
+ * the home page), so callers can call it unconditionally.
+ */
+const SANDBOX_ID = 'sandbox';
+
+export function openSandbox(): boolean {
+	const details = document.getElementById(SANDBOX_ID);
+	if (!(details instanceof HTMLDetailsElement)) return false;
+	details.open = true;
+	details.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	return true;
+}
