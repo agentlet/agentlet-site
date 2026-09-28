@@ -20,6 +20,11 @@ const VENDOR_SELECTOR = '#expense-vendor';
 
 async function openWorkshopOnHomePage(page: Page): Promise<void> {
 	await page.goto('/');
+	// The demo sandbox (#sandbox) is a collapsed <details> by default (see
+	// src/components/landing/TrySandbox.astro), so #expense-vendor below it
+	// is not visible until it is opened, the same way a real visitor would
+	// open it before interacting with anything inside.
+	await page.locator('#sandbox summary').click();
 	await page.getByRole('button', { name: 'Try it on this page' }).click();
 	await expect(page.locator('#agentlet-container')).toBeVisible();
 	await page.locator('[data-try="selector-workshop"]').click();
