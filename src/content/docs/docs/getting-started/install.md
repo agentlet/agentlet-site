@@ -9,7 +9,7 @@ Install agentlet-core from npm:
 npm install agentlet-core
 ```
 
-This installs version 2.1.0, see it on [npm](https://www.npmjs.com/package/agentlet-core). The package ships `dist/agentlet-core.js` (IIFE global, also used by `require`), `dist/agentlet-core.min.js`, `dist/agentlet-core.esm.js`, `dist/agentlet-core.d.ts`, and `dist/pdf.worker.min.mjs` (the matching pdf.js worker, see [Public API](/docs/reference/public-api/#agentletcoreconfig)), about 1.7 MB compressed.
+This installs version 2.1.1, see it on [npm](https://www.npmjs.com/package/agentlet-core). The package ships `dist/agentlet-core.js` (IIFE global, also used by `require`), `dist/agentlet-core.min.js`, `dist/agentlet-core.esm.js`, `dist/agentlet-core.d.ts`, and `dist/pdf.worker.min.mjs` (the matching pdf.js worker, see [Public API](/docs/reference/public-api/#agentletcoreconfig)), about 1.8 MB compressed.
 
 ## Works under Node
 
@@ -55,4 +55,4 @@ npm run build
 
 See [Manual setup](/docs/getting-started/manual-setup/) for what this produces, or [Quick demo](/docs/getting-started/quick-demo/) to run the built-in examples right away.
 
-Source: agentlet-core README.md, sections "Getting started" and "Using agentlet-core as a package dependency", and src/index.ts and package.json from agentlet-core 2.1.0.
+Source: agentlet-core README.md, sections "Getting started" and "Using agentlet-core as a package dependency", and src/index.ts and package.json from agentlet-core 2.1.1.
