@@ -1,6 +1,6 @@
 /**
  * Single source of truth for the agentlets that run on well-known third-party
- * sites (Wikipedia), distributed as the `agentlet-demos` npm
+ * sites (Wikipedia, arXiv), distributed as the `agentlet-demos` npm
  * package (packages/agentlet-demos/) through jsDelivr. The on-site demos
  * under src/agentlets/manifest.ts are a separate set served from agentlet.io
  * itself; nothing here changes how they work.
@@ -63,6 +63,13 @@ export const KNOWN_SITES: KnownSite[] = [
 		exampleUrl: 'https://en.wikipedia.org/wiki/Apollo_11',
 		exampleLabel: 'Apollo 11 on English Wikipedia',
 	},
+	{
+		id: 'arxiv',
+		label: 'arXiv',
+		where: 'Listing and search pages (arxiv.org/list/..., arxiv.org/search/...), and abstract pages (arxiv.org/abs/...).',
+		exampleUrl: 'https://arxiv.org/list/cs.AI/recent',
+		exampleLabel: 'Recent papers in cs.AI on arXiv',
+	},
 ];
 
 /**
@@ -80,6 +87,9 @@ export const KNOWN_SITES_LAUNCHER = {
 
 /** Any language edition's article pages, desktop or mobile host. */
 export const WIKIPEDIA_PATTERN = '^https?:\\/\\/[a-z0-9-]+(?:\\.m)?\\.wikipedia\\.org\\/wiki\\/';
+
+/** arXiv listing pages, search results, and abstract pages. */
+export const ARXIV_PATTERN = '^https?:\\/\\/(?:www\\.)?arxiv\\.org\\/(?:list|search|abs)\\/';
 
 export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 	{
@@ -99,6 +109,15 @@ export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 		title: 'Date timeline',
 		description: 'Finds the dates in the article text and builds a chronological timeline that scrolls to each passage.',
 		pattern: WIKIPEDIA_PATTERN,
+	},
+	{
+		id: 'arxiv-papers',
+		site: 'arxiv',
+		file: 'arxiv-papers',
+		className: 'ArxivPapersModule',
+		title: 'Papers to spreadsheet',
+		description: 'Finds every paper on a listing or search page, previews them, and exports the ones you tick to Excel. On an abstract page, shows a citation line.',
+		pattern: ARXIV_PATTERN,
 	},
 ];
 
