@@ -2,10 +2,14 @@ import { readFileSync } from 'node:fs';
 import { expect, test, type Page } from '@playwright/test';
 import * as XLSX from 'xlsx';
 import {
+	ARXIV_ABS_URL,
+	ARXIV_LIST_URL,
+	ARXIV_SEARCH_URL,
 	clickBookmarklet,
 	CORE_VERSION,
 	DEMOS_VERSION,
 	OTHER_SITE_URL,
+	serveArxiv,
 	serveKnownSitesPage,
 	serveWikipedia,
 	WIKIPEDIA_URL,
@@ -42,6 +46,7 @@ test.describe('Known-sites page', () => {
 
 		const main = page.locator('main');
 		await expect(main.getByRole('heading', { name: 'Wikipedia' })).toBeVisible();
+		await expect(main.getByRole('heading', { name: 'arXiv' })).toBeVisible();
 		await expect(main).toContainText('Tables to spreadsheet');
 		await expect(main).toContainText('Date timeline');
 		await expect(main).toContainText('GitHub, MDN, Stack Overflow and YouTube');
@@ -107,6 +112,7 @@ test.describe('Known-sites bookmarklet loader', () => {
 		await expect(page.getByText('No demo for this page')).toBeVisible();
 		const text = await panelText(page);
 		expect(text).toContain('Wikipedia');
+		expect(text).toContain('arXiv');
 		await expect(page.getByRole('link', { name: 'Apollo 11 on English Wikipedia' })).toBeVisible();
 	});
 });
@@ -246,5 +252,96 @@ test.describe('Wikipedia: date timeline', () => {
 		await page.evaluate(() => (window as unknown as { agentlet: { cleanup(): Promise<void> } }).agentlet.cleanup());
 		await expect(page.locator('mark.agentlet-date-mark')).toHaveCount(0);
 		expect(await page.locator('#mw-content-text').innerHTML()).toBe(before);
+	});
+});
+
+test.describe('arXiv: papers to spreadsheet', () => {
+	test('listing: previews the papers, exports the ticked ones, and opens without the launcher', async ({ page }) => {
+		const run = await serveArxiv(page, 'list');
+		await page.goto(ARXIV_LIST_URL);
+		await clickBookmarklet(page);
+
+		// A single demo for this page opens directly.
+		await expect(page.locator('.ks-stats')).toContainText('4 papers');
+		await expect(page.locator(PANEL_TITLE)).toHaveText('Papers to spreadsheet');
+		await expect(page.locator('.ks-stats')).toContainText('4 ticked');
+		await expect(page.locator('.ap-table tbody tr')).toHaveCount(4);
+		await expect(page.locator('.ap-table')).toContainText('2609.00003');
+		await expect(page.locator('.ap-table')).toContainText('Synthetic paper three: notes on bookmarklets');
+		await expect(page.locator('.ap-table')).toContainText('Eli Fixture, Fay Mock');
+
+		// Untick the second paper: three are exported.
+		await page.getByLabel('Include 2609.00002').uncheck();
+		await expect(page.locator('.ks-stats')).toContainText('3 ticked');
+		const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Export to Excel' }).click()]);
+		expect(download.suggestedFilename()).toBe('arxiv-list-cs-ai-recent.xlsx');
+		const book = await readWorkbook(download);
+		expect(book.SheetNames).toEqual(['Papers']);
+		const rows = XLSX.utils.sheet_to_json<string[]>(book.Sheets.Papers, { header: 1 });
+		expect(rows[0]).toEqual(['ID', 'Title', 'Authors', 'Primary category', 'Abstract link', 'PDF link']);
+		expect(rows).toHaveLength(4);
+		expect(rows[1]).toEqual([
+			'2609.00001',
+			'Synthetic paper one: agents that read tables',
+			'Ada Example, Ben Sample, Chi Placeholder',
+			'cs.AI',
+			'https://arxiv.org/abs/2609.00001',
+			'https://arxiv.org/pdf/2609.00001',
+		]);
+		expect(rows.map((row) => row[0])).toEqual(['ID', '2609.00001', '2609.00003', '2609.00004']);
+		expect(rows[3][3]).toBe('cs.CL');
+
+		// Untick all: nothing to export, and a message says so.
+		await page.getByRole('button', { name: 'Untick all' }).click();
+		await expect(page.locator('.ks-stats')).toContainText('0 ticked');
+		await page.getByRole('button', { name: 'Export to Excel' }).click();
+		await expect(page.getByText('Tick at least one paper to export.')).toBeVisible();
+		await page.getByRole('button', { name: 'Tick all', exact: true }).click();
+		await expect(page.locator('.ks-stats')).toContainText('4 ticked');
+
+		// Only the fixture page and jsDelivr were requested, and the page itself is unchanged.
+		expect(run.requests.filter((entry) => !entry.startsWith('cdn.jsdelivr.net/') && !entry.startsWith('arxiv.org/list/'))).toEqual([]);
+		expect(await run.cspViolations()).toEqual([]);
+	});
+
+	test('"Back to all demos" lists the single demo of the site, and it can be opened again', async ({ page }) => {
+		await serveArxiv(page, 'list');
+		await page.goto(ARXIV_LIST_URL);
+		await clickBookmarklet(page);
+		await expect(page.locator(PANEL_TITLE)).toHaveText('Papers to spreadsheet');
+		await page.getByRole('button', { name: 'Back to all demos' }).click();
+		await expect(page.getByText('Demos for arXiv')).toBeVisible();
+		await expect(page.locator('.agentlet-demo-card')).toHaveCount(1);
+		await page.getByRole('button', { name: 'Try it' }).click();
+		await expect(page.locator('.ap-table tbody tr')).toHaveCount(4);
+	});
+
+	test('search results: reads the first tag as the primary category', async ({ page }) => {
+		await serveArxiv(page, 'search');
+		await page.goto(ARXIV_SEARCH_URL);
+		await clickBookmarklet(page);
+		await expect(page.locator('.ks-stats')).toContainText('3 papers');
+		const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Export to Excel' }).click()]);
+		expect(download.suggestedFilename()).toBe('arxiv-search.xlsx');
+		const book = await readWorkbook(download);
+		const rows = XLSX.utils.sheet_to_json<string[]>(book.Sheets.Papers, { header: 1 });
+		expect(rows.map((row) => row[0])).toEqual(['ID', '2609.00001', '2609.00002', '2609.00003']);
+		expect(rows.map((row) => row[3])).toEqual(['Primary category', 'cs.AI', 'cs.LG', 'cs.AI']);
+		expect(rows[2][1]).toBe('Synthetic paper two: a study of $\\alpha$-stable widgets');
+		expect(rows[1][5]).toBe('https://arxiv.org/pdf/2609.00001');
+	});
+
+	test('abstract page: shows a citation line built from the page and copies it', async ({ page, context }) => {
+		await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: 'https://arxiv.org' });
+		const run = await serveArxiv(page, 'abs');
+		await page.goto(ARXIV_ABS_URL);
+		await clickBookmarklet(page);
+		await expect(page.getByRole('heading', { name: 'Paper details' })).toBeVisible();
+		const citation = 'Ada Example, Ben Sample, Chi Placeholder et al. Synthetic paper one: agents that read tables. arXiv:2609.00001 [cs.AI], 2026.';
+		await expect(page.locator('[data-role="citation"]')).toHaveText(citation);
+		await page.getByRole('button', { name: 'Copy citation' }).click();
+		await expect(page.getByText('Copied the citation.')).toBeVisible();
+		expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(citation);
+		expect(await run.cspViolations()).toEqual([]);
 	});
 });

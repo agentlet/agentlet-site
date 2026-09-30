@@ -30,9 +30,13 @@ export const DEMOS_VERSION: string = JSON.parse(readFileSync(join(ROOT, 'package
 export const CORE_VERSION: string = JSON.parse(readFileSync(join(ROOT, 'node_modules/agentlet-core/package.json'), 'utf8')).version;
 
 export const WIKIPEDIA_URL = 'https://en.wikipedia.org/wiki/Apollo_11';
+export const ARXIV_LIST_URL = 'https://arxiv.org/list/cs.AI/recent';
+export const ARXIV_SEARCH_URL = 'https://arxiv.org/search/?query=synthetic&searchtype=title';
+export const ARXIV_ABS_URL = 'https://arxiv.org/abs/2609.00001';
 export const OTHER_SITE_URL = 'https://example.com/';
 
 const WIKIPEDIA_CSP = readFileSync(join(FIXTURES, 'wikipedia-csp.txt'), 'utf8').trim();
+const ARXIV_CSP = readFileSync(join(FIXTURES, 'arxiv-csp.txt'), 'utf8').trim();
 const WIKIPEDIA_HTML = readFileSync(join(FIXTURES, 'wikipedia-article.html'), 'utf8');
 
 export interface KnownSitesRun {
@@ -117,6 +121,13 @@ export async function serveKnownSitesPage(page: Page, options: Options): Promise
 
 export async function serveWikipedia(page: Page): Promise<KnownSitesRun> {
 	return serveKnownSitesPage(page, { html: WIKIPEDIA_HTML, csp: WIKIPEDIA_CSP, url: WIKIPEDIA_URL });
+}
+
+/** An arXiv fixture page, served with the policy arxiv.org really sent (frame-ancestors only). */
+export async function serveArxiv(page: Page, kind: 'list' | 'search' | 'abs'): Promise<KnownSitesRun> {
+	const html = readFileSync(join(FIXTURES, `arxiv-${kind}.html`), 'utf8');
+	const url = { list: ARXIV_LIST_URL, search: ARXIV_SEARCH_URL, abs: ARXIV_ABS_URL }[kind];
+	return serveKnownSitesPage(page, { html, csp: ARXIV_CSP, url });
 }
 
 /**
