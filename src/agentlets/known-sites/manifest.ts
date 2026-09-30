@@ -106,7 +106,17 @@ export const WIKIPEDIA_PATTERN = '^https?:\\/\\/[a-z0-9-]+(?:\\.m)?\\.wikipedia\
 /** A Hacker News item page (story with its comments). */
 export const HACKER_NEWS_ITEM_PATTERN = '^https?:\\/\\/news\\.ycombinator\\.com\\/item\\?(?:[^#]*&)?id=\\d+';
 
-export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [];
+export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
+	{
+		id: 'wikipedia-tables',
+		site: 'wikipedia',
+		file: 'wikipedia-tables',
+		className: 'WikipediaTablesModule',
+		title: 'Tables to spreadsheet',
+		description: 'Finds the infobox and every table of the article, previews them, and exports them to Excel.',
+		pattern: WIKIPEDIA_PATTERN,
+	},
+];
 
 export function findKnownSite(id: string): KnownSite | undefined {
 	return KNOWN_SITES.find((site) => site.id === id);
