@@ -1,4 +1,4 @@
-# agentlet-demos
+# @agentlet/demos
 
 Agentlet demos that run on well-known sites, loaded by one bookmarklet through
 [jsDelivr](https://www.jsdelivr.com/). Part of
@@ -14,7 +14,7 @@ bookmarks bar, then click it on a supported page. It is a script tag that points
 at:
 
 ```
-https://cdn.jsdelivr.net/npm/agentlet-demos@1/dist/loader.js
+https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js
 ```
 
 | Site | Demos |

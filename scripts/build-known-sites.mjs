@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Builds the `agentlet-demos` npm package contents into
+ * Builds the `@agentlet/demos` npm package contents into
  * packages/agentlet-demos/dist/, from src/agentlets/known-sites/manifest.ts,
  * the single source of truth for the agentlets that run on well-known
  * third-party sites.
@@ -106,7 +106,7 @@ function buildRegistry({ launcher, agentlets }) {
 // the core; the loader and the launcher read it.
 (function () {
 	'use strict';
-	var fallback = 'https://cdn.jsdelivr.net/npm/agentlet-demos@${DEMOS_VERSION}/dist/';
+	var fallback = 'https://cdn.jsdelivr.net/npm/@agentlet/demos@${DEMOS_VERSION}/dist/';
 	var script = document.currentScript;
 	var own = script && script.src ? script.src.replace(/[?#].*$/, '') : '';
 	var base = own ? own.replace(/[^/]*$/, '') : fallback;
@@ -143,7 +143,7 @@ async function main() {
 	});
 
 	console.log(
-		`Built packages/agentlet-demos/dist/ (agentlet-demos@${DEMOS_VERSION}, agentlet-core@${CORE_VERSION}: loader, registry, ${agentlets.length} demo bundle(s): ${agentlets.map((e) => e.id).join(', ')}, plus the launcher)`,
+		`Built packages/agentlet-demos/dist/ (@agentlet/demos@${DEMOS_VERSION}, agentlet-core@${CORE_VERSION}: loader, registry, ${agentlets.length} demo bundle(s): ${agentlets.map((e) => e.id).join(', ')}, plus the launcher)`,
 	);
 }
 

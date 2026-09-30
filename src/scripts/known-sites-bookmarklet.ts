@@ -7,7 +7,7 @@ import { KNOWN_SITES_DEV_PORT } from './known-sites-dev.mjs';
  * meant for other people's sites, and agentlet.io itself is not allowed by
  * their Content Security Policy (Wikipedia's allows `*.jsdelivr.net` and
  * localhost, not agentlet.io). So it loads its loader from jsDelivr, from the
- * npm package `agentlet-demos`, using the major range `@1`: a fix released as
+ * npm package `@agentlet/demos`, using the major range `@1`: a fix released as
  * 1.0.1 reaches everyone without dragging a new bookmark. The loader then
  * pins everything else it loads to its own exact version (see
  * src/scripts/known-sites-loader.ts).
@@ -17,7 +17,7 @@ import { KNOWN_SITES_DEV_PORT } from './known-sites-dev.mjs';
  */
 
 /** Production loader URL, the one visitors drag to their bookmarks bar. */
-export const KNOWN_SITES_LOADER_URL = 'https://cdn.jsdelivr.net/npm/agentlet-demos@1/dist/loader.js';
+export const KNOWN_SITES_LOADER_URL = 'https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js';
 
 /**
  * Where `npm run dev` serves the locally built package (see astro.config.mjs

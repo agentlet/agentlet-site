@@ -39,7 +39,7 @@ hand; edit `src/agentlets/` and let the build regenerate this directory.
 
 The demos that run on other sites (Wikipedia, arXiv) are not served from
 `/cdn/v1/`. Those sites' Content Security Policies do not allow agentlet.io, so
-they are published to npm as `agentlet-demos` and served by jsDelivr. They are
+they are published to npm as `@agentlet/demos` and served by jsDelivr. They are
 built by `scripts/build-known-sites.mjs` into `packages/agentlet-demos/dist/`,
 which is also gitignored. See `/docs/guides/known-sites/`. Nothing about
 `/cdn/v1/` or the on-site demo changes because of them.

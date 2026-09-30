@@ -57,7 +57,7 @@ function isJsDelivr(url: string): boolean {
 /** Where this loader's siblings and the core come from. See the file comment. */
 function resolveLocations(): { registryUrl: string; coreUrl: string; pdfWorkerUrl: string } {
 	if (!ownSrc || isJsDelivr(ownSrc)) {
-		const demos = `${JSDELIVR_ORIGIN}/npm/agentlet-demos@${__DEMOS_VERSION__}/dist/`;
+		const demos = `${JSDELIVR_ORIGIN}/npm/@agentlet/demos@${__DEMOS_VERSION__}/dist/`;
 		const core = `${JSDELIVR_ORIGIN}/npm/agentlet-core@${__CORE_VERSION__}/dist/`;
 		return {
 			registryUrl: `${demos}registry.js`,

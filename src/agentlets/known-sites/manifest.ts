@@ -1,6 +1,6 @@
 /**
  * Single source of truth for the agentlets that run on well-known third-party
- * sites (Wikipedia, arXiv), distributed as the `agentlet-demos` npm
+ * sites (Wikipedia, arXiv), distributed as the `@agentlet/demos` npm
  * package (packages/agentlet-demos/) through jsDelivr. The on-site demos
  * under src/agentlets/manifest.ts are a separate set served from agentlet.io
  * itself; nothing here changes how they work.

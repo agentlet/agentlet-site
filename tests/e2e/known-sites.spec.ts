@@ -17,7 +17,7 @@ import {
 
 /**
  * The known-sites demos (src/agentlets/known-sites/), distributed as the
- * `agentlet-demos` npm package through jsDelivr. Nothing here touches a real
+ * `@agentlet/demos` npm package through jsDelivr. Nothing here touches a real
  * third-party site: fixtures are served as if from those sites, Wikipedia's
  * own Content-Security-Policy header included, and the jsDelivr URLs are
  * answered from the locally built package (see known-sites-helpers.ts).
@@ -41,7 +41,7 @@ test.describe('Known-sites page', () => {
 		await page.goto('/try/known-sites/');
 		const href = await page.locator('#known-sites-link').getAttribute('href');
 		// Not served by `npm run dev`, so it points at the package on jsDelivr, by major range.
-		expect(href).toContain('https://cdn.jsdelivr.net/npm/agentlet-demos@1/dist/loader.js');
+		expect(href).toContain('https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js');
 		expect(href).toMatch(/^javascript:/);
 
 		const main = page.locator('main');
@@ -83,14 +83,14 @@ test.describe('Known-sites bookmarklet loader', () => {
 
 		const external = run.requests.filter((entry) => !entry.startsWith('en.wikipedia.org/'));
 		// The bookmarklet uses the major range; every later request names an exact version.
-		expect(external[0]).toBe('cdn.jsdelivr.net/npm/agentlet-demos@1/dist/loader.js');
+		expect(external[0]).toBe('cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js');
 		for (const entry of external.slice(1)) {
 			expect(entry).toMatch(
-				new RegExp(`^cdn\\.jsdelivr\\.net/npm/(agentlet-demos@${DEMOS_VERSION}|agentlet-core@${CORE_VERSION})/dist/`),
+				new RegExp(`^cdn\\.jsdelivr\\.net/npm/(@agentlet/demos@${DEMOS_VERSION}|agentlet-core@${CORE_VERSION})/dist/`),
 			);
 		}
 		expect(external.some((entry) => entry.includes(`agentlet-core@${CORE_VERSION}/dist/agentlet-core.min.js`))).toBe(true);
-		expect(external.some((entry) => entry.includes(`agentlet-demos@${DEMOS_VERSION}/dist/registry.js`))).toBe(true);
+		expect(external.some((entry) => entry.includes(`@agentlet/demos@${DEMOS_VERSION}/dist/registry.js`))).toBe(true);
 		expect(external.some((entry) => entry.includes('agentlets/wikipedia-'))).toBe(false); // demos are lazy
 	});
 

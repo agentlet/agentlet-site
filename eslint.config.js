@@ -12,7 +12,7 @@ export default tseslint.config(
       '.wrangler/',
       'node_modules/',
       'public/cdn/v1/',
-      // Built contents of the agentlet-demos npm package, see
+      // Built contents of the @agentlet/demos npm package, see
       // scripts/build-known-sites.mjs.
       'packages/agentlet-demos/dist/',
       'test-results/',

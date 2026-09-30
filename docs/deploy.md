@@ -279,10 +279,10 @@ same format for Workers static assets and Pages. It currently sends the
 old `/docs/getting-started/` page to `/docs/getting-started/install/`.
 Add a line there whenever a published URL changes.
 
-## Publishing the agentlet-demos package
+## Publishing the @agentlet/demos package
 
 The known-sites demos are not part of the Cloudflare deployment. They are an
-npm package, `agentlet-demos` (`packages/agentlet-demos/`), served to other
+npm package, `@agentlet/demos` (`packages/agentlet-demos/`), served to other
 sites by jsDelivr. See `/docs/guides/known-sites/` for why. The Cloudflare build
 is unchanged and does not build or publish it.
 
@@ -290,7 +290,7 @@ One-time setup, done by a human with access to the npm account and the GitHub
 repository:
 
 1. On npmjs.com, create an automation token that can publish
-   `agentlet-demos` (a granular token limited to that package is best).
+   `@agentlet/demos` (a granular token limited to that package is best).
 2. In the GitHub repository settings, add it as the Actions secret
    `NPM_TOKEN`.
 
