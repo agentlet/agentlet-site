@@ -211,6 +211,30 @@ export function requestShowLauncher(): void {
 }
 
 /**
+ * Makes the launcher module named `launcherName` answer SHOW_LAUNCHER_EVENT
+ * by activating itself. Call it from the launcher's initModule().
+ *
+ * The listener must outlive the launcher's own deactivation: it is needed
+ * exactly while a demo is active and the launcher is not. agentlet-core runs
+ * a module's cleanupModule() on every deactivation, not only on teardown
+ * (Module.cleanup() in agentlet-core src/core/Module.ts, called by
+ * ModuleRegistry.deactivateModule()), and initModule() runs only once. So the
+ * listener is removed when the whole core is torn down, on the `core:cleanup`
+ * event, and never in cleanupModule().
+ */
+export function listenForShowLauncher(launcherName: string): void {
+	const onShowLauncher = (): void => {
+		const registry = window.agentlet?.moduleRegistry;
+		const self = registry?.get(launcherName);
+		if (registry && self) void registry.activateModule(self);
+	};
+	window.addEventListener(SHOW_LAUNCHER_EVENT, onShowLauncher);
+	window.agentlet?.eventBus.on('core:cleanup', () => {
+		window.removeEventListener(SHOW_LAUNCHER_EVENT, onShowLauncher);
+	});
+}
+
+/**
  * True on `/docs/` and below, the one place the launcher itself never runs
  * (its own pattern excludes it, see launcher.ts's NOT_DOCS_PATTERN, so it
  * cannot be reached with requestShowLauncher() there either).
