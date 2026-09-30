@@ -26,10 +26,11 @@
  * Usage: node scripts/build-cdn.mjs
  */
 
-import { build, buildSync } from 'esbuild';
+import { build } from 'esbuild';
 import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
+import { loadTsModule } from './lib/load-ts-module.mjs';
 import { LOADER_URL } from '../src/scripts/agentlet-inline-snippets.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -49,19 +50,7 @@ const LOADER_OUT = join(ROOT, 'public', LOADER_URL.replace(/^\//, ''));
  * rather than depending on Node's own experimental TypeScript support.
  */
 async function loadManifest() {
-	const outfile = join(ROOT, 'node_modules/.agentlet-manifest.generated.mjs');
-	buildSync({
-		entryPoints: [join(AGENTLETS_SRC, 'manifest.ts')],
-		bundle: true,
-		write: true,
-		outfile,
-		format: 'esm',
-		platform: 'neutral',
-		target: 'es2022',
-		logLevel: 'warning',
-	});
-	const mod = await import(pathToFileURL(outfile).href);
-	rmSync(outfile, { force: true });
+	const mod = await loadTsModule(join(AGENTLETS_SRC, 'manifest.ts'), '.agentlet-manifest.generated.mjs');
 	return mod.AGENTLET_MANIFEST;
 }
 
