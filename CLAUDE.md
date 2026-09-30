@@ -11,8 +11,8 @@ agentlet framework (agentlet-core).
 - `src/content/docs/docs/`: Starlight documentation content, served under
   `/docs/`. `src/content/docs/docs/index.md` is `/docs/`,
   `src/content/docs/docs/getting-started.md` is `/docs/getting-started/`.
-- `src/agentlets/known-sites/`: agentlets that run on other sites (Wikipedia), with their own `manifest.ts`.
-  Built into the `agentlet-demos` npm package (`packages/agentlet-demos/`, served by jsDelivr, `dist/` is
+- `src/agentlets/known-sites/`: agentlets that run on other sites (Wikipedia, arXiv), with their own
+  `manifest.ts`. Built into the `agentlet-demos` npm package (`packages/agentlet-demos/`, served by jsDelivr, `dist/` is
   gitignored) by `scripts/build-known-sites.mjs`. Page at `/try/known-sites/`,
   docs at `/docs/guides/known-sites/`. Unrelated to `/cdn/v1/`.
 - `src/content.config.ts`: Starlight's `docs` content collection.

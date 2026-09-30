@@ -14,10 +14,11 @@ A bookmarklet runs inside someone else's page, so that page's Content Security P
 This is also the limit of the approach. A site whose policy does not allow jsDelivr, or does not allow inline scripts at all, cannot run the bookmarklet. On 30 September 2026:
 
 - Wikipedia allows it.
+- arXiv allows it: it sends only `frame-ancestors 'none'`, with no script-src.
 - GitHub, MDN, Stack Overflow and YouTube do not allow inline scripts without a nonce or hash, so even the bookmarklet's own code is refused.
 - Hacker News allows inline scripts but limits loaded scripts to itself, Google reCAPTCHA and cdnjs, so the script from jsDelivr is refused. It is an example of a site that restricts scripts to its own domain and a few others. It has no demo here.
 
-Policies change, so check the real page before relying on a site. `tests/e2e/fixtures/known-sites/` keeps the policy Wikipedia sent, and the tests apply them.
+Policies change, so check the real page before relying on a site. `tests/e2e/fixtures/known-sites/` keeps the policies Wikipedia and arXiv sent, and the tests apply them.
 
 ## What the bookmarklet does
 
@@ -60,7 +61,7 @@ The build, the registry, the launcher and the known-sites page all read the mani
 
 ## Tests
 
-The Playwright tests do not touch any real site. They serve committed fixtures as if they came from `en.wikipedia.org`, send the policy header the site really sent, and answer the jsDelivr URLs from the locally built package and from `node_modules/agentlet-core`. A test also checks that after the loader, every request names an exact version and goes to jsDelivr only. `npm run test:e2e` builds the package first.
+The Playwright tests do not touch any real site. They serve committed fixtures as if they came from `en.wikipedia.org` and `arxiv.org`, send the policy header each site really sent, and answer the jsDelivr URLs from the locally built package and from `node_modules/agentlet-core`. A test also checks that after the loader, every request names an exact version and goes to jsDelivr only. `npm run test:e2e` builds the package first.
 
 ## Publishing
 
