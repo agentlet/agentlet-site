@@ -1,10 +1,30 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
+import { startKnownSitesServer } from './scripts/serve-known-sites.mjs';
 import { AGENTLET_REOPEN_SCRIPT } from './src/scripts/agentlet-inline-snippets.mjs';
+
+/**
+ * Dev only: starts the small server that serves the locally built
+ * `agentlet-demos` package (scripts/serve-known-sites.mjs), so the
+ * known-sites bookmarklet on /try/known-sites/ can point at
+ * http://localhost:4400/ while developing. It is not a route of this dev
+ * server on purpose: see the comment at the top of that script.
+ */
+function knownSitesDevServer() {
+  return {
+    name: 'agentlet-known-sites-dev',
+    apply: 'serve',
+    configureServer(server) {
+      const demos = startKnownSitesServer();
+      server.httpServer?.on('close', () => demos.close());
+    },
+  };
+}
 
 export default defineConfig({
   site: 'https://agentlet.io',
+  vite: { plugins: [knownSitesDevServer()] },
   integrations: [
     starlight({
       title: 'agentlet',
