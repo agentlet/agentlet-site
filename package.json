@@ -8,15 +8,17 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "predev": "node scripts/build-cdn.mjs",
+    "predev": "node scripts/build-cdn.mjs && node scripts/build-known-sites.mjs",
     "dev": "astro dev",
     "prebuild": "node scripts/build-cdn.mjs",
     "build": "astro build",
     "build:cdn": "node scripts/build-cdn.mjs",
+    "build:known-sites": "node scripts/build-known-sites.mjs",
     "generate:demo-receipt": "node scripts/generate-demo-receipt.mjs",
     "preview": "astro preview",
     "check": "astro check",
-    "lint": "eslint . && node scripts/check-typography.mjs src public astro.config.mjs",
+    "lint": "eslint . && node scripts/check-typography.mjs src public astro.config.mjs packages scripts tests .github",
+    "pretest:e2e": "node scripts/build-known-sites.mjs",
     "test:e2e": "playwright test",
     "prepare": "husky"
   },

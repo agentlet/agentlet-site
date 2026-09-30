@@ -1,0 +1,25 @@
+{
+  "name": "agentlet-demos",
+  "version": "1.0.0",
+  "description": "Agentlet demos for well-known sites (Wikipedia, arXiv), loaded by a bookmarklet through jsDelivr.",
+  "license": "MIT",
+  "homepage": "https://agentlet.io/try/known-sites/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agentlet/agentlet-site.git",
+    "directory": "packages/agentlet-demos"
+  },
+  "keywords": [
+    "agentlet",
+    "bookmarklet",
+    "wikipedia",
+    "arxiv"
+  ],
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

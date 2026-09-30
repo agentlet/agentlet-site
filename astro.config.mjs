@@ -1,10 +1,30 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
+import { startKnownSitesServer } from './scripts/serve-known-sites.mjs';
 import { AGENTLET_REOPEN_SCRIPT } from './src/scripts/agentlet-inline-snippets.mjs';
+
+/**
+ * Dev only: starts the small server that serves the locally built
+ * `agentlet-demos` package (scripts/serve-known-sites.mjs), so the
+ * known-sites bookmarklet on /try/known-sites/ can point at
+ * http://localhost:4400/ while developing. It is not a route of this dev
+ * server on purpose: see the comment at the top of that script.
+ */
+function knownSitesDevServer() {
+  return {
+    name: 'agentlet-known-sites-dev',
+    apply: 'serve',
+    configureServer(server) {
+      const demos = startKnownSitesServer();
+      server.httpServer?.on('close', () => demos.close());
+    },
+  };
+}
 
 export default defineConfig({
   site: 'https://agentlet.io',
+  vite: { plugins: [knownSitesDevServer()] },
   integrations: [
     starlight({
       title: 'agentlet',
@@ -45,10 +65,11 @@ export default defineConfig({
         { tag: 'script', content: AGENTLET_REOPEN_SCRIPT },
       ],
       plugins: [
-        // /try/bookmarklet/ is a plain Astro page, not part of the docs
-        // content collection, so this plugin cannot resolve it as a slug;
-        // excluded rather than dropping the link from docs/live-demo.md.
-        starlightLinksValidator({ exclude: ['/try/bookmarklet/'] }),
+        // /try/bookmarklet/ and /try/known-sites/ are plain Astro pages, not
+        // part of the docs content collection, so this plugin cannot resolve
+        // them as slugs; excluded rather than dropping the links from the
+        // docs (docs/live-demo.md, docs/guides/known-sites.md).
+        starlightLinksValidator({ exclude: ['/try/bookmarklet/', '/try/known-sites/'] }),
       ],
       sidebar: [
         { label: 'Introduction', slug: 'docs' },
@@ -92,6 +113,7 @@ export default defineConfig({
             { label: 'Mount API', slug: 'docs/guides/mount-api' },
             { label: 'TypeScript', slug: 'docs/guides/typescript' },
             { label: 'Script injection and registry', slug: 'docs/guides/script-injection' },
+            { label: 'Known-site demos', slug: 'docs/guides/known-sites' },
             { label: 'Layering and z-index', slug: 'docs/guides/z-index' },
           ],
         },

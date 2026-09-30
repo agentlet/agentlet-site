@@ -29,6 +29,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Build the agentlet-demos package
+        run: npm run build:known-sites
+
+      - name: Check that the package would publish cleanly
+        working-directory: packages/agentlet-demos
+        run: npm pack --dry-run
+
       - name: Check built pages for forbidden characters
         run: node scripts/check-typography.mjs dist
 

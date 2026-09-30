@@ -1,0 +1,50 @@
+name: Publish agentlet-demos
+
+# Publishes packages/agentlet-demos to npm when a tag named demos-v<version> is
+# pushed. Nothing here runs on a normal push or pull request: the regular
+# build workflow (build.yml) builds the package on every push to catch
+# breakage, but never publishes it.
+
+on:
+  push:
+    tags:
+      - 'demos-v*'
+
+permissions:
+  contents: read
+  # Needed for npm provenance (a signed statement of where the package was built).
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check that the tag matches the package version
+        run: |
+          version="$(node -p "require('./packages/agentlet-demos/package.json').version")"
+          if [ "${GITHUB_REF_NAME}" != "demos-v${version}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match packages/agentlet-demos/package.json version ${version} (expected demos-v${version})."
+            exit 1
+          fi
+
+      - name: Build the package
+        run: npm run build:known-sites
+
+      - name: Publish to npm
+        working-directory: packages/agentlet-demos
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
