@@ -116,6 +116,15 @@ export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 		description: 'Finds the infobox and every table of the article, previews them, and exports them to Excel.',
 		pattern: WIKIPEDIA_PATTERN,
 	},
+	{
+		id: 'wikipedia-timeline',
+		site: 'wikipedia',
+		file: 'wikipedia-timeline',
+		className: 'WikipediaTimelineModule',
+		title: 'Date timeline',
+		description: 'Finds the dates in the article text and builds a chronological timeline that scrolls to each passage.',
+		pattern: WIKIPEDIA_PATTERN,
+	},
 ];
 
 export function findKnownSite(id: string): KnownSite | undefined {
