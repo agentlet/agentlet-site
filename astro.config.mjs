@@ -80,6 +80,7 @@ export default defineConfig({
             { label: 'Install', slug: 'docs/getting-started/install' },
             { label: 'Quick demo', slug: 'docs/getting-started/quick-demo' },
             { label: 'Scaffold an agentlet', slug: 'docs/getting-started/scaffold' },
+            { label: 'Generate with Claude Code', slug: 'docs/getting-started/generate-with-claude-code' },
             { label: 'Manual setup', slug: 'docs/getting-started/manual-setup' },
           ],
         },
