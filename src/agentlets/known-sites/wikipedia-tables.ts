@@ -1,6 +1,7 @@
-import type { PageHighlighterHighlightControl, TableData } from 'agentlet-core';
+import type { PageHighlighterHighlightControl } from 'agentlet-core';
 import { backToLauncherHtml, sourceLinkHtml, wireBackToLauncher } from '../shared';
 import { WIKIPEDIA_PATTERN } from './manifest';
+import { type ExportableTable, exportTable, exportWorkbook, sheetNameFrom, slugify, toTableData } from './table-export';
 import { KNOWN_SITES_SOURCE_DIR, KNOWN_SITE_STYLES, escapeHtml, squash } from './shared';
 
 /**
@@ -33,30 +34,13 @@ const NOISE_SELECTOR = [
 	'[style*="display: none"]',
 ].join(', ');
 
-/** Sheet names in Excel: at most 31 characters, none of `\ / ? * [ ] :`. */
-const MAX_SHEET_NAME = 31;
 const PREVIEW_ROWS = 3;
 const MAX_COLSPAN = 100;
 const MAX_ROWSPAN = 1000;
 
-interface FoundTable {
+interface FoundTable extends ExportableTable {
 	kind: 'infobox' | 'wikitable';
 	element: HTMLTableElement;
-	/** Shown in the panel. */
-	label: string;
-	/** Excel sheet name, unique within the article. */
-	sheetName: string;
-	data: TableData;
-}
-
-/** The slice of SheetJS (the copy agentlet-core bundles and exposes as `window.XLSX`) used to build one workbook with several sheets. */
-interface SheetJs {
-	utils: {
-		book_new(): unknown;
-		aoa_to_sheet(rows: string[][]): unknown;
-		book_append_sheet(workbook: unknown, sheet: unknown, name: string): void;
-	};
-	writeFile(workbook: unknown, filename: string): void;
 }
 
 function cleanCellText(cell: Element): string {
@@ -138,49 +122,6 @@ function infoboxGrid(table: HTMLTableElement): string[][] {
 	return rows;
 }
 
-/** Builds a detached `<table>` from a grid so the core's own extractor reads it. */
-function toTableData(grid: string[][]): TableData {
-	const table = document.createElement('table');
-	const [head, ...body] = grid;
-	const thead = table.createTHead().insertRow();
-	for (const text of head ?? []) {
-		const th = document.createElement('th');
-		th.textContent = text;
-		thead.appendChild(th);
-	}
-	const tbody = table.createTBody();
-	for (const values of body) {
-		const tr = tbody.insertRow();
-		for (const text of values) tr.insertCell().textContent = text;
-	}
-
-	const api = window.agentlet?.tables;
-	if (api) return api.extract(table);
-	return {
-		headers: head ?? [],
-		rows: body,
-		metadata: {
-			totalRows: body.length,
-			totalColumns: head?.length ?? 0,
-			extractedAt: new Date().toISOString(),
-			tableId: null,
-		},
-	};
-}
-
-function sheetNameFrom(label: string, used: Set<string>): string {
-	const base = label.replace(/[\\/?*[\]:]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, MAX_SHEET_NAME) || 'Table';
-	let name = base;
-	let n = 2;
-	while (used.has(name.toLowerCase())) {
-		const suffix = ` ${n}`;
-		name = base.slice(0, MAX_SHEET_NAME - suffix.length) + suffix;
-		n += 1;
-	}
-	used.add(name.toLowerCase());
-	return name;
-}
-
 function articleSlug(): string {
 	const raw = window.location.pathname.split('/wiki/')[1] ?? 'article';
 	let title = raw;
@@ -189,7 +130,7 @@ function articleSlug(): string {
 	} catch {
 		// A malformed escape in the path: use the raw text.
 	}
-	return title.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '') || 'article';
+	return slugify(title, 'article');
 }
 
 function headingText(heading: Element): string {
@@ -454,48 +395,12 @@ class WikipediaTablesModule extends window.agentlet.Module {
 	}
 
 	private async _exportOne(table: FoundTable): Promise<void> {
-		const api = window.agentlet?.tables;
-		if (!api) {
-			window.agentlet?.utils.MessageBubble.error('The table export API is not available in this browser.');
-			return;
-		}
-		const slug = table.kind === 'infobox' ? 'infobox' : table.sheetName.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-+|-+$/g, '');
-		const result = await api.download(table.data, {
-			filename: `${articleSlug()}-${slug || 'table'}.xlsx`,
-			sheetName: table.sheetName,
-		});
-		if (!result.success) {
-			window.agentlet?.utils.MessageBubble.error(`Could not export the table: ${result.error}`);
-			return;
-		}
-		window.agentlet?.utils.MessageBubble.success(`Exported ${table.label}.`);
+		const slug = table.kind === 'infobox' ? 'infobox' : slugify(table.sheetName, 'table');
+		await exportTable(table, `${articleSlug()}-${slug}.xlsx`);
 	}
 
-	/**
-	 * One workbook, one sheet per table. agentlet-core's download() writes a
-	 * single sheet per file, so this uses the SheetJS copy the core bundles
-	 * and exposes as `window.XLSX` for the multi-sheet case, and falls back to
-	 * one download per table if that global is missing.
-	 */
 	private async _exportAll(): Promise<void> {
-		if (this._tables.length === 1) {
-			await this._exportOne(this._tables[0]);
-			return;
-		}
-
-		const xlsx = (globalThis as unknown as { XLSX?: SheetJs }).XLSX;
-		if (xlsx?.utils && typeof xlsx.writeFile === 'function') {
-			const workbook = xlsx.utils.book_new();
-			for (const table of this._tables) {
-				const sheet = xlsx.utils.aoa_to_sheet([table.data.headers, ...table.data.rows]);
-				xlsx.utils.book_append_sheet(workbook, sheet, table.sheetName);
-			}
-			xlsx.writeFile(workbook, `${articleSlug()}-tables.xlsx`);
-			window.agentlet?.utils.MessageBubble.success(`Exported ${this._tables.length} tables to one Excel file.`);
-			return;
-		}
-
-		for (const table of this._tables) await this._exportOne(table);
+		await exportWorkbook(this._tables, `${articleSlug()}-tables.xlsx`, (table) => `${articleSlug()}-${slugify(table.sheetName, 'table')}.xlsx`);
 	}
 }
 
