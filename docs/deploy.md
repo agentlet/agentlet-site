@@ -302,6 +302,7 @@ To release:
 
 The `publish-demos` workflow (`.github/workflows/publish-demos.yml`) builds the
 package, fails if the tag does not match the version in `package.json`, and
-publishes with provenance. The bookmarklet uses the `@1` range, so a 1.x
+publishes without npm provenance, because the source repository is
+private and npm only supports provenance for public ones. The bookmarklet uses the `@1` range, so a 1.x
 release reaches existing bookmarks. A breaking change needs a new major
 version, a new bookmarklet URL, and a new bookmarklet on the site.

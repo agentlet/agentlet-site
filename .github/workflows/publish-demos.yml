@@ -12,8 +12,6 @@ on:
 
 permissions:
   contents: read
-  # Needed for npm provenance (a signed statement of where the package was built).
-  id-token: write
 
 jobs:
   publish:
@@ -45,6 +43,6 @@ jobs:
 
       - name: Publish to npm
         working-directory: packages/agentlet-demos
-        run: npm publish --provenance --access public
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
