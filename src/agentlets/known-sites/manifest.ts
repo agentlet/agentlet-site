@@ -125,6 +125,15 @@ export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 		description: 'Finds the dates in the article text and builds a chronological timeline that scrolls to each passage.',
 		pattern: WIKIPEDIA_PATTERN,
 	},
+	{
+		id: 'hacker-news-thread',
+		site: 'hacker-news',
+		file: 'hacker-news-thread',
+		className: 'HackerNewsThreadModule',
+		title: 'Thread navigator',
+		description: 'Moves between top-level comments with j and k, collapses the thread, and marks what is new since your last visit.',
+		pattern: HACKER_NEWS_ITEM_PATTERN,
+	},
 ];
 
 export function findKnownSite(id: string): KnownSite | undefined {
