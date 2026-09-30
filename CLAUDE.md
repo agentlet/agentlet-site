@@ -11,6 +11,11 @@ agentlet framework (agentlet-core).
 - `src/content/docs/docs/`: Starlight documentation content, served under
   `/docs/`. `src/content/docs/docs/index.md` is `/docs/`,
   `src/content/docs/docs/getting-started.md` is `/docs/getting-started/`.
+- `src/agentlets/known-sites/`: agentlets that run on other sites (Wikipedia,
+  Hacker News), with their own `manifest.ts`. Built into the `agentlet-demos`
+  npm package (`packages/agentlet-demos/`, served by jsDelivr, `dist/` is
+  gitignored) by `scripts/build-known-sites.mjs`. Page at `/try/known-sites/`,
+  docs at `/docs/guides/known-sites/`. Unrelated to `/cdn/v1/`.
 - `src/content.config.ts`: Starlight's `docs` content collection.
 - `public/`: static files copied as-is (favicons, manifest, images, GIFs,
   architecture diagrams).
@@ -24,6 +29,8 @@ agentlet framework (agentlet-core).
 - `npm run preview`: preview the production build.
 - `npm run check`: `astro check` (TypeScript and Astro diagnostics).
 - `npm run lint`: ESLint over the whole project.
+- `npm run build:known-sites`: build `packages/agentlet-demos/dist/`. `npm run dev`
+  does it and serves it on `http://localhost:4400`; `npm run test:e2e` does it first.
 
 Before committing, `npm run lint`, `npm run check` and `npm run build` must
 all exit 0.

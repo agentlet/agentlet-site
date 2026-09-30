@@ -34,3 +34,12 @@ hand; edit `src/agentlets/` and let the build regenerate this directory.
   the tiny inline reopen script every page carries, see
   `src/scripts/agentlet-inline-snippets.mjs`); everything else above is
   loaded by this file or by agentlet-core itself.
+
+## Not here: the known-sites demos
+
+The demos that run on other sites (Wikipedia, Hacker News) are not served from
+`/cdn/v1/`. Those sites' Content Security Policies do not allow agentlet.io, so
+they are published to npm as `agentlet-demos` and served by jsDelivr. They are
+built by `scripts/build-known-sites.mjs` into `packages/agentlet-demos/dist/`,
+which is also gitignored. See `/docs/guides/known-sites/`. Nothing about
+`/cdn/v1/` or the on-site demo changes because of them.
