@@ -12,8 +12,8 @@ import { buildKnownSitesBookmarkletHref, KNOWN_SITES_LOADER_URL } from '../../sr
  * network), with the real Content-Security-Policy header Wikipedia sends, and
  * answer the jsDelivr URLs from the locally built files:
  *
- *   https://cdn.jsdelivr.net/npm/agentlet-demos@1/dist/loader.js   the bookmarklet's range URL
- *   https://cdn.jsdelivr.net/npm/agentlet-demos@<x.y.z>/dist/...   everything the loader then loads
+ *   https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js   the bookmarklet's range URL
+ *   https://cdn.jsdelivr.net/npm/@agentlet/demos@<x.y.z>/dist/...   everything the loader then loads
  *   https://cdn.jsdelivr.net/npm/agentlet-core@<x.y.z>/dist/...    the core
  *
  * Every request is recorded, so a test can check that nothing went to a host
@@ -93,7 +93,7 @@ export async function serveKnownSitesPage(page: Page, options: Options): Promise
 		}
 
 		if (url.host === 'cdn.jsdelivr.net') {
-			const demos = /^\/npm\/agentlet-demos@([^/]+)\/dist\/(.+)$/.exec(url.pathname);
+			const demos = /^\/npm\/@agentlet\/demos@([^/]+)\/dist\/(.+)$/.exec(url.pathname);
 			if (demos) {
 				const [, version, file] = demos;
 				// The range the bookmarklet uses resolves to the current build;

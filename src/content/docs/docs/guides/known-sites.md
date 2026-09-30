@@ -9,7 +9,7 @@ These demos are separate from the [live demo](/docs/live-demo/) on agentlet.io. 
 
 ## Why jsDelivr
 
-A bookmarklet runs inside someone else's page, so that page's Content Security Policy decides what it may load. Wikipedia's policy allows scripts from `*.jsdelivr.net` and from localhost, and does not allow agentlet.io. So the demos are published as an npm package, `agentlet-demos`, and served by jsDelivr, which serves any npm package. agentlet-core itself is not copied into that package: the loader takes it from jsDelivr too, from the `agentlet-core` package.
+A bookmarklet runs inside someone else's page, so that page's Content Security Policy decides what it may load. Wikipedia's policy allows scripts from `*.jsdelivr.net` and from localhost, and does not allow agentlet.io. So the demos are published as an npm package, `@agentlet/demos`, and served by jsDelivr, which serves any npm package. agentlet-core itself is not copied into that package: the loader takes it from jsDelivr too, from the `agentlet-core` package.
 
 This is also the limit of the approach. A site whose policy does not allow jsDelivr, or does not allow inline scripts at all, cannot run the bookmarklet. On 30 September 2026:
 
@@ -22,13 +22,13 @@ Policies change, so check the real page before relying on a site. `tests/e2e/fix
 
 ## What the bookmarklet does
 
-The bookmarklet adds one classic script tag that points at `https://cdn.jsdelivr.net/npm/agentlet-demos@1/dist/loader.js`. A classic script needs no CORS, and the `@1` range means a fix released as 1.0.1 reaches everyone without dragging a new bookmark.
+The bookmarklet adds one classic script tag that points at `https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js`. A classic script needs no CORS, and the `@1` range means a fix released as 1.0.1 reaches everyone without dragging a new bookmark.
 
 The loader then:
 
-1. Bakes in, at build time, the exact version of `agentlet-demos` and of `agentlet-core` (read from `node_modules/agentlet-core/package.json`).
+1. Bakes in, at build time, the exact version of `@agentlet/demos` and of `agentlet-core` (read from `node_modules/agentlet-core/package.json`).
 2. Loads `agentlet-core@<exact>/dist/agentlet-core.min.js`.
-3. Creates the core with `registryUrl` set to `agentlet-demos@<exact>/dist/registry.js`, and a theme picked from `prefers-color-scheme`.
+3. Creates the core with `registryUrl` set to `@agentlet/demos@<exact>/dist/registry.js`, and a theme picked from `prefers-color-scheme`.
 4. Activates the one demo that matches the page, or leaves the launcher open when several match (Wikipedia has two) or none does.
 
 Everything after the first request names an exact version. Mixing a newer loader with an older cached registry or bundle would break in ways that are hard to see, so the `@1` range is used once, for the loader, and never again. The registry works out its bundle URLs from its own address, so the same file works from jsDelivr and from the dev server.

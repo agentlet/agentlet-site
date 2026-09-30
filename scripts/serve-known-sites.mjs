@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Serves the locally built `agentlet-demos` package for development, so the
+ * Serves the locally built `@agentlet/demos` package for development, so the
  * known-sites bookmarklet can be tried on real sites before a version is
  * published to npm. Wikipedia's Content Security Policy allows `localhost`,
  * which is what makes this possible.

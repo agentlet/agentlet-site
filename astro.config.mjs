@@ -6,7 +6,7 @@ import { AGENTLET_REOPEN_SCRIPT } from './src/scripts/agentlet-inline-snippets.m
 
 /**
  * Dev only: starts the small server that serves the locally built
- * `agentlet-demos` package (scripts/serve-known-sites.mjs), so the
+ * `@agentlet/demos` package (scripts/serve-known-sites.mjs), so the
  * known-sites bookmarklet on /try/known-sites/ can point at
  * http://localhost:4400/ while developing. It is not a route of this dev
  * server on purpose: see the comment at the top of that script.
