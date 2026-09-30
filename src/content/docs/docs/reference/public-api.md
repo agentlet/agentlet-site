@@ -260,7 +260,7 @@ Outer lifecycle entry points, called by the framework: `init()`, `activate(conte
 
 Other members: `checkPattern(url)`, `getContent()`, `getMetadata()`, `on(event, callback)`, `off(event, callback)`, `emit(event, data?)` (notifies local listeners, then forwards to `this.eventBus` if set), `removeAllEventListeners()`, `injectStyles(css)` (cumulative, appended to a single `<style data-module="...">` element), `removeAllStyles()`, `log(message, ...args)`, `error(message, ...args)`, `warn(message, ...args)`.
 
-Optional duck-typed hooks the core looks for, none required: `getStyles?()`, `getPanelTitle?()` (labels the panel header instead of `name`), `showSettings?()`, `showHelp?()`, `setSubmoduleChangeCallback?(callback)`, `requiresLocalStorageChangeNotification?`, `onLocalStorageChange?(key, newValue)`.
+Optional duck-typed hooks the core looks for, none required: `getStyles?()` (CSS injected before each mount since 2.2.0, see [Mount API](/docs/guides/mount-api/#getstyles)), `getPanelTitle?()` (labels the panel header instead of `name`), `showSettings?()`, `showHelp?()`, `setSubmoduleChangeCallback?(callback)`, `requiresLocalStorageChangeNotification?`, `onLocalStorageChange?(key, newValue)`.
 
 ## `AgentletCoreConfig`
 

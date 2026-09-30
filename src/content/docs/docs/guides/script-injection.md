@@ -83,6 +83,8 @@ A registry file is a `.js` file that builds a registry object and dispatches it 
 })();
 ```
 
+An entry's `url` can be relative. Since agentlet-core 2.2.0 it resolves against the registry script's own URL, so `"url": "./hello-world.js"` in `https://cdn.example.com/agentlets/agentlets-registry.js` loads `https://cdn.example.com/agentlets/hello-world.js`, whatever page the agentlet runs on. `getRegistryEntries()` returns the resolved URLs. Earlier versions resolve a relative entry URL against the host page, so use absolute URLs there.
+
 Loading proceeds in five steps: `ModuleRegistry` injects a `<script>` tag pointing at the registry URL, sets up a listener for the `agentletRegistryLoaded` event, applies a 10-second timeout to avoid hanging on a failed load, the registry script dispatches the event once loaded, and the event's `detail` is processed the same way a fetched JSON payload would have been.
 
 ### Lazy entries
