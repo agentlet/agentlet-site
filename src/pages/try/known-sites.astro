@@ -1,0 +1,178 @@
+---
+import LandingLayout from '../../layouts/LandingLayout.astro';
+import Header from '../../components/landing/Header.astro';
+import Footer from '../../components/landing/Footer.astro';
+import { KNOWN_SITES, KNOWN_SITE_AGENTLETS } from '../../agentlets/known-sites/manifest';
+import { KNOWN_SITES_LOADER_URL, buildKnownSitesBookmarkletHref } from '../../scripts/known-sites-bookmarklet';
+
+const title = 'Try agentlet on well-known sites';
+const description =
+	'One bookmarklet that runs small agentlet demos on Wikipedia and other well-known sites. Read only, nothing leaves your browser.';
+
+const sites = KNOWN_SITES.map((site) => ({
+	...site,
+	demos: KNOWN_SITE_AGENTLETS.filter((entry) => entry.site === site.id),
+}));
+---
+
+<LandingLayout title={title} description={description}>
+	<Header />
+	<main id="main">
+		<section>
+			<div class="wrap known-sites-page">
+				<h1>Try agentlet on well-known sites</h1>
+				<p>
+					Drag the button below to your bookmarks bar. Click it on a supported page to open the demo
+					for that site. Click it anywhere else to see the list of supported sites.
+				</p>
+				<p>
+					<a
+						class="button button-primary known-sites-link"
+						id="known-sites-link"
+						href={buildKnownSitesBookmarkletHref(KNOWN_SITES_LOADER_URL)}
+					>
+						Agentlet demos
+					</a>
+				</p>
+				<p class="known-sites-hint">
+					Most browsers show the bookmarks bar with Ctrl+Shift+B (Windows and Linux) or Cmd+Shift+B
+					(macOS). This bookmarklet is separate from the one on <a href="/try/bookmarklet/">the
+					bookmarklet page</a>, which only works on agentlet.io.
+				</p>
+
+				<h2>Supported sites</h2>
+				<ul class="known-sites-list">
+					{
+						sites.map((site) => (
+							<li class="known-site">
+								<h3>{site.label}</h3>
+								<p>{site.where}</p>
+								<ul>
+									{site.demos.map((demo) => (
+										<li>
+											<strong>{demo.title}.</strong> {demo.description}
+										</li>
+									))}
+								</ul>
+								{site.status === 'blocked' && (
+									<p class="known-site-blocked">
+										<strong>Blocked today.</strong> {site.statusNote}
+									</p>
+								)}
+								<p>
+									Example: <a href={site.exampleUrl} rel="noopener noreferrer">{site.exampleLabel}</a>.
+								</p>
+							</li>
+						))
+					}
+				</ul>
+
+				<h2>What the demos do and do not do</h2>
+				<ul>
+					<li>They only read the page you are on. They never post, vote, reply or change anything on the site.</li>
+					<li>
+						There is no AI call and no backend. Nothing is sent anywhere. Excel files are built in
+						your browser.
+					</li>
+					<li>
+						The Hacker News demo remembers which comments you saw, in your browser's local storage on
+						that site, under a key that includes the item number.
+					</li>
+					<li>Closing the panel removes the marks and highlights the demos added to the page.</li>
+				</ul>
+
+				<h2>Limits</h2>
+				<p>
+					A site's Content Security Policy decides whether a bookmarklet can run. On checking, on 30
+					September 2026, the policies of GitHub, MDN, Stack Overflow and YouTube do not allow
+					scripts that a bookmarklet adds, so nothing starts there. Hacker News allows only its own
+					scripts and a few others, which also blocks it (see above). Wikipedia allows scripts from
+					jsDelivr, which is why it works. These policies can change at any time.
+				</p>
+				<p>
+					Bare four-digit numbers are read as years only when a word or bracket before them says so,
+					and some numbers will still be misread. The timeline covers English, French, German,
+					Spanish and Italian month names. It needs a recent browser.
+				</p>
+
+				<h2>How it is built</h2>
+				<p>
+					The bookmarklet loads a small script from the <code>agentlet-demos</code> npm package
+					through jsDelivr, which then loads agentlet-core and the demo for the page from the same
+					exact version. Read <a href="/docs/guides/known-sites/">how the known-site demos are built
+					and hosted</a>, including how to add a site.
+				</p>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</LandingLayout>
+
+<style>
+	.known-sites-page {
+		max-width: 42rem;
+		padding-block: 1rem 3rem;
+	}
+
+	.known-sites-page h1 {
+		margin-bottom: 1rem;
+	}
+
+	.known-sites-page h2 {
+		margin-top: 2rem;
+	}
+
+	.known-sites-page p,
+	.known-sites-page ul {
+		margin: 1rem 0;
+	}
+
+	.known-sites-link {
+		cursor: grab;
+	}
+
+	.known-sites-hint {
+		color: var(--color-text-muted);
+		font-size: 0.9rem;
+	}
+
+	.known-sites-list {
+		list-style: none;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.known-site {
+		border: 1px solid var(--color-surface-border);
+		border-radius: 10px;
+		padding: 1rem 1.25rem;
+	}
+
+	.known-site h3 {
+		margin: 0;
+	}
+
+	.known-site p,
+	.known-site ul {
+		margin: 0.5rem 0;
+	}
+
+	.known-site-blocked {
+		color: var(--color-text-muted);
+	}
+</style>
+
+<script>
+	import { buildKnownSitesBookmarkletHref, knownSitesLoaderUrlFor } from '../../scripts/known-sites-bookmarklet';
+
+	// Under `npm run dev` on localhost the bookmarklet points at the local
+	// build (see scripts/serve-known-sites.mjs); everywhere else it keeps the
+	// jsDelivr address written into the page above.
+	const link = document.getElementById('known-sites-link');
+	if (link) {
+		const loaderUrl = knownSitesLoaderUrlFor(window.location, import.meta.env.DEV);
+		link.setAttribute('href', buildKnownSitesBookmarkletHref(loaderUrl));
+	}
+</script>

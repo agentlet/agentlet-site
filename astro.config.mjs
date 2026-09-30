@@ -65,10 +65,11 @@ export default defineConfig({
         { tag: 'script', content: AGENTLET_REOPEN_SCRIPT },
       ],
       plugins: [
-        // /try/bookmarklet/ is a plain Astro page, not part of the docs
-        // content collection, so this plugin cannot resolve it as a slug;
-        // excluded rather than dropping the link from docs/live-demo.md.
-        starlightLinksValidator({ exclude: ['/try/bookmarklet/'] }),
+        // /try/bookmarklet/ and /try/known-sites/ are plain Astro pages, not
+        // part of the docs content collection, so this plugin cannot resolve
+        // them as slugs; excluded rather than dropping the links from the
+        // docs (docs/live-demo.md, docs/guides/known-sites.md).
+        starlightLinksValidator({ exclude: ['/try/bookmarklet/', '/try/known-sites/'] }),
       ],
       sidebar: [
         { label: 'Introduction', slug: 'docs' },
@@ -112,6 +113,7 @@ export default defineConfig({
             { label: 'Mount API', slug: 'docs/guides/mount-api' },
             { label: 'TypeScript', slug: 'docs/guides/typescript' },
             { label: 'Script injection and registry', slug: 'docs/guides/script-injection' },
+            { label: 'Known-site demos', slug: 'docs/guides/known-sites' },
             { label: 'Layering and z-index', slug: 'docs/guides/z-index' },
           ],
         },

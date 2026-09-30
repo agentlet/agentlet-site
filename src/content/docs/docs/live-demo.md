@@ -137,6 +137,8 @@ Because this site does a full page load on every navigation, a tiny inline scrip
 
 The home page's hero also has a draggable "agentlet demo" chip, next to the "Try it on this page" button, that does the same thing as [the bookmarklet page](/try/bookmarklet/): drag it to your bookmarks bar, or click it directly, to load the demo loader on whichever agentlet.io page you are currently on. Both build their `javascript:` code from the same source (`src/scripts/bookmarklet.ts`), so they stay in sync.
 
+That bookmarklet only works on agentlet.io. Demos that run on other sites, such as Wikipedia, use a separate bookmarklet served from jsDelivr: see [the known-sites page](/try/known-sites/) and [how the known-site demos are built and hosted](/docs/guides/known-sites/).
+
 ## Rules the demos follow
 
 - **No demo submits a form.** A demo may read a page's form, or fill one in locally so you can see the result, but it never submits it or sends data to a live backend.
