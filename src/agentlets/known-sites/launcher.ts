@@ -135,7 +135,6 @@ class KnownSitesLauncherModule extends window.agentlet.Module {
 					<span class="kl-site-name">${escapeHtml(site.label)}</span>
 					<span class="kl-site-where">${escapeHtml(site.where)}</span>
 					<span class="ks-note">${demos.map((entry) => escapeHtml(entry.title)).join(', ')}</span>
-					${site.status === 'blocked' ? '<span class="ks-note">Blocked today by the site\'s security policy. See the limits.</span>' : ''}
 					<a class="kl-link" href="${escapeHtml(site.exampleUrl)}" rel="noopener noreferrer">${escapeHtml(site.exampleLabel)}</a>
 				</li>
 			`;

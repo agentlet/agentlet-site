@@ -54,11 +54,6 @@ const sites = KNOWN_SITES.map((site) => ({
 										</li>
 									))}
 								</ul>
-								{site.status === 'blocked' && (
-									<p class="known-site-blocked">
-										<strong>Blocked today.</strong> {site.statusNote}
-									</p>
-								)}
 								<p>
 									Example: <a href={site.exampleUrl} rel="noopener noreferrer">{site.exampleLabel}</a>.
 								</p>
@@ -74,10 +69,6 @@ const sites = KNOWN_SITES.map((site) => ({
 						There is no AI call and no backend. Nothing is sent anywhere. Excel files are built in
 						your browser.
 					</li>
-					<li>
-						The Hacker News demo remembers which comments you saw, in your browser's local storage on
-						that site, under a key that includes the item number.
-					</li>
 					<li>Closing the panel removes the marks and highlights the demos added to the page.</li>
 				</ul>
 
@@ -85,9 +76,9 @@ const sites = KNOWN_SITES.map((site) => ({
 				<p>
 					A site's Content Security Policy decides whether a bookmarklet can run. On checking, on 30
 					September 2026, the policies of GitHub, MDN, Stack Overflow and YouTube do not allow
-					scripts that a bookmarklet adds, so nothing starts there. Hacker News allows only its own
-					scripts and a few others, which also blocks it (see above). Wikipedia allows scripts from
-					jsDelivr, which is why it works. These policies can change at any time.
+					scripts that a bookmarklet adds, so nothing starts there. Hacker News restricts scripts to
+					its own domain and a few others, which also blocks a script from jsDelivr, so it has no
+					demo. Wikipedia allows scripts from jsDelivr, which is why it works. These policies can change at any time.
 				</p>
 				<p>
 					Bare four-digit numbers are read as years only when a word or bracket before them says so,
@@ -159,9 +150,6 @@ const sites = KNOWN_SITES.map((site) => ({
 		margin: 0.5rem 0;
 	}
 
-	.known-site-blocked {
-		color: var(--color-text-muted);
-	}
 </style>
 
 <script>

@@ -5,10 +5,7 @@ import {
 	clickBookmarklet,
 	CORE_VERSION,
 	DEMOS_VERSION,
-	HN_URL,
 	OTHER_SITE_URL,
-	serveHackerNews,
-	serveHackerNewsWithItsPolicy,
 	serveKnownSitesPage,
 	serveWikipedia,
 	WIKIPEDIA_URL,
@@ -36,7 +33,7 @@ async function readWorkbook(download: import('@playwright/test').Download): Prom
 }
 
 test.describe('Known-sites page', () => {
-	test('offers the jsDelivr bookmarklet, lists the sites and says what is blocked', async ({ page }) => {
+	test('offers the jsDelivr bookmarklet, lists the sites and states the limits', async ({ page }) => {
 		await page.goto('/try/known-sites/');
 		const href = await page.locator('#known-sites-link').getAttribute('href');
 		// Not served by `npm run dev`, so it points at the package on jsDelivr, by major range.
@@ -45,11 +42,8 @@ test.describe('Known-sites page', () => {
 
 		const main = page.locator('main');
 		await expect(main.getByRole('heading', { name: 'Wikipedia' })).toBeVisible();
-		await expect(main.getByRole('heading', { name: 'Hacker News' })).toBeVisible();
 		await expect(main).toContainText('Tables to spreadsheet');
 		await expect(main).toContainText('Date timeline');
-		await expect(main).toContainText('Thread navigator');
-		await expect(main).toContainText('Blocked today.');
 		await expect(main).toContainText('GitHub, MDN, Stack Overflow and YouTube');
 		await expect(main).toContainText('Nothing is sent anywhere');
 		await expect(main.getByRole('link', { name: 'Apollo 11 on English Wikipedia' })).toHaveAttribute(
@@ -113,7 +107,6 @@ test.describe('Known-sites bookmarklet loader', () => {
 		await expect(page.getByText('No demo for this page')).toBeVisible();
 		const text = await panelText(page);
 		expect(text).toContain('Wikipedia');
-		expect(text).toContain('Hacker News');
 		await expect(page.getByRole('link', { name: 'Apollo 11 on English Wikipedia' })).toBeVisible();
 	});
 });
@@ -253,140 +246,5 @@ test.describe('Wikipedia: date timeline', () => {
 		await page.evaluate(() => (window as unknown as { agentlet: { cleanup(): Promise<void> } }).agentlet.cleanup());
 		await expect(page.locator('mark.agentlet-date-mark')).toHaveCount(0);
 		expect(await page.locator('#mw-content-text').innerHTML()).toBe(before);
-	});
-});
-
-test.describe('Hacker News: thread navigator', () => {
-	// A record of a limit, not a feature: with the Content-Security-Policy
-	// Hacker News sends (checked 2026-09-30, tests/e2e/fixtures/known-sites/
-	// hacker-news-csp.txt), the page allows scripts only from itself, Google
-	// reCAPTCHA and cdnjs, so the bookmarklet's script from jsDelivr is
-	// refused. /try/known-sites/ says so. If this test starts failing because
-	// the policy in the fixture was refreshed and now allows jsDelivr, update
-	// that page, the docs and the `status` of the site in
-	// src/agentlets/known-sites/manifest.ts.
-	test('the real site policy blocks the bookmarklet, as the docs say', async ({ page }) => {
-		const run = await serveHackerNewsWithItsPolicy(page);
-		await page.goto(HN_URL);
-		await clickBookmarklet(page);
-		await expect.poll(async () => (await run.cspViolations()).join(' ')).toContain('cdn.jsdelivr.net');
-		await expect(page.locator('#agentlet-container')).toHaveCount(0);
-	});
-
-	test('opens directly, moves with j and k, collapses, and marks the story author', async ({ page }) => {
-		const run = await serveHackerNews(page);
-		await page.goto(HN_URL);
-		await clickBookmarklet(page);
-
-		// A single demo for this page opens without going through the launcher.
-		await expect(page.locator(PANEL_TITLE)).toHaveText('Thread navigator');
-		await expect(page.locator('.ks-stats')).toContainText('7 comments');
-		await expect(page.locator('.ks-stats')).toContainText('4 top-level');
-
-		// The story author's comments are marked, at any depth.
-		await expect(page.locator('tr.comtr[data-agentlet-op]')).toHaveCount(2);
-		await expect(page.locator('[id="9000102"]')).toHaveAttribute('data-agentlet-op', '');
-		await expect(page.locator('[id="9000107"]')).toHaveAttribute('data-agentlet-op', '');
-
-		// j and k move between top-level comments only.
-		const current = page.locator('tr.comtr[data-agentlet-current]');
-		await expect(current).toHaveCount(0);
-		await page.keyboard.press('j');
-		await expect(current).toHaveAttribute('id', '9000101');
-		await page.keyboard.press('j');
-		await expect(current).toHaveAttribute('id', '9000104');
-		await page.keyboard.press('j');
-		await expect(current).toHaveAttribute('id', '9000105');
-		await page.keyboard.press('k');
-		await expect(current).toHaveAttribute('id', '9000104');
-		await expect(current).toBeInViewport();
-		await expect(page.getByText('Comment 2 of 4')).toBeVisible();
-		// Stops at the ends instead of wrapping.
-		await page.keyboard.press('k');
-		await page.keyboard.press('k');
-		await expect(current).toHaveAttribute('id', '9000101');
-
-		// Collapse all hides every reply and the body of each top-level comment.
-		await page.getByRole('button', { name: 'Collapse all' }).click();
-		await expect(page.locator('[id="9000102"]')).toBeHidden();
-		await expect(page.locator('[id="9000103"]')).toBeHidden();
-		await expect(page.locator('[id="9000106"]')).toBeHidden();
-		await expect(page.locator('[id="9000101"] .comment')).toBeHidden();
-		await expect(page.locator('[id="9000101"]')).toBeVisible();
-		await expect(page.locator('.ks-stats')).toContainText('4 collapsed');
-
-		await page.getByRole('button', { name: 'Expand all' }).click();
-		await expect(page.locator('[id="9000102"]')).toBeVisible();
-		await expect(page.locator('[id="9000101"] .comment')).toBeVisible();
-		await expect(page.locator('.ks-stats')).toContainText('0 collapsed');
-
-		// "c" collapses the current thread only.
-		await page.keyboard.press('c');
-		await expect(page.locator('[id="9000102"]')).toBeHidden();
-		await expect(page.locator('[id="9000106"]')).toBeVisible();
-
-		// Nothing was posted: the only requests are the fixture page and jsDelivr.
-		// (The fixture's own images are answered empty; they are not part of this check.)
-		const other = run.requests.filter(
-			(entry) => !entry.startsWith('cdn.jsdelivr.net/') && !entry.startsWith('news.ycombinator.com/item') && !/\.(svg|gif)$/.test(entry),
-		);
-		expect(other).toEqual([]);
-		expect(await run.cspViolations()).toEqual([]);
-	});
-
-	test('shortcuts do not fire while typing in a field', async ({ page }) => {
-		await serveHackerNews(page);
-		await page.goto(HN_URL);
-		await clickBookmarklet(page);
-		await expect(page.locator(PANEL_TITLE)).toHaveText('Thread navigator');
-		await page.locator('textarea[name="text"]').focus();
-		await page.keyboard.type('jjj');
-		await expect(page.locator('tr.comtr[data-agentlet-current]')).toHaveCount(0);
-		await expect(page.locator('textarea[name="text"]')).toHaveValue('jjj');
-	});
-
-	test('marks comments that are new since the last visit, keyed by item id', async ({ page }) => {
-		// First visit: nothing to compare with yet.
-		await serveHackerNews(page, false);
-		await page.goto(HN_URL);
-		await clickBookmarklet(page);
-		await expect(page.getByText(/First visit to this thread/)).toBeVisible();
-		await expect(page.locator('tr.comtr[data-agentlet-new]')).toHaveCount(0);
-		const stored = await page.evaluate(() => Object.keys(localStorage));
-		expect(stored).toEqual(['agentlet-demos:hn-seen:9000001']);
-
-		// Second visit: two comments were added in the meantime.
-		await page.unrouteAll({ behavior: 'ignoreErrors' });
-		await serveHackerNews(page, true);
-		await page.goto(HN_URL);
-		await clickBookmarklet(page);
-		await expect(page.locator('tr.comtr[data-agentlet-new]')).toHaveCount(2);
-		await expect(page.locator('[id="9000108"]')).toHaveAttribute('data-agentlet-new', '');
-		await expect(page.locator('[id="9000109"]')).toHaveAttribute('data-agentlet-new', '');
-		await expect(page.locator('[data-role="new-count"]')).toHaveText('2');
-
-		// Third visit: everything was seen on the second one.
-		await page.goto(HN_URL);
-		await clickBookmarklet(page);
-		await expect(page.locator('tr.comtr[data-agentlet-new]')).toHaveCount(0);
-		await expect(page.locator('[data-role="new-count"]')).toHaveText('0');
-	});
-
-	test('still works when storage is blocked', async ({ page }) => {
-		await serveHackerNews(page);
-		// A full or blocked store: writing this demo's own key throws.
-		await page.addInitScript(() => {
-			const original = Storage.prototype.setItem;
-			Storage.prototype.setItem = function (key: string, value: string) {
-				if (key.startsWith('agentlet-demos:')) throw new DOMException('quota', 'QuotaExceededError');
-				return original.call(this, key, value);
-			};
-		});
-		await page.goto(HN_URL);
-		await clickBookmarklet(page);
-		await expect(page.locator(PANEL_TITLE)).toHaveText('Thread navigator');
-		await expect(page.getByText(/blocked storage/)).toBeVisible();
-		await page.keyboard.press('j');
-		await expect(page.locator('tr.comtr[data-agentlet-current]')).toHaveAttribute('id', '9000101');
 	});
 });

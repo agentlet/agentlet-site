@@ -20,7 +20,6 @@ https://cdn.jsdelivr.net/npm/agentlet-demos@1/dist/loader.js
 | Site | Demos |
 | --- | --- |
 | Wikipedia (`*.wikipedia.org/wiki/...`) | Tables to spreadsheet, Date timeline |
-| Hacker News (`news.ycombinator.com/item?id=...`) | Thread navigator (see the limits below) |
 
 On any other page the bookmarklet opens a list of the supported sites.
 
@@ -28,9 +27,8 @@ On any other page the bookmarklet opens a list of the supported sites.
 
 A site's Content Security Policy decides whether a bookmarklet can run. On
 30 September 2026 Wikipedia allowed it. GitHub, MDN, Stack Overflow and
-YouTube did not allow scripts added by a bookmarklet at all. Hacker News allowed
-inline scripts but not scripts from jsDelivr, so its demo cannot start there
-today. See the
+YouTube did not allow scripts added by a bookmarklet at all, and Hacker News
+allowed inline scripts but not scripts from jsDelivr. See the
 [known-sites page](https://agentlet.io/try/known-sites/) for details.
 
 ## What is in the package

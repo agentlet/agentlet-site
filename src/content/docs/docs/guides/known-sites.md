@@ -15,9 +15,9 @@ This is also the limit of the approach. A site whose policy does not allow jsDel
 
 - Wikipedia allows it.
 - GitHub, MDN, Stack Overflow and YouTube do not allow inline scripts without a nonce or hash, so even the bookmarklet's own code is refused.
-- Hacker News allows inline scripts but limits loaded scripts to itself, Google reCAPTCHA and cdnjs, so the script from jsDelivr is refused. The Hacker News demo is built and tested against a copy of its markup, and will work if that policy changes.
+- Hacker News allows inline scripts but limits loaded scripts to itself, Google reCAPTCHA and cdnjs, so the script from jsDelivr is refused. It is an example of a site that restricts scripts to its own domain and a few others. It has no demo here.
 
-Policies change, so check the real page before relying on a site. `tests/e2e/fixtures/known-sites/` keeps the policies Wikipedia and Hacker News sent, and the tests apply them.
+Policies change, so check the real page before relying on a site. `tests/e2e/fixtures/known-sites/` keeps the policy Wikipedia sent, and the tests apply them.
 
 ## What the bookmarklet does
 
@@ -52,7 +52,7 @@ After editing an agentlet, run `npm run build:known-sites`, reload the host page
 
 ## Add a site
 
-1. Add a `KnownSite` to `KNOWN_SITES` in `src/agentlets/known-sites/manifest.ts`: a label, where it runs, an example link, and `status`. Check the site's real policy first, and set `status: 'blocked'` with a note if the bookmarklet cannot load there.
+1. Add a `KnownSite` to `KNOWN_SITES` in `src/agentlets/known-sites/manifest.ts`: a label, where it runs, and an example link. Check the site's real policy first: if it does not allow scripts from jsDelivr, the bookmarklet cannot load there and a demo would never start.
 2. Write `src/agentlets/known-sites/<id>.ts`: a class extending `window.agentlet.Module`, with the site's URL regular expression in `patterns`, ending with the global assignment used by the other files. Use `KNOWN_SITE_STYLES` from `shared.ts` for the panel, and `backToLauncherHtml()` from `src/agentlets/shared.ts` for the way back to the list. Keep it read only, and clean up what it adds to the page in `cleanupModule()`.
 3. Add a `KnownSiteAgentlet` to `KNOWN_SITE_AGENTLETS` with the same pattern.
 
@@ -60,7 +60,7 @@ The build, the registry, the launcher and the known-sites page all read the mani
 
 ## Tests
 
-The Playwright tests do not touch any real site. They serve committed fixtures as if they came from `en.wikipedia.org` and `news.ycombinator.com`, send the policy header each site really sent, and answer the jsDelivr URLs from the locally built package and from `node_modules/agentlet-core`. A test also checks that after the loader, every request names an exact version and goes to jsDelivr only. `npm run test:e2e` builds the package first.
+The Playwright tests do not touch any real site. They serve committed fixtures as if they came from `en.wikipedia.org`, send the policy header the site really sent, and answer the jsDelivr URLs from the locally built package and from `node_modules/agentlet-core`. A test also checks that after the loader, every request names an exact version and goes to jsDelivr only. `npm run test:e2e` builds the package first.
 
 ## Publishing
 

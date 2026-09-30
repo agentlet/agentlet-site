@@ -1,6 +1,6 @@
 /**
  * Single source of truth for the agentlets that run on well-known third-party
- * sites (Wikipedia, Hacker News), distributed as the `agentlet-demos` npm
+ * sites (Wikipedia), distributed as the `agentlet-demos` npm
  * package (packages/agentlet-demos/) through jsDelivr. The on-site demos
  * under src/agentlets/manifest.ts are a separate set served from agentlet.io
  * itself; nothing here changes how they work.
@@ -31,17 +31,6 @@ export interface KnownSite {
 	exampleUrl: string;
 	/** Short label for the example link. */
 	exampleLabel: string;
-	/**
-	 * `works`: the bookmarklet can load the demos on this site. `blocked`: the
-	 * site's Content-Security-Policy does not allow scripts from jsDelivr, so
-	 * the bookmarklet cannot start the demos there today. A blocked site's
-	 * demos are still built and tested against a copy of its markup, so they
-	 * work the day the policy allows it. Shown honestly on
-	 * /try/known-sites/ and in the docs.
-	 */
-	status: 'works' | 'blocked';
-	/** For a blocked site: what was checked, and when. */
-	statusNote?: string;
 }
 
 export interface KnownSiteAgentlet {
@@ -73,17 +62,6 @@ export const KNOWN_SITES: KnownSite[] = [
 		where: 'Article pages on any language edition (*.wikipedia.org/wiki/...).',
 		exampleUrl: 'https://en.wikipedia.org/wiki/Apollo_11',
 		exampleLabel: 'Apollo 11 on English Wikipedia',
-		status: 'works',
-	},
-	{
-		id: 'hacker-news',
-		label: 'Hacker News',
-		where: 'Story and comment pages (news.ycombinator.com/item?id=...).',
-		exampleUrl: 'https://news.ycombinator.com/item?id=1',
-		exampleLabel: 'A story page on Hacker News',
-		status: 'blocked',
-		statusNote:
-			"On 30 September 2026 Hacker News sent a Content-Security-Policy whose script-src allows only its own pages, inline scripts, Google reCAPTCHA and cdnjs. A bookmarklet cannot load a script from jsDelivr under it, so this demo cannot start there today.",
 	},
 ];
 
@@ -103,9 +81,6 @@ export const KNOWN_SITES_LAUNCHER = {
 /** Any language edition's article pages, desktop or mobile host. */
 export const WIKIPEDIA_PATTERN = '^https?:\\/\\/[a-z0-9-]+(?:\\.m)?\\.wikipedia\\.org\\/wiki\\/';
 
-/** A Hacker News item page (story with its comments). */
-export const HACKER_NEWS_ITEM_PATTERN = '^https?:\\/\\/news\\.ycombinator\\.com\\/item\\?(?:[^#]*&)?id=\\d+';
-
 export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 	{
 		id: 'wikipedia-tables',
@@ -124,15 +99,6 @@ export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 		title: 'Date timeline',
 		description: 'Finds the dates in the article text and builds a chronological timeline that scrolls to each passage.',
 		pattern: WIKIPEDIA_PATTERN,
-	},
-	{
-		id: 'hacker-news-thread',
-		site: 'hacker-news',
-		file: 'hacker-news-thread',
-		className: 'HackerNewsThreadModule',
-		title: 'Thread navigator',
-		description: 'Moves between top-level comments with j and k, collapses the thread, and marks what is new since your last visit.',
-		pattern: HACKER_NEWS_ITEM_PATTERN,
 	},
 ];
 
