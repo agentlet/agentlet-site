@@ -155,5 +155,3 @@ Existing modules that only used DOM injection in a web page environment keep wor
 - **"ScriptInjector not available"**: ensure agentlet-core is loaded before using it.
 - **Content script injection timeout**: verify the background script is responding and that extension permissions are granted.
 - **DOM injection setup failed**: check for Content Security Policy restrictions and that `document.head` is available.
-
-Source: agentlet-core docs/registry-script-injection.md, docs/script-injection-migration.md, and src/types/public-api.d.ts at 6f24ed2 (agentlet-core 2.2.0). `injectModule()`'s `validateSecurity` option, described in the migration source document, is not part of the current `ScriptInjectorAPI` type, so it was dropped from the examples here.

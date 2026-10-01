@@ -91,5 +91,3 @@ window.agentlet.ai.refresh(); // Refresh after env changes
 ## Direct access to the manager
 
 `window.agentlet.ai.manager` (also `window.agentlet.aiManager`) is the underlying `AIManager` instance, exposing the same methods plus `getCurrentProvider()`.
-
-Source: agentlet-core CLAUDE.md, API Quick Reference ("AI integration"), and src/types/public-api.d.ts at e3f78fa.

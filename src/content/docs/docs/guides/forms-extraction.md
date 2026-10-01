@@ -188,5 +188,3 @@ try {
 ```
 
 For the clean, AI-oriented export instead of this full structure, see [AI-ready forms](/docs/guides/forms-ai-ready/).
-
-Source: agentlet-core docs/form-extraction.md and src/types/public-api.d.ts at e3f78fa. The full extraction result documented here matches the current `FormExtractionResult`/`FormElementInfo` types; older examples in the source document that referenced selector lists with certainty scores, ARIA accessibility metadata, and free-text context were not carried over because they are not part of the current public API.

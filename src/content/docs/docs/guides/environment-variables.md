@@ -147,5 +147,3 @@ async function loadRemoteConfiguration() {
     window.agentlet.env.loadFromObject(config);
 }
 ```
-
-Source: agentlet-core docs/environment-variables.md and src/types/public-api.d.ts at e3f78fa. The source document also described a `delete()` method, a `validate()` method with schemas, `export()` in `json`/`env`/`js` formats, and `getStatistics()`; the current `EnvAPI` type has `remove()` (used above) instead of `delete()`, and does not include `validate`, `export`, or `getStatistics`, so those sections were dropped.

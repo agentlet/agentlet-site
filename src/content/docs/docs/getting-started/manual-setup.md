@@ -21,5 +21,3 @@ From here, either:
 
 - Open `dist/bookmarklet.html` to install the bookmarklet in your browser, then click it on a page you want to augment.
 - Reference `dist/agentlet-core.js` or `dist/agentlet-core.esm.js` from your own build, and construct `AgentletCore` yourself. See [Public API](/docs/reference/public-api/) for the constructor configuration.
-
-Source: agentlet-core README.md, section "Getting started".

@@ -40,5 +40,3 @@ npm install
 npm run build
 npm start
 ```
-
-Source: agentlet-core README.md, section "Getting started", and plopfile.js and plop-templates/agentlet/ from agentlet-core 2.2.0 (6f24ed2).

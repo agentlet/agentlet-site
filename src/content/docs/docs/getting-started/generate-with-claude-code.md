@@ -79,5 +79,3 @@ node skills/create-agentlet/scripts/sync.ts crm-helper
 node skills/create-agentlet/scripts/serve.ts workspace/crm-helper/dist 8080
 node skills/create-agentlet/scripts/inject.ts --url http://localhost:8000/crm/index.html --module crm-helper --headed --keep
 ```
-
-Source: agentlet-designer README.md and `skills/create-agentlet/SKILL.md`.

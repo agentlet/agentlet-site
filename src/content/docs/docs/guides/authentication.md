@@ -149,5 +149,3 @@ Inspect the current auth configuration and state from the console:
 window.agentlet.auth.getState();
 window.agentlet.debug?.getConfig().auth; // Only when the core was constructed with debugMode: true
 ```
-
-Source: agentlet-core docs/authentication.md and src/types/public-api.d.ts at e3f78fa. The source document's `messageHandler` examples called `authManager.handleSuccess()`/`handleError()` methods that are not part of the current `AuthManagerAPI` type; the corrected form here has `messageHandler` return a result object instead, matching the current `AuthManagerConfig['messageHandler']` signature.

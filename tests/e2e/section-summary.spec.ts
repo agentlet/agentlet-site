@@ -82,14 +82,14 @@ test.describe('Summarize and share a section agentlet', () => {
 		await openSectionSummary(page);
 
 		await page.getByRole('button', { name: 'Pick a section' }).click();
-		await page.getByRole('heading', { name: 'Augment your web apps, without touching the backend.' }).click();
+		await page.getByRole('heading', { name: 'A side panel for web apps you cannot change.' }).click();
 
 		const dialog = page.locator('.agentlet-fullscreen-dialog');
 		await expect(dialog).toBeVisible();
 		await expect(dialog.getByRole('heading', { name: 'Hero', exact: true })).toBeVisible();
 		await expect(dialog.locator('.section-summary-recorded-label')).toHaveText('Recorded AI response');
 		await expect(dialog.locator('.section-summary-text')).toContainText(
-			'Agentlet augments web apps without touching the backend',
+			'agentlet injects a side panel into a web app you cannot change',
 		);
 
 		await dialog.getByRole('button', { name: 'Close' }).click();

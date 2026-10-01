@@ -64,7 +64,7 @@ function headingTextOf(landmark: Element): string | null {
 
 /**
  * One entry per home page section (src/pages/index.astro): hero,
- * definition, demo sandbox, see it in action, deployment modes,
+ * demo sandbox, see it in action, definition, deployment modes,
  * capabilities, principles, comparison, get started. Summaries are written
  * from each section's own copy (src/components/landing/), kept factual and
  * short, in the site's own tone (see CLAUDE.md's content style rules).
@@ -74,15 +74,8 @@ const KNOWN_SECTIONS: KnownSection[] = [
 		key: 'hero',
 		title: 'Hero',
 		summary:
-			'Agentlet augments web apps without touching the backend: a small agent is dropped into any page with a bookmarklet, an extension, or a native integration, adding a side panel with the actions a team needs. The animated story on this section walks through one example, from a form filled by hand to the same form filled by an agentlet. The project is open source, under the MIT license.',
+			'agentlet injects a side panel into a web app you cannot change, by bookmarklet, browser extension, or from the app itself. The panel reads and fills forms, exports tables to Excel, captures parts of the page and calls an AI model. The animated story on this section walks through one example, from a form filled by hand to the same form filled by an agentlet. The project is open source, under the MIT license.',
 		matches: (landmark) => landmark.classList.contains('hero'),
-	},
-	{
-		key: 'definition',
-		title: 'Definition',
-		summary:
-			'Defines the word "agentlet": a lightweight, embeddable software agent injected into an existing application, typically via a browser bookmarklet or extension. It adds autonomous or semi-autonomous capabilities such as automation, AI, analytics, or UX augmentation, without requiring any backend change.',
-		matches: (landmark) => landmark.classList.contains('definition-section'),
 	},
 	{
 		key: 'sandbox',
@@ -97,6 +90,13 @@ const KNOWN_SECTIONS: KnownSection[] = [
 		summary:
 			'Shows the same business application before and after being augmented with an agentlet: manual, field by field entry on one side, and the same task automated through an agentlet side panel on the other.',
 		matches: (landmark) => landmark.id === 'demo',
+	},
+	{
+		key: 'definition',
+		title: 'Definition',
+		summary:
+			'Defines the word "agentlet" in one sentence: a small, page-specific tool injected into a web app you do not control, like a bookmarklet with a side panel, forms, tables and AI.',
+		matches: (landmark) => landmark.classList.contains('definition-section'),
 	},
 	{
 		key: 'deployment-modes',
@@ -116,20 +116,20 @@ const KNOWN_SECTIONS: KnownSection[] = [
 		key: 'principles',
 		title: 'Guiding principles',
 		summary:
-			"States agentlet's guiding principles: target specific needs instead of generic, global changes; respect the host application's styles; offer opt-in features through a side panel; assist without overriding, so forms are filled but never auto-submitted; and stay lightweight by relying on the host's own backend APIs.",
+			"States agentlet's guiding principles: target specific needs instead of generic, global changes; respect the host application's styles; offer opt-in features through a side panel; assist without overriding, so forms are filled but never auto-submitted; and keep each agentlet's own code small and rely on the host's own backend APIs for heavy logic.",
 		matches: (landmark) => headingTextOf(landmark) === 'Guiding principles',
 	},
 	{
 		key: 'comparison',
 		title: 'Compared to robots',
 		summary:
-			"Compares agentlets to RPA-style robots across installation, autonomy, security scope, robustness, and reach. Agentlets are lighter to install and narrower in scope, but, unlike a robot, they depend on the user's active tab and enhance rather than replace the user's own interaction.",
+			"Compares agentlets to RPA-style robots across installation, autonomy, security scope, robustness, and reach. Agentlets are lighter to install and narrower in scope, but, unlike a robot, they depend on the user's active tab and enhance rather than replace the user's own interaction. A second table compares agentlet-core with userscripts and hand-written extensions, which are simpler when only one person needs the tool or when browser APIs are needed.",
 		matches: (landmark) => headingTextOf(landmark) === 'Compared to robots',
 	},
 	{
 		key: 'get-started',
 		title: 'Get started',
-		summary: 'The call to action to start building: install the agentlet-core package with npm, then follow the getting started guide to build a first agentlet.',
+		summary: 'The call to action to start building: install the agentlet-core package with npm, or follow the quick start for a working bookmarklet or page in two minutes without cloning anything.',
 		matches: (landmark) => headingTextOf(landmark) === 'Get started',
 	},
 ];

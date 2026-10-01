@@ -79,7 +79,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'agentlet',
-      description: 'Augment your web apps, without touching the backend.',
+      description: 'A side panel for web apps you cannot change: read and fill forms, export tables to Excel, capture the page and call an AI model.',
       logo: {
         light: './src/assets/brand/agentlet-lockup-light.svg',
         dark: './src/assets/brand/agentlet-lockup-dark.svg',
@@ -129,6 +129,7 @@ export default defineConfig({
         {
           label: 'Getting started',
           items: [
+            { label: 'Quick start', slug: 'docs/getting-started/quick-start' },
             { label: 'Install', slug: 'docs/getting-started/install' },
             { label: 'Quick demo', slug: 'docs/getting-started/quick-demo' },
             { label: 'Scaffold an agentlet', slug: 'docs/getting-started/scaffold' },

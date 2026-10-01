@@ -164,5 +164,3 @@ async function sendToAIService(formElement) {
     window.agentlet.forms.fillFromAI(formElement, formData, filledValues.values);
 }
 ```
-
-Source: agentlet-core docs/ai-ready-forms-api.md and src/types/public-api.d.ts at e3f78fa. The source document described extra fields (`certainty` confidence scores, `selectorType`, `includeContext`, `groupByForm`, per-field `constraints`/`position`) that are not part of the current `AIFormExport`/`CleanFormElement`/`QuickExportField` types, so they were not carried over.

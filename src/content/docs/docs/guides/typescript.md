@@ -83,5 +83,3 @@ This resolves correctly with both `"moduleResolution": "bundler"` and `"moduleRe
 ## How the types are maintained
 
 The declarations in `src/types/public-api.d.ts` are hand-written: it ships standalone as `dist/agentlet-core.d.ts`, so it cannot `import` from the rest of `src/` at publish time. Instead, the shared shape types (`ModuleConfig`, `EventBusAPI`, `ThemeManagerAPI`, `ZIndexConstants`, `PanelManagerAPI`, ...) are single-sourced here, and the real runtime classes `import type` them from this file, so both sides describe the same shape instead of being hand-maintained independently. A type-only test asserts bidirectional assignability between each real class and its declaration, so drift between them fails the build.
-
-Source: agentlet-core docs/typescript.md at e3f78fa.
