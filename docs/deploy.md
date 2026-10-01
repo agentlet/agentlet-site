@@ -306,3 +306,21 @@ publishes with npm provenance, which links each release to the commit and
 workflow run that built it. The bookmarklet uses the `@1` range, so a 1.x
 release reaches existing bookmarks. A breaking change needs a new major
 version, a new bookmarklet URL, and a new bookmarklet on the site.
+
+How a release reaches people:
+
+- jsDelivr refreshes the `@1` range within 12 hours. To do it right away,
+  purge it once the version shows on the npm registry:
+  `https://purge.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js`
+- jsDelivr serves that URL with `cache-control: public, max-age=604800,
+  s-maxage=43200`, so a purge alone does not refresh browsers that already
+  have the loader. The bookmarklet adds `?d=YYYYMMDD` (the UTC date when it is
+  clicked) to the loader URL. A browser then fetches a fresh loader on its
+  first click of each day.
+- Bookmarks added before the daily parameter existed (2 October 2026) keep
+  the plain URL. People drag the button again once.
+
+Warning: do not request the new exact-version URLs
+(`@agentlet/demos@<version>/...`) before the npm registry shows that version.
+jsDelivr caches the 404, and the URL then needs a purge too. Check
+`npm view @agentlet/demos version` first.

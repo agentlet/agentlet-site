@@ -14,8 +14,13 @@ bookmarks bar, then click it on a supported page. It is a script tag that points
 at:
 
 ```
-https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js
+https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js?d=YYYYMMDD
 ```
+
+The bookmarklet fills in `d` with the current UTC date when it is clicked, so a
+browser fetches a fresh loader at most once a day. jsDelivr refreshes the `@1`
+range within 12 hours, or right away with its purge API. A new release then
+reaches a browser on its first click of the next day.
 
 | Site | Demos |
 | --- | --- |

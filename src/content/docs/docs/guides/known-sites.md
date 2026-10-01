@@ -25,7 +25,9 @@ Policies change, so check the real page before relying on a site. `tests/e2e/fix
 
 ## What the bookmarklet does
 
-The bookmarklet adds one classic script tag that points at `https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js`. A classic script needs no CORS, and the `@1` range means a fix released as 1.1.1 reaches everyone without dragging a new bookmark.
+The bookmarklet adds one classic script tag that points at `https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js?d=YYYYMMDD`, where the value is the current UTC date, computed when the bookmarklet is clicked. A classic script needs no CORS, and the `@1` range means a fix released as 1.1.1 reaches everyone without dragging a new bookmark.
+
+The date matters because jsDelivr serves the range URL with `cache-control: public, max-age=604800, s-maxage=43200`. Without it, a browser that fetched the loader once could keep it for up to 7 days, even after the CDN was purged. With it, a browser fetches a fresh loader on its first click of each day, and all visitors share the same URL on a given day, so the CDN cache stays effective. Bookmarks added before 2 October 2026 have no date, so people drag the button again once.
 
 The loader then:
 
@@ -79,3 +81,5 @@ The Playwright tests do not touch any real site. They serve committed fixtures a
 ## Publishing
 
 Push a tag named `demos-v<version>`, for example `demos-v1.1.0`. The `publish-demos` workflow builds the package, checks that the tag matches the version in `packages/agentlet-demos/package.json`, and runs `npm publish` with the `NPM_TOKEN` secret and npm provenance, which links each release to the commit and workflow run that built it. Bump the version by hand in that file before tagging. Publishing is never automatic on a merge.
+
+How fast a release reaches people: jsDelivr refreshes the `@1` range within 12 hours, or right away when you call its purge API (see [deploy.md](https://github.com/agentlet/agentlet-site/blob/main/docs/deploy.md) for the release steps). Browsers then pick up the new version on the first click of the next day, thanks to the daily parameter.
