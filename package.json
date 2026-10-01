@@ -46,6 +46,6 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.1",
     "wrangler": "^4.42.4",
-    "xlsx": "^0.18.5"
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   }
 }
