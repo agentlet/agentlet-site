@@ -1,17 +1,19 @@
 ---
-// Each GIF is paired with a still frame at the same dimensions
-// (public/img/*-still.png, the GIF's first frame). A GIF cannot be
-// paused, so the site-wide "Pause animations" toggle swaps to the
-// still instead (see src/styles/landing.css and AnimationsToggle.astro).
+// Each demo is a looping, muted video (WebM and MP4, public/img/*.webm and
+// *.mp4) paired with a still frame at the same dimensions
+// (public/img/*-still.png, the video's first frame, also used as its
+// poster). The site-wide "Pause animations" toggle pauses the videos and
+// swaps to the still (see the script below, src/styles/landing.css and
+// AnimationsToggle.astro).
 const demos = [
 	{
-		gif: '/img/demo-part1.gif',
+		video: '/img/demo-part1',
 		still: '/img/demo-part1-still.png',
 		alt: 'A recurring business task being processed manually, field by field, in a web application',
 		caption: 'Manual processing of a recurring task',
 	},
 	{
-		gif: '/img/demo-part2.gif',
+		video: '/img/demo-part2',
 		still: '/img/demo-part2-still.png',
 		alt: 'The same application, augmented with an agentlet side panel that automates the task',
 		caption: 'The same application, augmented with an agentlet',
@@ -30,15 +32,21 @@ const demos = [
 				demos.map((demo) => (
 					<figure class="demo-figure">
 						<div class="demo-media">
-							<img
-								class="demo-media-gif"
-								src={demo.gif}
+							<video
+								class="demo-media-video"
+								autoplay
+								loop
+								muted
+								playsinline
+								preload="metadata"
+								poster={demo.still}
 								width="600"
 								height="390"
-								loading="lazy"
-								decoding="async"
-								alt={demo.alt}
-							/>
+								aria-label={demo.alt}
+							>
+								<source src={`${demo.video}.webm`} type="video/webm" />
+								<source src={`${demo.video}.mp4`} type="video/mp4" />
+							</video>
 							<img
 								class="demo-media-still"
 								src={demo.still}
@@ -56,3 +64,27 @@ const demos = [
 		</div>
 	</div>
 </section>
+
+<script>
+	// Keep the videos in step with the "Pause animations" toggle: the head
+	// script in LandingLayout.astro sets html[data-animations] before first
+	// paint, and AnimationsToggle.astro dispatches this event on every
+	// change. While paused the video is also hidden by CSS, which shows the
+	// still frame in its place.
+	const videos = document.querySelectorAll<HTMLVideoElement>('.demo-media-video');
+
+	function syncVideos(): void {
+		const paused = document.documentElement.dataset.animations === 'paused';
+		for (const video of videos) {
+			if (paused) {
+				video.pause();
+			} else {
+				// play() rejects if the browser blocks autoplay; the poster stays visible then.
+				video.play().catch(() => {});
+			}
+		}
+	}
+
+	syncVideos();
+	document.addEventListener('agentlet:animations-change', syncVideos);
+</script>

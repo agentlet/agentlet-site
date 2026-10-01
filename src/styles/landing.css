@@ -761,24 +761,26 @@ figure.demo-figure {
 	margin: 0;
 }
 
-figure.demo-figure img {
+figure.demo-figure img,
+figure.demo-figure video {
 	border: 1px solid var(--color-surface-border);
 	border-radius: var(--radius-card);
 	width: 100%;
 	height: auto;
 }
 
-/* Each demo GIF is paired with a still frame at the same dimensions
+/* Each demo video is paired with a still frame at the same dimensions
    (see src/components/landing/Demo.astro): the "Pause animations"
-   toggle swaps to the still, since a GIF cannot be paused. The fixed
-   aspect-ratio box keeps both images stacked in place with no layout
-   shift when the swap happens. */
+   toggle pauses the video and swaps to the still. The fixed
+   aspect-ratio box keeps both stacked in place with no layout shift
+   when the swap happens. */
 .demo-media {
 	position: relative;
 	aspect-ratio: 600 / 390;
 }
 
-.demo-media img {
+.demo-media img,
+.demo-media video {
 	position: absolute;
 	inset: 0;
 	height: 100%;
@@ -788,7 +790,7 @@ figure.demo-figure img {
 	display: none;
 }
 
-:root[data-animations='paused'] .demo-media-gif {
+:root[data-animations='paused'] .demo-media-video {
 	display: none;
 }
 
@@ -985,12 +987,12 @@ figure.demo-figure figcaption {
 
 /* Comparison table */
 
-.table-scroll-hint {
-	margin: 1rem 0 0;
 .comparison-subtitle {
 	margin: 3rem 0 0.5rem;
 }
 
+.table-scroll-hint {
+	margin: 1rem 0 0;
 	color: var(--color-text-muted);
 	font-size: 0.85rem;
 }
