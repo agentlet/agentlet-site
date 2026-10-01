@@ -31,6 +31,7 @@ import { copyFileSync, existsSync, mkdirSync, rmSync, writeFileSync } from 'node
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadTsModule } from './lib/load-ts-module.mjs';
+import { resetMetafiles, writeMetafile } from './lib/metafile.mjs';
 import { LOADER_URL } from '../src/scripts/agentlet-inline-snippets.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -70,6 +71,16 @@ function copyCoreAssets() {
 	}
 	copyFileSync(coreMin, join(CDN_OUT, 'agentlet-core.min.js'));
 	copyFileSync(worker, join(CDN_OUT, 'pdf.worker.min.mjs'));
+	// Copied, not bundled by esbuild, so the scan would not see it. Record
+	// it by hand, in the esbuild metafile shape, so agentlet-core itself
+	// (which is served to browsers) is part of the shipped inventory.
+	writeMetafile('cdn', 'agentlet-core-copy', {
+		inputs: {
+			'node_modules/agentlet-core/dist/agentlet-core.min.js': {},
+			'node_modules/agentlet-core/dist/pdf.worker.min.mjs': {},
+		},
+		outputs: {},
+	});
 }
 
 /**
@@ -94,7 +105,7 @@ async function buildAgentletBundles(manifest) {
 	mkdirSync(join(CDN_OUT, 'agentlets'), { recursive: true });
 	for (const entry of manifest) {
 		const entryPoint = join(AGENTLETS_SRC, `${entry.file}.${entry.fileExt ?? 'ts'}`);
-		await build({
+		const result = await build({
 			entryPoints: [entryPoint],
 			bundle: true,
 			minify: true,
@@ -104,7 +115,9 @@ async function buildAgentletBundles(manifest) {
 			jsx: 'automatic',
 			outfile: join(CDN_OUT, 'agentlets', `${entry.id}.js`),
 			logLevel: 'warning',
+			metafile: true,
 		});
+		writeMetafile('cdn', `agentlet-${entry.id}`, result.metafile);
 	}
 }
 
@@ -169,7 +182,7 @@ function buildRegistry(manifest) {
 
 async function buildLoader() {
 	mkdirSync(dirname(LOADER_OUT), { recursive: true });
-	await build({
+	const result = await build({
 		entryPoints: [join(ROOT, 'src/scripts/demo-loader.ts')],
 		bundle: true,
 		minify: true,
@@ -178,12 +191,15 @@ async function buildLoader() {
 		target: 'es2020',
 		outfile: LOADER_OUT,
 		logLevel: 'warning',
+		metafile: true,
 	});
+	writeMetafile('cdn', 'demo-loader', result.metafile);
 }
 
 async function main() {
 	rmSync(CDN_OUT, { recursive: true, force: true });
 	mkdirSync(CDN_OUT, { recursive: true });
+	resetMetafiles('cdn');
 
 	const manifest = await loadManifest();
 	copyCoreAssets();

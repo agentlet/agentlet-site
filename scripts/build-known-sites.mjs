@@ -29,9 +29,10 @@
 
 import { build } from 'esbuild';
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadTsModule } from './lib/load-ts-module.mjs';
+import { resetMetafiles, writeMetafile } from './lib/metafile.mjs';
 
 const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const SRC = join(ROOT, 'src/agentlets/known-sites');
@@ -50,7 +51,7 @@ const DEMOS_VERSION = readVersion(join(PACKAGE_DIR, 'package.json'));
 const CORE_VERSION = readVersion(join(ROOT, 'node_modules/agentlet-core/package.json'));
 
 async function buildBundle(entryPoint, outfile, extra = {}) {
-	await build({
+	const result = await build({
 		entryPoints: [entryPoint],
 		bundle: true,
 		minify: true,
@@ -59,8 +60,11 @@ async function buildBundle(entryPoint, outfile, extra = {}) {
 		target: 'es2020',
 		outfile,
 		logLevel: 'warning',
+		metafile: true,
 		...extra,
 	});
+	// Outside dist/ on purpose: the metafile must not be published to npm.
+	writeMetafile('known-sites', basename(outfile, '.js'), result.metafile);
 }
 
 /**
@@ -124,6 +128,7 @@ function buildRegistry({ launcher, agentlets }) {
 async function main() {
 	rmSync(OUT, { recursive: true, force: true });
 	mkdirSync(join(OUT, 'agentlets'), { recursive: true });
+	resetMetafiles('known-sites');
 
 	const manifest = await loadTsModule(join(SRC, 'manifest.ts'), '.known-sites-manifest.generated.mjs');
 	const launcher = manifest.KNOWN_SITES_LAUNCHER;

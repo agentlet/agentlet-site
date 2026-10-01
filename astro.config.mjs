@@ -1,7 +1,10 @@
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
 import { startKnownSitesServer } from './scripts/serve-known-sites.mjs';
+import { resetMetafiles, writeMetafile } from './scripts/lib/metafile.mjs';
 import { AGENTLET_REOPEN_SCRIPT } from './src/scripts/agentlet-inline-snippets.mjs';
 
 /**
@@ -22,9 +25,57 @@ function knownSitesDevServer() {
   };
 }
 
+/**
+ * Production build only, and only when SBOM_META_DIR is set (the security
+ * workflow sets it): records which node_modules packages end up in the
+ * client chunks of the site's own pages (Starlight, React islands), for the
+ * dependency vulnerability scan. The result is written in the shape of an
+ * esbuild metafile (`{ inputs: { "node_modules/<pkg>/<file>": {} } }`) so the
+ * shared sbom-from-esbuild action can read it. It goes to
+ * SBOM_META_DIR/astro/, outside dist/, so it is never deployed.
+ *
+ * Packages whose browser code is not a Rollup module but a static file
+ * written outside the bundle graph are listed by hand in STATIC_ASSET_PACKAGES
+ * (Pagefind writes dist/pagefind/*.js, expressive-code writes
+ * dist/_astro/ec.*.js). The site has no framework islands: React only runs
+ * at build time and inside the /cdn/v1/ bundles, which the esbuild
+ * metafiles cover.
+ *
+ * Module ids are absolute paths, sometimes with a `?query` suffix or a
+ * leading NUL byte (virtual modules). Only ids under this project's
+ * node_modules are kept, made relative to the project root.
+ */
+const STATIC_ASSET_PACKAGES = ['pagefind', 'astro-expressive-code', '@expressive-code/plugin-frames'];
+
+function clientModulesMetafile() {
+  const root = dirname(fileURLToPath(import.meta.url)).replace(/\\/g, '/');
+  const inputs = Object.fromEntries(STATIC_ASSET_PACKAGES.map((name) => [`node_modules/${name}/package.json`, {}]));
+  return {
+    name: 'agentlet-client-modules-metafile',
+    apply: 'build',
+    buildStart() {
+      if (this.environment?.name === 'client') resetMetafiles('astro');
+    },
+    generateBundle(_options, bundle) {
+      if (this.environment?.name !== 'client') return;
+      for (const chunk of Object.values(bundle)) {
+        if (chunk.type !== 'chunk') continue;
+        for (const id of chunk.moduleIds ?? []) {
+          const clean = id.replace(/[?#].*$/, '').replace(/\\/g, '/');
+          if (!clean.startsWith(`${root}/node_modules/`)) continue;
+          inputs[clean.slice(root.length + 1)] = {};
+        }
+      }
+      writeMetafile('astro', 'client-modules', { inputs, outputs: {} });
+    },
+  };
+}
+
 export default defineConfig({
   site: 'https://agentlet.io',
-  vite: { plugins: [knownSitesDevServer()] },
+  vite: {
+    plugins: [knownSitesDevServer(), ...(process.env.SBOM_META_DIR ? [clientModulesMetafile()] : [])],
+  },
   integrations: [
     starlight({
       title: 'agentlet',
