@@ -1,4 +1,5 @@
 Contact: https://github.com/agentlet/agentlet-core/security/advisories/new
+Contact: mailto:security@agentlet.io
 Expires: 2027-10-01T00:00:00.000Z
 Preferred-Languages: en, fr
 Canonical: https://agentlet.io/.well-known/security.txt
