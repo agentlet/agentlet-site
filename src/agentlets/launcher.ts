@@ -1,5 +1,5 @@
 import { AGENTLET_MANIFEST, AUDIENCE_LABELS, listDemoAgentlets, type AgentletManifestEntry } from './manifest';
-import { AGENTLET_BASE_STYLES, SHOW_LAUNCHER_EVENT, sourceLinkHtml, sourceUrl } from './shared';
+import { AGENTLET_BASE_STYLES, listenForShowLauncher, sourceLinkHtml, sourceUrl } from './shared';
 import { AUTH_CHANGED_EVENT, configureDemoAuth, getDemoAuthUser, signOut, startSignIn, type DemoAuthUser } from './auth-demo';
 
 const LAUNCHER_FILE = 'launcher';
@@ -94,7 +94,6 @@ const LOCK_ICON =
 
 class AgentletLauncherModule extends window.agentlet.Module {
 	private _container: HTMLElement | null = null;
-	private _onShowLauncher: (() => void) | null = null;
 	private _onAuthChanged: (() => void) | null = null;
 	/** True while a sign-in popup was just requested and has not settled yet (success, error, or cancel); see auth-demo.ts's AUTH_CHANGED_EVENT. */
 	private _authBusy = false;
@@ -110,26 +109,9 @@ class AgentletLauncherModule extends window.agentlet.Module {
 	async initModule(): Promise<void> {
 		// Site-owned convention, not a core API: any module can ask to bring
 		// the launcher back by dispatching SHOW_LAUNCHER_EVENT on window (see
-		// shared.ts). There is no public way to reach "the launcher" other
-		// than by name, which this closes over. Goes through
-		// window.agentlet.moduleRegistry rather than the equivalent
-		// window.agentlet.modules: both agree on every registered module, but
-		// only moduleRegistry also exposes loadModule()/getRegistryEntries(),
-		// which _activate() below needs for the lazy demo entries, so this
-		// file sticks to one namespace throughout rather than mixing both.
-		this._onShowLauncher = () => {
-			const registry = window.agentlet?.moduleRegistry;
-			const self = registry?.get(this.name);
-			if (registry && self) void registry.activateModule(self);
-		};
-		window.addEventListener(SHOW_LAUNCHER_EVENT, this._onShowLauncher);
-	}
-
-	async cleanupModule(): Promise<void> {
-		if (this._onShowLauncher) {
-			window.removeEventListener(SHOW_LAUNCHER_EVENT, this._onShowLauncher);
-			this._onShowLauncher = null;
-		}
+		// shared.ts, which also explains why the listener is not removed in
+		// cleanupModule()).
+		listenForShowLauncher(this.name);
 	}
 
 	/**

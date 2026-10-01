@@ -1,4 +1,4 @@
-import { SHOW_LAUNCHER_EVENT, sourceLinkHtml } from '../shared';
+import { listenForShowLauncher, sourceLinkHtml } from '../shared';
 import { KNOWN_SITES, KNOWN_SITE_AGENTLETS, demosForUrl, findKnownSite, type KnownSiteAgentlet } from './manifest';
 import { KNOWN_SITES_PAGE_URL, KNOWN_SITES_SOURCE_DIR, KNOWN_SITE_STYLES, escapeHtml } from './shared';
 
@@ -54,8 +54,6 @@ const STYLES = `
 `;
 
 class KnownSitesLauncherModule extends window.agentlet.Module {
-	private _onShowLauncher: (() => void) | null = null;
-
 	constructor() {
 		super({
 			name: 'known-sites-launcher',
@@ -69,24 +67,9 @@ class KnownSitesLauncherModule extends window.agentlet.Module {
 	}
 
 	async initModule(): Promise<void> {
-		// Same convention as the on-site launcher (src/agentlets/shared.ts):
-		// any demo's "Back to all demos" button dispatches this event.
-		//
-		// The listener must outlive this module's own deactivation: it is
-		// needed exactly while a demo is active and this launcher is not,
-		// and agentlet-core calls cleanupModule() on every deactivation
-		// (initModule() runs once). So it is removed when the whole core is
-		// torn down (its close button), not in cleanupModule().
-		this._onShowLauncher = () => {
-			const registry = window.agentlet?.moduleRegistry;
-			const self = registry?.get(this.name);
-			if (registry && self) void registry.activateModule(self);
-		};
-		window.addEventListener(SHOW_LAUNCHER_EVENT, this._onShowLauncher);
-		window.agentlet?.eventBus.on('core:cleanup', () => {
-			if (this._onShowLauncher) window.removeEventListener(SHOW_LAUNCHER_EVENT, this._onShowLauncher);
-			this._onShowLauncher = null;
-		});
+		// Same convention as the on-site launcher: any demo's "Back to all
+		// demos" button dispatches this event (see shared.ts).
+		listenForShowLauncher(this.name);
 	}
 
 	async mount(container: HTMLElement): Promise<void> {
