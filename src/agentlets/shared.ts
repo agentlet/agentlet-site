@@ -5,11 +5,7 @@
  * in anything heavy.
  */
 
-/**
- * The site repository. Private today; the coordinator handles telling
- * visitors that until it is public. The link is still correct and will
- * start working the day the repository opens up.
- */
+/** The site repository, where every demo agentlet's source can be read. */
 export const SITE_REPO_URL = 'https://github.com/agentlet/agentlet-site';
 
 /**
