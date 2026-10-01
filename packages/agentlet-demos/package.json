@@ -1,7 +1,7 @@
 {
   "name": "@agentlet/demos",
-  "version": "1.0.0",
-  "description": "Agentlet demos for well-known sites (Wikipedia, arXiv), loaded by a bookmarklet through jsDelivr.",
+  "version": "1.1.0",
+  "description": "Agentlet demos for well-known sites (Wikipedia, arXiv, W3C, RFC Editor, EUR-Lex), loaded by a bookmarklet through jsDelivr.",
   "license": "MIT",
   "homepage": "https://agentlet.io/try/known-sites/",
   "repository": {
@@ -13,7 +13,10 @@
     "agentlet",
     "bookmarklet",
     "wikipedia",
-    "arxiv"
+    "arxiv",
+    "wcag",
+    "rfc",
+    "eur-lex"
   ],
   "files": [
     "dist"
