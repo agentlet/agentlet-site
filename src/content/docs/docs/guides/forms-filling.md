@@ -187,5 +187,3 @@ if (result.successful < result.total) {
     console.warn(`Partial success: ${result.successful}/${result.total} fields filled`);
 }
 ```
-
-Source: agentlet-core docs/form-filling-api.md and src/types/public-api.d.ts at 4a8aaab. Options and callbacks not present in the current `FormFillOptions`/`FormFillResult` types (`validateValues`, `waitForElement`, `onSuccess`/`onError`/`onSkipped` callbacks) were dropped in favor of the documented `validateFields` option and the returned `details`/`errors` arrays.

@@ -60,5 +60,3 @@ Commits are automatically validated via husky git hooks. Invalid commits are rej
 - Every new file under `src/` is written in TypeScript. Any existing `.js` file under `src/` that a change touches, and that is under 300 lines, is converted to `.ts` in the same change.
 - No `any`. ESLint rejects explicit `any` in `.ts` files; use `unknown`, or a precise union, with a one-line comment for genuinely dynamic values.
 - `npm run typecheck` must pass before any commit, alongside `npm test`, `npm run build`, and `npm run lint`.
-
-Source: agentlet-core CLAUDE.md, sections "Commit message format" and "Development rules".

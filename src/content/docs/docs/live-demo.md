@@ -152,5 +152,3 @@ That bookmarklet only works on agentlet.io. Demos that run on other sites, such 
 ## Source
 
 Every demo agentlet is a single TypeScript file under `src/agentlets/` in the site's repository. Each one shows a "View the source of this agentlet" link in its own panel, pointing at that file on GitHub.
-
-Source: this site's own live-demo feature (`src/agentlets/`, `src/scripts/demo-loader.ts`, `scripts/build-cdn.mjs`), not derived from agentlet-core's documentation.

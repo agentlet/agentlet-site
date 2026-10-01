@@ -70,5 +70,3 @@ This approach is especially useful in environments where deploying new backend f
 By default, the agentlet panel, dialogs, and toasts mount inside an isolated shadow root, so the host page's CSS cannot reach in and the framework's CSS cannot leak out. See [Shadow DOM](/docs/guides/shadow-dom/).
 
 Alongside the `initModule`/`activateModule`/`cleanupModule` hooks, a module can override `mount()`/`unmount()` to attach a UI framework root (React, Lit, or any other) directly into its panel container, instead of only returning an HTML string. The core never renders agentlet content in a tree of its own, so two agentlets can use two different frameworks, or two copies of the same one, on the same page without interfering. See [Mount API](/docs/guides/mount-api/).
-
-Source: agentlet-core README.md, section "Architecture".

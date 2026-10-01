@@ -37,5 +37,3 @@ Goals: a professional, business-ready appearance; consistent formatting across e
 ## Design spirit
 
 Simple, open source, honest. Plain typography, generous whitespace, content first, code blocks, one accent color. No gradients, no stock illustrations, no testimonials, no pricing, no hype.
-
-Source: agentlet-core CLAUDE.md, "Documentation Style Guide", and this repository's own CLAUDE.md, "Content style rules" and "Design spirit".

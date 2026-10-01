@@ -133,5 +133,3 @@ window.agentlet.utils.shortcuts.showHelp();
 ```
 
 `register()` resolves to `false`, rather than throwing, if the underlying hotkeys library could not be loaded or the arguments are invalid.
-
-Source: agentlet-core CLAUDE.md, API Quick Reference ("Keyboard shortcuts"), and src/types/public-api.d.ts at e3f78fa.

@@ -74,5 +74,3 @@ const agentlet = new AgentletCore({
 - **Keyboard shortcuts already handle this.** The shortcut manager resolves the real event target via `event.composedPath()` rather than `event.target`, so shortcuts keep working the same whether they originate inside the shadow root or on the host page.
 - **`PageHighlighter`, `ElementSelector`, and `ScreenCapture` stay in the page DOM by design.** These utilities draw overlays directly on top of host-page elements being selected, highlighted, or captured, so they need to live in the same DOM and stacking context as those elements rather than inside the panel's shadow root.
 - **Standalone use of `Dialog`/`MessageBubble` without `AgentletCore`** falls back to mounting in `document.body` when no `window.agentlet.ui.root` exists yet. The shadow root is only used once an `AgentletCore` instance has created one and pointed these shared instances at it.
-
-Source: agentlet-core docs/shadow-dom.md at e3f78fa.

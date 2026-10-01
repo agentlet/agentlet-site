@@ -52,5 +52,3 @@ For the full mechanism and migration notes, see [Script injection and registry](
 ## Reporting a vulnerability
 
 Report vulnerabilities privately through GitHub: [open a security advisory](https://github.com/agentlet/agentlet-core/security/advisories/new) on agentlet-core. Please do not open a public issue.
-
-Source: agentlet-core SECURITY.md and README.md, section "Security and API keys".

@@ -70,5 +70,3 @@ console.log(analysis.summary.status);
 2. Use `constants` or `createConstants()` instead of hardcoded numeric values, for maintainability.
 3. Respect the hierarchy: do not put a tooltip above a dialog.
 4. Test on the target application to catch visual conflicts early.
-
-Source: agentlet-core docs/z-index-usage-guide.md and src/types/public-api.d.ts at e3f78fa. The source document described a richer API (`detect()`/`suggest()` taking selector, range, and margin options; a `ranges`/`layerPreview` breakdown; a `LEGACY_Z_INDEX` mapping) that does not match the current `ZIndexAPI` type, whose `detect()` only takes `excludeAgentlet` and whose `suggest()` takes no arguments. The reference above follows the current type; the richer, options-heavy variant may reflect an earlier or planned implementation.

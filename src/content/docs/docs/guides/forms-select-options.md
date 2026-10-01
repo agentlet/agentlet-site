@@ -98,5 +98,3 @@ function isValidOption(selectElementInfo, desiredValue) {
     return selectElementInfo.options.options.some((opt) => opt.value === desiredValue && !opt.disabled);
 }
 ```
-
-Source: agentlet-core docs/select-options-extraction.md and src/types/public-api.d.ts at e3f78fa. The source document additionally described `defaultSelected`, a `size` property, and an optgroup `group` label on each option; these are not part of the current `FormElementOptionsInfo` type, so they were not carried over.
