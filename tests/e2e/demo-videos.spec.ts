@@ -15,8 +15,9 @@ test.describe('Demo videos and the "Pause animations" toggle', () => {
 		});
 
 		await page.goto('/');
-		await page.waitForLoadState('networkidle');
+		await page.waitForLoadState('load');
 
+		// Not 'networkidle': a looping video keeps fetching ranges, so the network never idles.
 		const videos = page.locator('.demo-media-video');
 		await expect(videos).toHaveCount(2);
 		for (const video of await videos.all()) {
@@ -56,7 +57,7 @@ test.describe('Demo videos and the "Pause animations" toggle', () => {
 			localStorage.setItem(key, 'paused');
 		}, ANIMATIONS_KEY);
 		await page.goto('/');
-		await page.waitForLoadState('networkidle');
+		await page.waitForLoadState('load');
 
 		await expect.poll(() => pausedStates(page)).toEqual([true, true]);
 		await expect(page.locator('.demo-media-video').first()).toBeHidden();
