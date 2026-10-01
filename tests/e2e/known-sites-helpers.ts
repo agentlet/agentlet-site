@@ -33,10 +33,16 @@ export const WIKIPEDIA_URL = 'https://en.wikipedia.org/wiki/Apollo_11';
 export const ARXIV_LIST_URL = 'https://arxiv.org/list/cs.AI/recent';
 export const ARXIV_SEARCH_URL = 'https://arxiv.org/search/?query=synthetic&searchtype=title';
 export const ARXIV_ABS_URL = 'https://arxiv.org/abs/2609.00001';
+export const WCAG_URL = 'https://www.w3.org/TR/WCAG22/';
+export const W3C_TR_URL = 'https://www.w3.org/TR/example-widget-protocol/';
+export const RFC_URL = 'https://www.rfc-editor.org/rfc/rfc9110.html';
+export const EURLEX_URL = 'https://eur-lex.europa.eu/eli/reg/2016/679/oj';
 export const OTHER_SITE_URL = 'https://example.com/';
 
 const WIKIPEDIA_CSP = readFileSync(join(FIXTURES, 'wikipedia-csp.txt'), 'utf8').trim();
 const ARXIV_CSP = readFileSync(join(FIXTURES, 'arxiv-csp.txt'), 'utf8').trim();
+const W3C_CSP = readFileSync(join(FIXTURES, 'w3c-csp.txt'), 'utf8').trim();
+const EURLEX_CSP = readFileSync(join(FIXTURES, 'eur-lex-csp.txt'), 'utf8').trim();
 const WIKIPEDIA_HTML = readFileSync(join(FIXTURES, 'wikipedia-article.html'), 'utf8');
 
 export interface KnownSitesRun {
@@ -128,6 +134,18 @@ export async function serveArxiv(page: Page, kind: 'list' | 'search' | 'abs'): P
 	const html = readFileSync(join(FIXTURES, `arxiv-${kind}.html`), 'utf8');
 	const url = { list: ARXIV_LIST_URL, search: ARXIV_SEARCH_URL, abs: ARXIV_ABS_URL }[kind];
 	return serveKnownSitesPage(page, { html, csp: ARXIV_CSP, url });
+}
+
+/** A standards fixture page, served with the policy its real site sent. rfc-editor.org sends none. */
+export async function serveSpec(page: Page, kind: 'wcag' | 'w3c' | 'rfc' | 'eurlex'): Promise<KnownSitesRun> {
+	const files = {
+		wcag: ['w3c-wcag.html', WCAG_URL, W3C_CSP],
+		w3c: ['w3c-tr.html', W3C_TR_URL, W3C_CSP],
+		rfc: ['rfc-editor-rfc9110.html', RFC_URL, undefined],
+		eurlex: ['eur-lex-gdpr.html', EURLEX_URL, EURLEX_CSP],
+	} as const;
+	const [file, url, csp] = files[kind];
+	return serveKnownSitesPage(page, { html: readFileSync(join(FIXTURES, file), 'utf8'), csp, url });
 }
 
 /**
