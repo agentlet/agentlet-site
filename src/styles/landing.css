@@ -475,6 +475,10 @@ section.alt {
 	font-size: 0.85rem;
 }
 
+.hero-known-sites-link {
+	font-size: 0.9rem;
+}
+
 .hero-bookmarklet {
 	display: flex;
 	flex-direction: column;
@@ -523,7 +527,8 @@ section.alt {
 
 @media (max-width: 767px) {
 	.hero-demo-button,
-	.hero-bookmarklet {
+	.hero-bookmarklet,
+	.hero-known-sites-link {
 		display: none;
 	}
 
@@ -1215,6 +1220,12 @@ figure.demo-figure figcaption {
    collapsed by default, styled as a clearly separate zone (dashed accent
    border, tinted background) so it never reads as part of the marketing
    page around it. */
+
+.sandbox-note {
+	margin: 0.75rem 0 0;
+	font-size: 0.9rem;
+	color: var(--color-text-muted);
+}
 
 .sandbox-details {
 	border: 1px dashed var(--color-accent);

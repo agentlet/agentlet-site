@@ -74,6 +74,7 @@ export default defineConfig({
       sidebar: [
         { label: 'Introduction', slug: 'docs' },
         { label: 'Live demo', slug: 'docs/live-demo' },
+        { label: 'Try it on real sites', link: '/try/known-sites/' },
         {
           label: 'Getting started',
           items: [
