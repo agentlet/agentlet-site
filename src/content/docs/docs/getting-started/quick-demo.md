@@ -3,7 +3,7 @@ title: Quick demo
 description: Run the built-in agentlet-core examples.
 ---
 
-The fastest way to try agentlet is to run the built-in examples from the core repository.
+To run the built-in examples, clone the core repository. If you only want a working agentlet without cloning anything, use the [Quick start](/docs/getting-started/quick-start/) instead.
 
 ```bash
 git clone https://github.com/agentlet/agentlet-core.git
@@ -31,5 +31,3 @@ To start the server without rebuilding the library first:
 ```bash
 npm run dev
 ```
-
-Source: agentlet-core README.md, section "Getting started".
