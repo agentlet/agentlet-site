@@ -31,6 +31,11 @@ agentlet framework (agentlet-core).
 - `npm run build:known-sites`: build `packages/agentlet-demos/dist/`. `npm run dev`
   does it and serves it on `http://localhost:4400`; `npm run test:e2e` does it first.
 
+The `Security` workflow scans dependencies (blocking scope: what reaches
+browsers; reporting scope: `package-lock.json`), see README.md. The build
+scripts write esbuild metafiles to the gitignored `reports/security/meta/`,
+never into `dist/`, `public/` or the npm package.
+
 Before committing, `npm run lint`, `npm run check` and `npm run build` must
 all exit 0.
 
