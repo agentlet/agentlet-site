@@ -1,13 +1,41 @@
 ---
 title: Security
-description: Content Security Policy, CORS, and registry loading considerations.
+description: What the host page can see, where API keys live, what data leaves the page, CSP, CORS and registry loading.
 ---
 
-To address the security considerations introduced by running inside the context of an existing webpage, the agentlet framework adheres to common web and API security principles, notably Content Security Policy (CSP) and Cross-Origin Resource Sharing (CORS).
+An agentlet is JavaScript injected into a page you do not control, by a bookmarklet, an extension or the page itself. It runs with the page's privileges, in the page's JavaScript context, and is not sandboxed. This page describes what that means in practice.
+
+## What the host page can see
+
+- **Everything the agentlet holds in memory.** `window.agentlet` is a global, so any other script on the page, including third-party analytics and any XSS payload, can read it.
+- **Everything the agentlet stores.** Environment variables are persisted in the host origin's `localStorage` under the key `agentlet`, readable by any script on that origin.
+- **The agentlet's network calls.** Other scripts on the page can wrap `fetch` and observe requests.
+
+A module you register can do anything the page can do.
+
+## API keys
+
+`window.agentlet.ai` calls the provider straight from the browser and sends `OPENAI_API_KEY` as a bearer token. A key set this way is readable by every script on the host page.
+
+Do not put a long-lived provider key in the browser on a page that loads third-party scripts or handles untrusted content. Instead:
+
+1. **Use a proxy.** Set `OPENAI_BASE_URL` to an endpoint on your own backend that speaks the OpenAI API, and set `OPENAI_API_KEY` to a short-lived token your backend issued to the signed-in user. The backend checks that token, adds the real provider key and forwards the request. The real key never reaches the browser.
+2. **Do not persist secrets.** Pass your own `envManager` to `new AgentletCore({ envManager })`, for example one that keeps values in memory only, or `envManager: null` to disable environment variables. See [Environment variables](/docs/guides/environment-variables/).
+3. **Scope the key.** If a key must reach the browser, use a project key with a spending limit, and rotate it.
+
+## Data sent to an AI provider
+
+Agentlet sends no page data on its own and has no telemetry. A module sends what it passes to `window.agentlet.ai`: prompts, form structures, table data or screenshots of page elements. Review what your module captures before pointing it at pages with personal or customer data.
+
+The only third-party request the core makes by itself is during PDF conversion, which downloads pdf.js character maps and standard fonts from cdnjs.cloudflare.com. The PDF content is not sent.
+
+The demos on this site do not call any AI provider. Their AI answers are recorded in advance, see [Live demo](/docs/live-demo/).
 
 ## Content Security Policy (CSP)
 
-CSP headers restrict which domains can serve content within a page. Typically, this includes the domain hosting the web app, its APIs, and associated CDNs. In corporate environments, a common pattern is to deploy your AI API within an existing trusted domain and serve the agentlet, as minified JavaScript, from your corporate CDN. This approach enables the bookmarklet to inject code into the page, permitted if hosted on an allowed domain per CSP, and subsequently lets the agentlet interact with internal APIs.
+CSP headers restrict which domains can serve content within a page. Typically, this includes the domain hosting the web app, its APIs, and associated CDNs. In corporate environments, a common pattern is to deploy your AI API within an existing trusted domain and serve the agentlet, as minified JavaScript, from your corporate CDN. The bookmarklet can then inject code into the page, because it is hosted on a domain the CSP allows, and the agentlet can call internal APIs.
+
+A page with a strict policy blocks a bookmarklet loaded from any other origin. Use the extension or native integration modes there, see [Deployment modes](/docs/concepts/deployment-modes/). The agentlet panel writes markup with `innerHTML`, so it does not run on pages that enforce Trusted Types.
 
 ## Cross-Origin Resource Sharing (CORS)
 
@@ -17,6 +45,12 @@ Your backend APIs must implement appropriate CORS headers to allow requests from
 
 Agentlet registries use script injection instead of `fetch()` to avoid CORS issues when loading agentlet configurations. Registry files are JavaScript files (`.js`) that dispatch events with registry data, rather than JSON files that require CORS-compliant servers. This ensures reliable loading across corporate environments and CDNs.
 
+A registry and the modules it lists run with the page's privileges. Only load them from an origin you control.
+
 For the full mechanism and migration notes, see [Script injection and registry](/docs/guides/script-injection/).
 
-Source: agentlet-core README.md, section "Security considerations".
+## Reporting a vulnerability
+
+Report vulnerabilities privately through GitHub: [open a security advisory](https://github.com/agentlet/agentlet-core/security/advisories/new) on agentlet-core. Please do not open a public issue.
+
+Source: agentlet-core SECURITY.md and README.md, section "Security and API keys".

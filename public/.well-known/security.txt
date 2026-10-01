@@ -1,0 +1,5 @@
+Contact: https://github.com/agentlet/agentlet-core/security/advisories/new
+Expires: 2027-10-01T00:00:00.000Z
+Preferred-Languages: en, fr
+Canonical: https://agentlet.io/.well-known/security.txt
+Policy: https://github.com/agentlet/agentlet-core/blob/main/SECURITY.md
