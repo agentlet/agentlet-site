@@ -324,4 +324,4 @@ URL-based re-detection (`checkUrlChange()`, the core's 1-second poll and its `po
 
 Only present when `AgentletCore` was constructed with `debugMode: true`: `getMetrics()`, `getConfig()`, `getStatistics()`, plus direct references `eventBus`, `envManager`, `cookieManager`, `storageManager`.
 
-Source: agentlet-core src/types/public-api.d.ts and CLAUDE.md, API Quick Reference, at c6e8a2f (agentlet-core 2.1.1).
+Source: agentlet-core src/types/public-api.d.ts and CLAUDE.md, API Quick Reference, at 6f24ed2 (agentlet-core 2.2.0).

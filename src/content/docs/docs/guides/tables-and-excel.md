@@ -126,4 +126,4 @@ if (window.agentlet.tables.extractor.isExcelExportAvailable()) {
 
 `window.agentlet.tables.extractor` is the underlying `TableExtractor` instance, with the same methods under their original names: `extractTableData`, `extractAllPages`, `downloadAsExcel`, `extractAndDownload`.
 
-Source: agentlet-core CLAUDE.md, API Quick Reference ("Table extraction and Excel export"), and src/utils/data-processing/TableExtractor.ts and src/types/public-api.d.ts at ac57317 (agentlet-core 2.2.0).
+Source: agentlet-core CLAUDE.md, API Quick Reference ("Table extraction and Excel export"), and src/utils/data-processing/TableExtractor.ts and src/types/public-api.d.ts at 6f24ed2 (agentlet-core 2.2.0).

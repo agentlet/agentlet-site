@@ -234,4 +234,4 @@ class TypedModule extends window.agentlet.Module {
 
 See [TypeScript](/docs/guides/typescript/) for how these declarations are imported and maintained.
 
-Source: agentlet-core docs/module-mount-api.md and src/types/public-api.d.ts at 4a8aaab, and src/core/Module.ts at ac57317 (agentlet-core 2.2.0) for `getStyles()`.
+Source: agentlet-core docs/module-mount-api.md and src/types/public-api.d.ts at 4a8aaab, and src/core/Module.ts at 6f24ed2 (agentlet-core 2.2.0) for `getStyles()`.
