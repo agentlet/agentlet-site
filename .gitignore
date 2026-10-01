@@ -19,3 +19,7 @@ dist/
 /test-results/
 /playwright-report/
 .claude/handoff/
+
+# Written by the build scripts and by the Vite plugin in astro.config.mjs for
+# the dependency scan (metafiles, SBOMs, scan reports). Never deployed.
+/reports/
