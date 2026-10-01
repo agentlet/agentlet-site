@@ -11,18 +11,21 @@ These demos are separate from the [live demo](/docs/live-demo/) on agentlet.io. 
 
 A bookmarklet runs inside someone else's page, so that page's Content Security Policy decides what it may load. Wikipedia's policy allows scripts from `*.jsdelivr.net` and from localhost, and does not allow agentlet.io. So the demos are published as an npm package, `@agentlet/demos`, and served by jsDelivr, which serves any npm package. agentlet-core itself is not copied into that package: the loader takes it from jsDelivr too, from the `agentlet-core` package.
 
-This is also the limit of the approach. A site whose policy does not allow jsDelivr, or does not allow inline scripts at all, cannot run the bookmarklet. On 30 September 2026:
+This is also the limit of the approach. A site whose policy does not allow jsDelivr, or does not allow inline scripts at all, cannot run the bookmarklet. On 30 September and 1 October 2026:
 
 - Wikipedia allows it.
 - arXiv allows it: it sends only `frame-ancestors 'none'`, with no script-src.
 - GitHub, MDN, Stack Overflow and YouTube do not allow inline scripts without a nonce or hash, so even the bookmarklet's own code is refused.
+- W3C Technical Reports allow it: they send only `frame-ancestors` and `upgrade-insecure-requests`, with no script-src.
+- rfc-editor.org allows it: it sends no policy.
+- EUR-Lex allows it: it sends only `frame-ancestors`. Its servers answer a plain `curl` with a bot challenge, so the header was read from a real browser session.
 - Hacker News allows inline scripts but limits loaded scripts to itself, Google reCAPTCHA and cdnjs, so the script from jsDelivr is refused. It is an example of a site that restricts scripts to its own domain and a few others. It has no demo here.
 
-Policies change, so check the real page before relying on a site. `tests/e2e/fixtures/known-sites/` keeps the policies Wikipedia and arXiv sent, and the tests apply them.
+Policies change, so check the real page before relying on a site. `tests/e2e/fixtures/known-sites/` keeps the policies Wikipedia, arXiv, W3C and EUR-Lex sent (rfc-editor.org sends none), and the tests apply them.
 
 ## What the bookmarklet does
 
-The bookmarklet adds one classic script tag that points at `https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js`. A classic script needs no CORS, and the `@1` range means a fix released as 1.0.1 reaches everyone without dragging a new bookmark.
+The bookmarklet adds one classic script tag that points at `https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js`. A classic script needs no CORS, and the `@1` range means a fix released as 1.1.1 reaches everyone without dragging a new bookmark.
 
 The loader then:
 
@@ -51,6 +54,16 @@ It is a separate server on purpose. The Astro dev server refuses cross-origin su
 
 After editing an agentlet, run `npm run build:known-sites`, reload the host page, and click the bookmarklet again. A recent Chrome can ask whether the site may connect to devices on the local network the first time a public page loads from localhost. Allow it for this test.
 
+## Spec to checklist
+
+One demo, `spec-checklist.ts`, covers three hosts under one manifest entry, "Standards and regulations (W3C, RFC Editor, EUR-Lex)". The readers are in `spec-extract.ts`:
+
+- W3C pages with success criteria (WCAG): one row per success criterion, with its level A, AA or AAA. Other W3C Technical Reports: one row per sentence with a requirement keyword, found through `em.rfc2119` or, when a document does not mark keywords up, by their uppercase spelling. Notes, examples and code blocks are skipped.
+- RFC Editor: one row per sentence with an uppercase BCP 14 keyword (RFC 2119 and RFC 8174), read from the paragraphs, list items and cells that have a `section-` or `appendix-` id. The row keeps the section number and the paragraph anchor.
+- EUR-Lex: one row per article paragraph that says "shall" or "must". This is a heuristic. The panel says it is a reading aid and not legal advice.
+
+Each row has a status (to review, compliant, partial, not compliant, not applicable) and a note. Both are saved in `localStorage` under a key made from the document URL without its hash, and stay in the browser. If the browser refuses to store them, the panel says so and keeps working. The list shows at most 200 rows at a time, with a counter. An export covers every row that matches the filters.
+
 ## Add a site
 
 1. Add a `KnownSite` to `KNOWN_SITES` in `src/agentlets/known-sites/manifest.ts`: a label, where it runs, and an example link. Check the site's real policy first: if it does not allow scripts from jsDelivr, the bookmarklet cannot load there and a demo would never start.
@@ -61,8 +74,8 @@ The build, the registry, the launcher and the known-sites page all read the mani
 
 ## Tests
 
-The Playwright tests do not touch any real site. They serve committed fixtures as if they came from `en.wikipedia.org` and `arxiv.org`, send the policy header each site really sent, and answer the jsDelivr URLs from the locally built package and from `node_modules/agentlet-core`. A test also checks that after the loader, every request names an exact version and goes to jsDelivr only. `npm run test:e2e` builds the package first.
+The Playwright tests do not touch any real site. They serve committed fixtures as if they came from `en.wikipedia.org`, `arxiv.org`, `www.w3.org`, `www.rfc-editor.org` and `eur-lex.europa.eu`, send the policy header each site really sent, and answer the jsDelivr URLs from the locally built package and from `node_modules/agentlet-core`. A test also checks that after the loader, every request names an exact version and goes to jsDelivr only. `npm run test:e2e` builds the package first.
 
 ## Publishing
 
-Push a tag named `demos-v<version>`, for example `demos-v1.0.1`. The `publish-demos` workflow builds the package, checks that the tag matches the version in `packages/agentlet-demos/package.json`, and runs `npm publish` with the `NPM_TOKEN` secret. It publishes without npm provenance, because the source repository is private and npm only supports provenance for public ones. Bump the version by hand in that file before tagging. Publishing is never automatic on a merge.
+Push a tag named `demos-v<version>`, for example `demos-v1.1.0`. The `publish-demos` workflow builds the package, checks that the tag matches the version in `packages/agentlet-demos/package.json`, and runs `npm publish` with the `NPM_TOKEN` secret. It publishes without npm provenance, because the source repository is private and npm only supports provenance for public ones. Bump the version by hand in that file before tagging. Publishing is never automatic on a merge.

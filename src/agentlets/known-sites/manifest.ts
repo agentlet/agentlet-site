@@ -1,6 +1,6 @@
 /**
  * Single source of truth for the agentlets that run on well-known third-party
- * sites (Wikipedia, arXiv), distributed as the `@agentlet/demos` npm
+ * sites (Wikipedia, arXiv, standards), distributed as the `@agentlet/demos` npm
  * package (packages/agentlet-demos/) through jsDelivr. The on-site demos
  * under src/agentlets/manifest.ts are a separate set served from agentlet.io
  * itself; nothing here changes how they work.
@@ -31,6 +31,8 @@ export interface KnownSite {
 	exampleUrl: string;
 	/** Short label for the example link. */
 	exampleLabel: string;
+	/** More example links, for a site entry that covers several hosts. */
+	moreExamples?: { url: string; label: string }[];
 }
 
 export interface KnownSiteAgentlet {
@@ -70,6 +72,18 @@ export const KNOWN_SITES: KnownSite[] = [
 		exampleUrl: 'https://arxiv.org/list/cs.AI/recent',
 		exampleLabel: 'Recent papers in cs.AI on arXiv',
 	},
+	{
+		id: 'standards',
+		label: 'Standards and regulations (W3C, RFC Editor, EUR-Lex)',
+		where:
+			'W3C Technical Reports (www.w3.org/TR/...), RFCs on rfc-editor.org (www.rfc-editor.org/rfc/rfc<number>.html), and EU legal texts on EUR-Lex (eur-lex.europa.eu/eli/... and /legal-content/...).',
+		exampleUrl: 'https://www.w3.org/TR/WCAG22/',
+		exampleLabel: 'WCAG 2.2 on W3C',
+		moreExamples: [
+			{ url: 'https://www.rfc-editor.org/rfc/rfc9110.html', label: 'RFC 9110 (HTTP Semantics) on RFC Editor' },
+			{ url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj', label: 'The GDPR on EUR-Lex' },
+		],
+	},
 ];
 
 /**
@@ -90,6 +104,10 @@ export const WIKIPEDIA_PATTERN = '^https?:\\/\\/[a-z0-9-]+(?:\\.m)?\\.wikipedia\
 
 /** arXiv listing pages, search results, and abstract pages. */
 export const ARXIV_PATTERN = '^https?:\\/\\/(?:www\\.)?arxiv\\.org\\/(?:list|search|abs)\\/';
+
+/** W3C Technical Reports, RFC Editor RFC pages, and EUR-Lex ELI and legal-content pages. */
+export const SPEC_PATTERN =
+	'^https?:\\/\\/(?:www\\.w3\\.org\\/TR\\/|(?:www\\.)?rfc-editor\\.org\\/rfc\\/rfc\\d+\\.html|eur-lex\\.europa\\.eu\\/(?:eli|legal-content)\\/)';
 
 export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 	{
@@ -118,6 +136,16 @@ export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 		title: 'Papers to spreadsheet',
 		description: 'Finds every paper on a listing or search page, previews them, and exports the ones you tick to Excel. On an abstract page, shows a citation line.',
 		pattern: ARXIV_PATTERN,
+	},
+	{
+		id: 'spec-checklist',
+		site: 'standards',
+		file: 'spec-checklist',
+		className: 'SpecChecklistModule',
+		title: 'Spec to checklist',
+		description:
+			'Extracts each requirement of a W3C, RFC or EUR-Lex document into an audit checklist with a status and a note per row, and exports it to Excel.',
+		pattern: SPEC_PATTERN,
 	},
 ];
 

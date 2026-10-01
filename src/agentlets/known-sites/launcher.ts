@@ -118,7 +118,9 @@ class KnownSitesLauncherModule extends window.agentlet.Module {
 					<span class="kl-site-name">${escapeHtml(site.label)}</span>
 					<span class="kl-site-where">${escapeHtml(site.where)}</span>
 					<span class="ks-note">${demos.map((entry) => escapeHtml(entry.title)).join(', ')}</span>
-					<a class="kl-link" href="${escapeHtml(site.exampleUrl)}" rel="noopener noreferrer">${escapeHtml(site.exampleLabel)}</a>
+					${[{ url: site.exampleUrl, label: site.exampleLabel }, ...(site.moreExamples ?? [])]
+						.map((example) => `<a class="kl-link" href="${escapeHtml(example.url)}" rel="noopener noreferrer">${escapeHtml(example.label)}</a>`)
+						.join('')}
 				</li>
 			`;
 		}).join('');

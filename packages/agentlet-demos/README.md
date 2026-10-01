@@ -21,13 +21,14 @@ https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js
 | --- | --- |
 | Wikipedia (`*.wikipedia.org/wiki/...`) | Tables to spreadsheet, Date timeline |
 | arXiv (`arxiv.org/list/...`, `/search/...`, `/abs/...`) | Papers to spreadsheet, and a citation line on abstract pages |
+| W3C Technical Reports (`www.w3.org/TR/...`), RFC Editor (`www.rfc-editor.org/rfc/rfc<number>.html`), EUR-Lex (`eur-lex.europa.eu/eli/...`, `/legal-content/...`) | Spec to checklist: requirements with a status and a note, exported to Excel |
 
 On any other page the bookmarklet opens a list of the supported sites.
 
 ## Limits
 
 A site's Content Security Policy decides whether a bookmarklet can run. On
-30 September 2026 Wikipedia and arXiv allowed it. GitHub, MDN, Stack Overflow and
+30 September 2026 Wikipedia and arXiv allowed it, and on 1 October 2026 so did W3C, RFC Editor and EUR-Lex. GitHub, MDN, Stack Overflow and
 YouTube did not allow scripts added by a bookmarklet at all, and Hacker News
 allowed inline scripts but not scripts from jsDelivr. See the
 [known-sites page](https://agentlet.io/try/known-sites/) for details.

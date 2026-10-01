@@ -47,6 +47,17 @@ test.describe('Known-sites page', () => {
 		const main = page.locator('main');
 		await expect(main.getByRole('heading', { name: 'Wikipedia' })).toBeVisible();
 		await expect(main.getByRole('heading', { name: 'arXiv' })).toBeVisible();
+		await expect(main.getByRole('heading', { name: 'Standards and regulations (W3C, RFC Editor, EUR-Lex)' })).toBeVisible();
+		await expect(main).toContainText('Spec to checklist');
+		await expect(main.getByRole('link', { name: 'WCAG 2.2 on W3C' })).toHaveAttribute('href', 'https://www.w3.org/TR/WCAG22/');
+		await expect(main.getByRole('link', { name: 'RFC 9110 (HTTP Semantics) on RFC Editor' })).toHaveAttribute(
+			'href',
+			'https://www.rfc-editor.org/rfc/rfc9110.html',
+		);
+		await expect(main.getByRole('link', { name: 'The GDPR on EUR-Lex' })).toHaveAttribute(
+			'href',
+			'https://eur-lex.europa.eu/eli/reg/2016/679/oj',
+		);
 		await expect(main).toContainText('Tables to spreadsheet');
 		await expect(main).toContainText('Date timeline');
 		await expect(main).toContainText('GitHub, MDN, Stack Overflow and YouTube');
@@ -113,7 +124,11 @@ test.describe('Known-sites bookmarklet loader', () => {
 		const text = await panelText(page);
 		expect(text).toContain('Wikipedia');
 		expect(text).toContain('arXiv');
+		expect(text).toContain('Standards and regulations (W3C, RFC Editor, EUR-Lex)');
+		expect(text).toContain('Spec to checklist');
 		await expect(page.getByRole('link', { name: 'Apollo 11 on English Wikipedia' })).toBeVisible();
+		await expect(page.getByRole('link', { name: 'WCAG 2.2 on W3C' })).toBeVisible();
+		await expect(page.getByRole('link', { name: 'The GDPR on EUR-Lex' })).toBeVisible();
 	});
 });
 

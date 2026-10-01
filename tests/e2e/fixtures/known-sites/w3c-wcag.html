@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web Content Accessibility Guidelines (WCAG) 2.2</title>
+</head>
+<body>
+<main id="main">
+<h1 id="title">Web Content Accessibility Guidelines (WCAG) 2.2</h1>
+<section id="conformance">
+<h2>Conformance</h2>
+<p>The key words <em class="rfc2119">MAY</em>, <em class="rfc2119">MUST</em>, <em class="rfc2119">MUST NOT</em>, <em class="rfc2119">NOT RECOMMENDED</em>, <em class="rfc2119">RECOMMENDED</em>, <em class="rfc2119">SHOULD</em>, and <em class="rfc2119">SHOULD NOT</em> are to be interpreted as described in [<cite><a class="bibref" data-link-type="biblio" href="#bib-rfc2119" title="Key words for use in RFCs to Indicate Requirement Levels">RFC2119</a></cite>].</p>
+</section>
+<section id="perceivable"><h2>Perceivable</h2>
+<section class="guideline" id="text-alternatives"><div class="header-wrapper"><h3 id="x1-1-text-alternatives"><bdi class="secno">Guideline 1.1 </bdi>Text Alternatives</h3><a class="self-link" href="#text-alternatives" aria-label="Permalink for Section 1.1"></a></div>
+                <div class="doclinks"><a href="https://www.w3.org/WAI/WCAG22/Understanding/text-alternatives.html">Understanding Text Alternatives</a> <span class="screenreader">|</span> <br><a href="https://www.w3.org/WAI/WCAG22/quickref/#text-alternatives">How to Meet Text Alternatives</a></div><p>Provide text alternatives for any non-text content so that it can be changed into other forms people need, such as large print, braille, speech, symbols or simpler language.</p>
+                <section id="non-text-content" class="guideline"><div class="header-wrapper"><h4 id="x1-1-1-non-text-content"><bdi class="secno">Success Criterion 1.1.1 </bdi>Non-text Content</h4><a class="self-link" href="#non-text-content" aria-label="Permalink for Section 1.1.1"></a></div>
+   <div class="doclinks"><a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-content.html">Understanding Non-text Content</a> <span class="screenreader">|</span> <br><a href="https://www.w3.org/WAI/WCAG22/quickref/#non-text-content">How to Meet Non-text Content</a></div><p class="conformance-level">(Level A)</p>
+   <p>All <a href="#dfn-non-text-content" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-non-text-content-1" title="any content that is not a sequence of characters that can be programmatically determined or where the sequence is not expressing something in human language">non-text content</a> that is presented to the user has a <a href="#dfn-text-alternative" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-text-alternative-1" title="Text that is programmatically associated with non-text content or referred to from text that is programmatically associated with non-text content. Programmatically associated text is text whose location can be programmatically determined from the non-text content.">text alternative</a> that serves the equivalent purpose, except for the situations listed below.
+   </p>
+   <dl>
+      <dt>Controls, Input</dt>
+      <dd>
+         <p>If non-text content is a control or accepts user input, then it has a <a href="#dfn-name" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-name-1" title="text by which software can identify a component within web content to the user">name</a> that describes its purpose. (Refer to <a href="#name-role-value">Success Criterion 4.1.2</a> for additional requirements for controls and content that accepts user input.)
+         </p>
+      </dd>
+      <dt>Time-Based Media</dt>
+      <dd>
+         <p>If non-text content is time-based media, then text alternatives at least provide descriptive
+            identification of the non-text content. (Refer to <a href="#time-based-media">Guideline 1.2</a> for additional requirements for media.)
+         </p>
+      </dd>
+      <dt>Test</dt>
+      <dd>
+         <p>If non-text content is a test or exercise that would be invalid if presented in <a href="#dfn-text" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-text-1" title="sequence of characters that can be programmatically determined, where the sequence is expressing something in human language">text</a>, then text alternatives at least provide descriptive identification of the non-text
+            content.
+         </p>
+      </dd>
+      <dt>Sensory</dt>
+      <dd>
+         <p>If non-text content is primarily intended to create a <a href="#dfn-specific-sensory-experience" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-specific-sensory-experience-1" title="a sensory experience that is not purely decorative and does not primarily convey important information or perform a function">specific sensory experience</a>, then text alternatives at least provide descriptive identification of the non-text
+            content.
+         </p>
+      </dd>
+      <dt><a href="#dfn-captcha" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-captcha-1" title="initialism for &quot;Completely Automated Public Turing test to tell Computers and Humans Apart&quot;">CAPTCHA</a></dt>
+      <dd>
+         <p>If the purpose of non-text content is to confirm that content is being accessed by
+            a person rather than a computer, then text alternatives that identify and describe
+            the purpose of the non-text content are provided, and alternative forms of CAPTCHA
+            using output modes for different types of sensory perception are provided to accommodate
+            different disabilities.
+         </p>
+      </dd>
+      <dt>Decoration, Formatting, Invisible</dt>
+      <dd>
+         <p>If non-text content is <a href="#dfn-pure-decoration" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-pure-decoration-1" title="serving only an aesthetic purpose, providing no information, and having no functionality">pure decoration</a>, is used only for visual formatting, or is not presented to users, then it is implemented
+            in a way that it can be ignored by <a href="#dfn-assistive-technologies" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-assistive-technologies-1" title="hardware and/or software that acts as a user agent, or along with a mainstream user agent, to provide functionality to meet the requirements of users with disabilities that go beyond those offered by mainstream user agents">assistive technology</a>.
+         </p>
+      </dd>
+   </dl>
+</section>
+            </section>
+<section class="guideline" id="distinguishable"><div class="header-wrapper"><h3 id="x1-4-distinguishable"><bdi class="secno">Guideline 1.4 </bdi>Distinguishable</h3><a class="self-link" href="#distinguishable" aria-label="Permalink for Section 1.4"></a></div>
+                <div class="doclinks"><a href="https://www.w3.org/WAI/WCAG22/Understanding/distinguishable.html">Understanding Distinguishable</a> <span class="screenreader">|</span> <br><a href="https://www.w3.org/WAI/WCAG22/quickref/#distinguishable">How to Meet Distinguishable</a></div><p>Make it easier for users to see and hear content including separating foreground from background.</p>
+                <section id="contrast-minimum" class="guideline"><div class="header-wrapper"><h4 id="x1-4-3-contrast-minimum"><bdi class="secno">Success Criterion 1.4.3 </bdi>Contrast (Minimum)</h4><a class="self-link" href="#contrast-minimum" aria-label="Permalink for Section 1.4.3"></a></div>
+   <div class="doclinks"><a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">Understanding Contrast (Minimum)</a> <span class="screenreader">|</span> <br><a href="https://www.w3.org/WAI/WCAG22/quickref/#contrast-minimum">How to Meet Contrast (Minimum)</a></div><p class="conformance-level">(Level AA)</p>
+   <p>The visual presentation of <a href="#dfn-text" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-text-2" title="sequence of characters that can be programmatically determined, where the sequence is expressing something in human language">text</a> and <a href="#dfn-images-of-text" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-images-of-text-1" title="text that has been rendered in a non-text form (e.g., an image) in order to achieve a particular visual effect">images of text</a> has a <a href="#dfn-contrast-ratio" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-contrast-ratio-1" title="(L1 + 0.05) / (L2 + 0.05), where">contrast ratio</a> of at least 4.5:1, except for the following:
+   </p>
+   <dl>
+      <dt>Large Text</dt>
+      <dd>
+         <p><a href="#dfn-large-scale" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-large-scale-1" title="with at least 18 point or 14 point bold or font size that would yield equivalent size for Chinese, Japanese and Korean (CJK) fonts">Large-scale</a> text and images of large-scale text have a contrast ratio of at least 3:1;
+         </p>
+      </dd>
+      <dt>Incidental</dt>
+      <dd>
+         <p>Text or images of text that are part of an inactive <a href="#dfn-user-interface-components" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-user-interface-components-2" title="a part of the content that is perceived by users as a single control for a distinct function">user interface component</a>, that are <a href="#dfn-pure-decoration" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-pure-decoration-2" title="serving only an aesthetic purpose, providing no information, and having no functionality">pure decoration</a>, that are not visible to anyone, or that are part of a picture that contains significant
+            other visual content, have no contrast requirement.
+         </p>
+      </dd>
+      <dt>Logotypes</dt>
+      <dd>
+         <p>Text that is part of a logo or brand name has no contrast requirement.</p>
+      </dd>
+   </dl>
+</section><section id="contrast-enhanced" class="guideline"><div class="header-wrapper"><h4 id="x1-4-6-contrast-enhanced"><bdi class="secno">Success Criterion 1.4.6 </bdi>Contrast (Enhanced)</h4><a class="self-link" href="#contrast-enhanced" aria-label="Permalink for Section 1.4.6"></a></div>
+   <div class="doclinks"><a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced.html">Understanding Contrast (Enhanced)</a> <span class="screenreader">|</span> <br><a href="https://www.w3.org/WAI/WCAG22/quickref/#contrast-enhanced">How to Meet Contrast (Enhanced)</a></div><p class="conformance-level">(Level AAA)</p>
+   <p>The visual presentation of <a href="#dfn-text" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-text-5" title="sequence of characters that can be programmatically determined, where the sequence is expressing something in human language">text</a> and <a href="#dfn-images-of-text" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-images-of-text-4" title="text that has been rendered in a non-text form (e.g., an image) in order to achieve a particular visual effect">images of text</a> has a <a href="#dfn-contrast-ratio" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-contrast-ratio-2" title="(L1 + 0.05) / (L2 + 0.05), where">contrast ratio</a> of at least 7:1, except for the following:
+   </p>
+   <dl>
+      <dt>Large Text</dt>
+      <dd>
+         <p><a href="#dfn-large-scale" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-large-scale-2" title="with at least 18 point or 14 point bold or font size that would yield equivalent size for Chinese, Japanese and Korean (CJK) fonts">Large-scale</a> text and images of large-scale text have a contrast ratio of at least 4.5:1;
+         </p>
+      </dd>
+      <dt>Incidental</dt>
+      <dd>
+         <p>Text or images of text that are part of an inactive <a href="#dfn-user-interface-components" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-user-interface-components-3" title="a part of the content that is perceived by users as a single control for a distinct function">user interface component</a>, that are <a href="#dfn-pure-decoration" class="internalDFN" data-link-type="dfn" id="ref-for-dfn-pure-decoration-3" title="serving only an aesthetic purpose, providing no information, and having no functionality">pure decoration</a>, that are not visible to anyone, or that are part of a picture that contains significant
+            other visual content, have no contrast requirement.
+         </p>
+      </dd>
+      <dt>Logotypes</dt>
+      <dd>
+         <p>Text that is part of a logo or brand name has no contrast requirement.</p>
+      </dd>
+   </dl>
+</section></section>
+</section>
+<section id="robust"><h2>Robust</h2>
+<section class="guideline" id="compatible"><div class="header-wrapper"><h3 id="x4-1-compatible"><bdi class="secno">Guideline 4.1 </bdi>Compatible</h3></div>
+<section id="parsing" class="guideline"><div class="header-wrapper"><h4 id="x4-1-1-parsing-obsolete-and-removed"><bdi class="secno">Success Criterion 4.1.1 </bdi>Parsing (Obsolete and removed)</h4><a class="self-link" href="#parsing" aria-label="Permalink for Section 4.1.1"></a></div>
+   <div class="doclinks"><a href="https://www.w3.org/WAI/WCAG22/Understanding/parsing.html">Understanding Parsing (Obsolete and removed)</a> <span class="screenreader">|</span> <br><a href="https://www.w3.org/WAI/WCAG22/quickref/#parsing">How to Meet Parsing (Obsolete and removed)</a></div><div class="note" role="note" id="issue-container-generatedID-43"><div role="heading" class="note-title marker" id="h-note-43" aria-level="5"><span>Note</span></div><p class="">This criterion was originally adopted to address problems that assistive technology had directly parsing <abbr title="HyperText Markup Language">HTML</abbr>. Assistive technology no longer has any need to directly parse <abbr title="HyperText Markup Language">HTML</abbr>. Consequently, these problems either no longer exist or are addressed by other criteria. This criterion no longer has utility and is removed.</p></div>
+</section>
+</section>
+</section>
+<div style="height:3000px" aria-hidden="true"></div>
+</main>
+</body>
+</html>
