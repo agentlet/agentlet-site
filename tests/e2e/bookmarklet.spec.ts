@@ -23,4 +23,26 @@ test.describe('Bookmarklet page', () => {
 		await page.locator('#bookmarklet-link').click();
 		await expect(page.locator('#agentlet-container')).toBeVisible();
 	});
+
+	test('on another site, offers the known-sites demos instead of failing silently', async ({ page, baseURL }) => {
+		await page.goto('/try/bookmarklet/');
+		const href = (await page.locator('#bookmarklet-link').getAttribute('href')) ?? '';
+		const code = decodeURIComponent(href.replace(/^javascript:/, ''));
+		const siteOrigin = new URL(baseURL ?? 'http://localhost').origin;
+
+		// 127.0.0.1 and localhost are different origins, so this is "another site".
+		const otherOrigin = siteOrigin.replace('localhost', '127.0.0.1');
+		expect(otherOrigin).not.toBe(siteOrigin);
+		await page.goto(`${otherOrigin}/try/bookmarklet/`);
+
+		let message = '';
+		page.once('dialog', async (dialog) => {
+			message = dialog.message();
+			await dialog.accept();
+		});
+		await page.evaluate(code);
+
+		await page.waitForURL(`${siteOrigin}/try/known-sites/`);
+		expect(message).toContain('only runs on agentlet.io');
+	});
 });
