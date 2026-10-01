@@ -17,9 +17,9 @@ const rows = [
 	{
 		aspect: 'Security, scope of action',
 		robot: 'Full access: OS, files, apps',
-		bookmarklet: 'Sandboxed, browser only',
+		bookmarklet: 'Page privileges, browser only',
 		extension: 'Extended: extension APIs',
-		native: 'Sandboxed, inside app',
+		native: 'Page privileges, inside app',
 	},
 	{
 		aspect: 'Robustness to UI changes',
@@ -71,13 +71,52 @@ const rows = [
 		native: 'Deep: full access to app DOM',
 	},
 ];
+
+const userscriptRows = [
+	{
+		aspect: 'Install for the user',
+		userscript: 'A userscript manager, then the script',
+		extension: 'The extension',
+		agentlet: 'Nothing for a bookmarklet, or nothing if the app embeds it',
+	},
+	{
+		aspect: 'Runs without a click on matching pages',
+		userscript: 'Yes',
+		extension: 'Yes',
+		agentlet: 'Only when embedded or loaded by an extension. A bookmarklet needs a click',
+	},
+	{
+		aspect: 'Pages with a strict Content Security Policy',
+		userscript: 'Works',
+		extension: 'Works',
+		agentlet: 'A CDN bookmarklet is blocked',
+	},
+	{
+		aspect: 'Panel UI, form, table, screenshot and AI helpers',
+		userscript: 'Write them yourself',
+		extension: 'Write them yourself',
+		agentlet: 'Included',
+	},
+	{
+		aspect: 'Module lifecycle and URL matching',
+		userscript: 'Match rules in the script header',
+		extension: 'Match rules in the manifest',
+		agentlet: 'Included, including single page app navigation',
+	},
+	{
+		aspect: 'Cross-origin requests and background work',
+		userscript: 'GM_xmlhttpRequest and storage APIs',
+		extension: 'Full extension APIs',
+		agentlet: 'Same limits as the host page',
+	},
+];
 ---
 
 <section class="alt">
 	<div class="wrap">
 		<h2 class="section-title">Compared to robots</h2>
 		<p class="section-intro">
-			Agentlets can look like lightweight, local robots, the kind used in RPA (robotic process
+			Agentlets can look like small, local robots, the kind used in RPA (robotic process
 			automation). They are not true bots: they depend on the context of the user's active tab and
 			enhance, rather than replace, the user's interaction.
 		</p>
@@ -105,6 +144,43 @@ const rows = [
 								<td>{row.bookmarklet}</td>
 								<td>{row.extension}</td>
 								<td>{row.native}</td>
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+		<h3 class="comparison-subtitle">Compared to userscripts and extensions</h3>
+		<p class="section-intro">
+			Userscripts (Tampermonkey and similar) and hand-written browser extensions also change pages
+			you do not own, and are often the simpler choice. Pick a userscript when only you will use the
+			script. Pick an extension when you need browser APIs, background work or a store listing.
+			Pick agentlet when colleagues should run the tool from a bookmark without installing anything,
+			when the host app can load it directly, or when you want one panel, set of helpers and
+			lifecycle across all three ways of shipping it.
+		</p>
+		<p class="table-scroll-hint">Scroll for more</p>
+		<div class="table-scroll">
+			<table class="comparison-table">
+				<caption>
+					Userscripts and hand-written extensions compared to agentlet-core
+				</caption>
+				<thead>
+					<tr>
+						<th scope="col">Aspect</th>
+						<th scope="col">Userscript</th>
+						<th scope="col">Hand-written extension</th>
+						<th scope="col">agentlet-core</th>
+					</tr>
+				</thead>
+				<tbody>
+					{
+						userscriptRows.map((row) => (
+							<tr>
+								<th scope="row">{row.aspect}</th>
+								<td>{row.userscript}</td>
+								<td>{row.extension}</td>
+								<td>{row.agentlet}</td>
 							</tr>
 						))
 					}

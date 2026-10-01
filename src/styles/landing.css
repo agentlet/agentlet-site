@@ -987,6 +987,10 @@ figure.demo-figure figcaption {
 
 .table-scroll-hint {
 	margin: 1rem 0 0;
+.comparison-subtitle {
+	margin: 3rem 0 0.5rem;
+}
+
 	color: var(--color-text-muted);
 	font-size: 0.85rem;
 }
