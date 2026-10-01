@@ -5,6 +5,8 @@ description: What you can try on agentlet.io, how it loads, and the rules the de
 
 Most pages on this site, and every page under this docs section, carry a "Try it on this page" button (on the home page) or load an agentlet you already opened on a previous page. This page explains what that is and what it does.
 
+To try agentlet on real sites such as Wikipedia and arXiv instead, use [the known-sites page](/try/known-sites/).
+
 ## What you can try
 
 Clicking "Try it on this page" opens a launcher panel listing the demo agentlets available on this site. Each one shows a short description and who it is aimed at (business, developers, or IT and security). Pick one to activate it in the same panel.
