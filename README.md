@@ -4,9 +4,10 @@ Source of [agentlet.io](https://agentlet.io): the presentation site and
 documentation for the [agentlet](https://github.com/agentlet/agentlet-core)
 framework.
 
-agentlet is an open source (MIT) JavaScript framework that augments existing
-web applications without touching their backend, through small agents
-injected by bookmarklet, browser extension, or native integration. This site
+agentlet is an open source (MIT) JavaScript framework that injects a side panel
+into web apps you cannot change, by bookmarklet, browser extension, or from the
+app itself. The panel reads and fills forms, exports tables to Excel, captures
+parts of the page and calls an AI model. This site
 is built with [Astro](https://astro.build) and
 [Starlight](https://starlight.astro.build): a custom home page at `/`, and
 documentation under `/docs/`.

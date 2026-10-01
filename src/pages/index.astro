@@ -12,9 +12,9 @@ import Comparison from '../components/landing/Comparison.astro';
 import GetStarted from '../components/landing/GetStarted.astro';
 import Footer from '../components/landing/Footer.astro';
 
-const title = 'agentlet: augment your web apps without touching the backend';
+const title = 'agentlet: a side panel for web apps you cannot change';
 const description =
-	'Agentlet is an open source JavaScript framework that adds form automation, data extraction, and AI to existing web applications, without touching their backend.';
+	'agentlet-core is an open source JavaScript framework that injects a side panel into web apps you cannot change. It reads and fills forms, exports tables to Excel, captures the page and calls an AI model.';
 ---
 
 <LandingLayout title={title} description={description}>
@@ -22,8 +22,8 @@ const description =
 	<main id="main">
 		<Hero />
 		<TrySandbox />
-		<Definition />
 		<Demo />
+		<Definition />
 		<DeploymentModes />
 		<Capabilities />
 		<Principles />

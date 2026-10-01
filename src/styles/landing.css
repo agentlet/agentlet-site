@@ -702,16 +702,10 @@ section.alt {
 
 /* Definition */
 
-.definition-section {
-	padding-block-start: 0;
-}
-
-/* As wide as .hero-surface above it: both are plain, unconstrained
-   block children of the same .wrap, so they always share its left and
-   right edges at any viewport width. The text itself stays capped at
-   readable width via .definition-text below, left-aligned next to the
-   opening quote; the closing quote (position: absolute, see .quote-close)
-   then falls naturally at the wide card's own bottom right corner. */
+/* A single quoted sentence, as wide as the section's .wrap. The text stays
+   capped at readable width via .definition-text below, left-aligned next to
+   the opening quote; the closing quote (position: absolute, see
+   .quote-close) then falls at the card's own bottom right corner. */
 .definition {
 	position: relative;
 	border: 1px solid var(--color-surface-border);
@@ -746,21 +740,13 @@ section.alt {
 }
 
 .definition .term {
-	margin: 0;
-	font-size: 1.25rem;
 	font-weight: 600;
 	color: var(--color-heading);
 }
 
-.definition .pos {
-	font-style: italic;
-	color: var(--color-text-muted);
-	font-size: 0.9rem;
-	margin: 0.15rem 0 0.75rem;
-}
-
 .definition p {
 	margin: 0;
+	font-size: 1.15rem;
 }
 
 /* Demo */
