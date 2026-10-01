@@ -105,6 +105,25 @@ class ThemedPanelModule extends window.agentlet.Module {
 
 `injectStyles(css)` appends its `<style>` element to the root captured from the most recent `mount()` call (`context.root`) rather than always to `document.head`. In the default `shadowDom: true` mode that is the shadow root, so styles reach content mounted inside it. See [Shadow DOM](/docs/guides/shadow-dom/#consequences-for-agentlet-authors) for the full fallback chain.
 
+## `getStyles()`
+
+Since agentlet-core 2.2.0, a module that defines `getStyles()` does not need to call `injectStyles()` itself. The core injects the CSS it returns into the UI root before each `mount()`, whether or not `mount()` is overridden, once per activation:
+
+- Re-mounts on a URL change or a refresh do not add a second copy.
+- `cleanup()` removes the styles, and the next activation injects them again.
+- CSS the module already injected itself, as the same string, is not added twice.
+- If `getStyles()` throws, the error is logged and the module still mounts.
+
+```javascript
+class MyAgentlet extends window.agentlet.Module {
+    getStyles() {
+        return '.my-agentlet button { padding: 8px 16px; }';
+    }
+}
+```
+
+In agentlet-core 2.1 and earlier, `getStyles()` is never called: call `this.injectStyles(this.getStyles())` from `mount()` instead.
+
 ## Error handling
 
 If `mount()` throws or rejects, the core catches the error, logs it, and renders the panel's built-in error markup in place of the module's content. The module is not left half-mounted: `this.mounted`/`this.mountedContainer` reflect the attempt, and the next content update still calls `unmount()` on it as usual. If `unmount()` itself throws, the core logs the error and continues; the container's content is cleared by the core regardless.
@@ -215,4 +234,4 @@ class TypedModule extends window.agentlet.Module {
 
 See [TypeScript](/docs/guides/typescript/) for how these declarations are imported and maintained.
 
-Source: agentlet-core docs/module-mount-api.md and src/types/public-api.d.ts at 4a8aaab.
+Source: agentlet-core docs/module-mount-api.md and src/types/public-api.d.ts at 4a8aaab, and src/core/Module.ts at 6f24ed2 (agentlet-core 2.2.0) for `getStyles()`.

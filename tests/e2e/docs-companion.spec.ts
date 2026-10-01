@@ -5,7 +5,7 @@ import { DEMO_FLAG_KEY, trackPageHealth } from './helpers';
 /**
  * A real doc page with at least one table and several code blocks
  * (src/content/docs/docs/guides/mount-api.md): one markdown table (the
- * ModuleMountContext field reference) and seven fenced code blocks.
+ * ModuleMountContext field reference) and eight fenced code blocks.
  * Starlight's pagination puts "TypeScript" right after it (see
  * astro.config.mjs's sidebar order), used below to check the "next page"
  * command.
@@ -147,7 +147,7 @@ test.describe('Documentation companion: command palette', () => {
 		await expect(page.getByText(/Copied \d+ code examples? to the clipboard\./)).toBeVisible();
 
 		const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
-		expect(clipboardText).toContain('// Example 1 of 7');
+		expect(clipboardText).toContain('// Example 1 of 8');
 		expect(clipboardText).toContain('async mount(container: HTMLElement, context: ModuleMountContext): Promise<void>;');
 		expect(clipboardText).toContain('// ----------');
 

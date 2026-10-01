@@ -260,7 +260,7 @@ Outer lifecycle entry points, called by the framework: `init()`, `activate(conte
 
 Other members: `checkPattern(url)`, `getContent()`, `getMetadata()`, `on(event, callback)`, `off(event, callback)`, `emit(event, data?)` (notifies local listeners, then forwards to `this.eventBus` if set), `removeAllEventListeners()`, `injectStyles(css)` (cumulative, appended to a single `<style data-module="...">` element), `removeAllStyles()`, `log(message, ...args)`, `error(message, ...args)`, `warn(message, ...args)`.
 
-Optional duck-typed hooks the core looks for, none required: `getStyles?()`, `getPanelTitle?()` (labels the panel header instead of `name`), `showSettings?()`, `showHelp?()`, `setSubmoduleChangeCallback?(callback)`, `requiresLocalStorageChangeNotification?`, `onLocalStorageChange?(key, newValue)`.
+Optional duck-typed hooks the core looks for, none required: `getStyles?()` (CSS injected before each mount since 2.2.0, see [Mount API](/docs/guides/mount-api/#getstyles)), `getPanelTitle?()` (labels the panel header instead of `name`), `showSettings?()`, `showHelp?()`, `setSubmoduleChangeCallback?(callback)`, `requiresLocalStorageChangeNotification?`, `onLocalStorageChange?(key, newValue)`.
 
 ## `AgentletCoreConfig`
 
@@ -324,4 +324,4 @@ URL-based re-detection (`checkUrlChange()`, the core's 1-second poll and its `po
 
 Only present when `AgentletCore` was constructed with `debugMode: true`: `getMetrics()`, `getConfig()`, `getStatistics()`, plus direct references `eventBus`, `envManager`, `cookieManager`, `storageManager`.
 
-Source: agentlet-core src/types/public-api.d.ts and CLAUDE.md, API Quick Reference, at c6e8a2f (agentlet-core 2.1.1).
+Source: agentlet-core src/types/public-api.d.ts and CLAUDE.md, API Quick Reference, at 6f24ed2 (agentlet-core 2.2.0).
