@@ -78,4 +78,4 @@ The Playwright tests do not touch any real site. They serve committed fixtures a
 
 ## Publishing
 
-Push a tag named `demos-v<version>`, for example `demos-v1.1.0`. The `publish-demos` workflow builds the package, checks that the tag matches the version in `packages/agentlet-demos/package.json`, and runs `npm publish` with the `NPM_TOKEN` secret. It publishes without npm provenance, because the source repository is private and npm only supports provenance for public ones. Bump the version by hand in that file before tagging. Publishing is never automatic on a merge.
+Push a tag named `demos-v<version>`, for example `demos-v1.1.0`. The `publish-demos` workflow builds the package, checks that the tag matches the version in `packages/agentlet-demos/package.json`, and runs `npm publish` with the `NPM_TOKEN` secret and npm provenance, which links each release to the commit and workflow run that built it. Bump the version by hand in that file before tagging. Publishing is never automatic on a merge.

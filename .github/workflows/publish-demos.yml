@@ -12,6 +12,8 @@ on:
 
 permissions:
   contents: read
+  # Lets npm sign a provenance statement for the release.
+  id-token: write
 
 jobs:
   publish:
@@ -43,6 +45,6 @@ jobs:
 
       - name: Publish to npm
         working-directory: packages/agentlet-demos
-        run: npm publish --access public
+        run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

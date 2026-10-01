@@ -26,9 +26,9 @@ fails.
 1. In the Cloudflare dashboard, go to Workers & Pages, then Create, then
    import a repository from Git.
 2. Authorise the Cloudflare GitHub app for the agentlet organisation.
-   Grant it access to the `agentlet-site` repository only. The repository
-   is private, so this authorisation step is required before Cloudflare
-   can read it.
+   Grant it access to the `agentlet-site` repository only. Cloudflare
+   needs this authorisation to build the repository and to report checks
+   on its pull requests.
 3. Select the `agentlet-site` repository. The project name must be
    `agentlet-site`, the same as `name` in `wrangler.jsonc`.
 4. Set the production branch to `main`.
@@ -302,7 +302,7 @@ To release:
 
 The `publish-demos` workflow (`.github/workflows/publish-demos.yml`) builds the
 package, fails if the tag does not match the version in `package.json`, and
-publishes without npm provenance, because the source repository is
-private and npm only supports provenance for public ones. The bookmarklet uses the `@1` range, so a 1.x
+publishes with npm provenance, which links each release to the commit and
+workflow run that built it. The bookmarklet uses the `@1` range, so a 1.x
 release reaches existing bookmarks. A breaking change needs a new major
 version, a new bookmarklet URL, and a new bookmarklet on the site.
