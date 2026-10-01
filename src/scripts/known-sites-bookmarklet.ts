@@ -27,8 +27,16 @@ export const KNOWN_SITES_LOADER_URL = 'https://cdn.jsdelivr.net/npm/@agentlet/de
  */
 export const KNOWN_SITES_DEV_LOADER_URL = `http://localhost:${KNOWN_SITES_DEV_PORT}/loader.js`;
 
+/**
+ * jsDelivr serves the `@1` range URL with `max-age=604800`, so a browser that
+ * fetched the loader once would keep it for up to a week, even after a purge
+ * of the CDN. The bookmarklet therefore adds `?d=YYYYMMDD` (the UTC date when
+ * it is clicked): a browser fetches a fresh loader at most once a day, and
+ * every visitor shares one URL per day, so the CDN cache stays effective. The
+ * loader's own sibling URLs name exact versions and have no query string.
+ */
 export function buildKnownSitesBookmarkletHref(loaderUrl: string): string {
-	const code = `(function(){var s=document.createElement('script');s.src='${loaderUrl}';document.head.appendChild(s)})()`;
+	const code = `(function(){var s=document.createElement('script');s.src='${loaderUrl}?d='+new Date().toISOString().slice(0,10).replace(/-/g,'');document.head.appendChild(s)})()`;
 	return `javascript:${code}`;
 }
 

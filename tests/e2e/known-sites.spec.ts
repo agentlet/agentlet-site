@@ -43,6 +43,9 @@ test.describe('Known-sites page', () => {
 		// Not served by `npm run dev`, so it points at the package on jsDelivr, by major range.
 		expect(href).toContain('https://cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js');
 		expect(href).toMatch(/^javascript:/);
+		// The date is computed when the bookmarklet is clicked, not when the page is built.
+		expect(href).toContain("loader.js?d='+new Date().toISOString()");
+		await expect(page.getByText('Added it before 2 October 2026?')).toBeVisible();
 
 		const main = page.locator('main');
 		await expect(main.getByRole('heading', { name: 'Wikipedia' })).toBeVisible();
@@ -94,8 +97,11 @@ test.describe('Known-sites bookmarklet loader', () => {
 
 		const external = run.requests.filter((entry) => !entry.startsWith('en.wikipedia.org/'));
 		// The bookmarklet uses the major range; every later request names an exact version.
-		expect(external[0]).toBe('cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js');
+		// The loader URL carries today's UTC date, so a browser refetches it at most once a day.
+		const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+		expect(external[0]).toBe(`cdn.jsdelivr.net/npm/@agentlet/demos@1/dist/loader.js?d=${today}`);
 		for (const entry of external.slice(1)) {
+			expect(entry).not.toContain('?');
 			expect(entry).toMatch(
 				new RegExp(`^cdn\\.jsdelivr\\.net/npm/(@agentlet/demos@${DEMOS_VERSION}|agentlet-core@${CORE_VERSION})/dist/`),
 			);
