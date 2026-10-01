@@ -1,0 +1,80 @@
+name: Security
+
+# Dependency vulnerability scan (shared action in agentlet/.github).
+#
+# Blocking scope: what reaches browsers, taken from the esbuild metafiles of
+# the /cdn/v1/ scripts and of the @agentlet/demos package, plus the client
+# modules of the Astro build (see astro.config.mjs). Reporting scope:
+# package-lock.json (build tooling), never blocking.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '41 3 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  dependency-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
+      # Only for the nightly tracking issue.
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the @agentlet/demos package (writes its metafiles)
+        run: npm run build:known-sites
+
+      - name: Build the site
+        # The prebuild hook builds the /cdn/v1/ scripts and writes their
+        # metafiles; SBOM_META_DIR makes Astro record its client modules.
+        run: npm run build
+        env:
+          SBOM_META_DIR: reports/security/meta
+
+      - name: List the metafiles
+        id: metafiles
+        # The SBOM action takes paths, not globs, so expand them here and
+        # fail early if a build stopped writing its metafiles.
+        run: |
+          set -euo pipefail
+          for group in cdn known-sites astro; do
+            if ! ls reports/security/meta/"${group}"/*.meta.json >/dev/null 2>&1; then
+              echo "::error::No metafile found in reports/security/meta/${group}."
+              exit 1
+            fi
+          done
+          {
+            echo 'list<<EOF'
+            ls reports/security/meta/*/*.meta.json
+            echo 'EOF'
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Build the shipped-inventory SBOM
+        id: sbom
+        uses: agentlet/.github/actions/sbom-from-esbuild@13f8b012ab7b0e07229389ac7538bdab38cdb4e6 # dependency-scan-v1
+        with:
+          metafiles: ${{ steps.metafiles.outputs.list }}
+
+      - name: Scan dependencies
+        uses: agentlet/.github/actions/dependency-scan@13f8b012ab7b0e07229389ac7538bdab38cdb4e6 # dependency-scan-v1
+        with:
+          blocking-sbom: ${{ steps.sbom.outputs.sbom-path }}
+          lockfile: package-lock.json
+          issue-on-failure: ${{ github.event_name == 'schedule' }}
+          issue-title: 'Nightly scan: shipped code has a blocking vulnerability'

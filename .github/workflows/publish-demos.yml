@@ -12,18 +12,21 @@ on:
 
 permissions:
   contents: read
-  # Lets npm sign a provenance statement for the release.
-  id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      # Attaches the SBOM to the GitHub release of the tag.
+      contents: write
+      # Lets npm sign a provenance statement for the release.
+      id-token: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           cache: npm
@@ -39,12 +42,65 @@ jobs:
             echo "Tag ${GITHUB_REF_NAME} does not match packages/agentlet-demos/package.json version ${version} (expected demos-v${version})."
             exit 1
           fi
+          echo "DEMOS_VERSION=${version}" >> "${GITHUB_ENV}"
 
       - name: Build the package
         run: npm run build:known-sites
+
+      - name: List the package metafiles
+        id: metafiles
+        run: |
+          set -euo pipefail
+          if ! ls reports/security/meta/known-sites/*.meta.json >/dev/null 2>&1; then
+            echo "::error::The package build wrote no metafile."
+            exit 1
+          fi
+          {
+            echo 'list<<EOF'
+            ls reports/security/meta/known-sites/*.meta.json
+            echo 'EOF'
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Build the SBOM of the package
+        id: sbom
+        # The package is a set of esbuild bundles, so a filesystem scan of
+        # dist/ finds no dependency. The metafiles (written outside dist/)
+        # list what was bundled.
+        uses: agentlet/.github/actions/sbom-from-esbuild@13f8b012ab7b0e07229389ac7538bdab38cdb4e6 # dependency-scan-v1
+        with:
+          metafiles: ${{ steps.metafiles.outputs.list }}
+          name: '@agentlet/demos'
+          version: ${{ env.DEMOS_VERSION }}
+          output: reports/security/sbom-demos.cdx.json
+
+      - name: Scan the bundled dependencies
+        # Blocks the publish: a vulnerable bundled dependency must not reach
+        # npm or jsDelivr. The lockfile is covered by the Security workflow.
+        uses: agentlet/.github/actions/dependency-scan@13f8b012ab7b0e07229389ac7538bdab38cdb4e6 # dependency-scan-v1
+        with:
+          blocking-sbom: ${{ steps.sbom.outputs.sbom-path }}
+          lockfile: ''
+          fail-on-gate: 'true'
+          upload-sarif: 'false'
+          report-dir: reports/security/publish
+          artifact-name: demos-publish-scan-reports
 
       - name: Publish to npm
         working-directory: packages/agentlet-demos
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Attach the SBOM to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SBOM_SOURCE: ${{ steps.sbom.outputs.sbom-path }}
+        run: |
+          set -euo pipefail
+          asset="agentlet-demos-${DEMOS_VERSION}.cdx.json"
+          cp "${SBOM_SOURCE}" "${asset}"
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" "${asset}" --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" "${asset}" --verify-tag --title "${GITHUB_REF_NAME}" --generate-notes
+          fi
