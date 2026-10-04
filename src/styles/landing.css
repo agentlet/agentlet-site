@@ -1369,6 +1369,14 @@ figure.demo-figure figcaption {
 	color: var(--color-text-muted);
 }
 
+.sandbox-supplier {
+	margin-top: 2.5rem;
+}
+
+.sandbox-supplier h3 {
+	margin-bottom: 0.6rem;
+}
+
 .sandbox-recent {
 	margin-top: 2.5rem;
 }

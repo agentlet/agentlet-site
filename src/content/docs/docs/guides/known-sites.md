@@ -11,9 +11,10 @@ These demos are separate from the [live demo](/docs/live-demo/) on agentlet.io. 
 
 A bookmarklet runs inside someone else's page, so that page's Content Security Policy decides what it may load. Wikipedia's policy allows scripts from `*.jsdelivr.net` and from localhost, and does not allow agentlet.io. So the demos are published as an npm package, `@agentlet/demos`, and served by jsDelivr, which serves any npm package. agentlet-core itself is not copied into that package: the loader takes it from jsDelivr too, from the `agentlet-core` package.
 
-This is also the limit of the approach. A site whose policy does not allow jsDelivr, or does not allow inline scripts at all, cannot run the bookmarklet. On 30 September and 1 October 2026:
+This is also the limit of the approach. A site whose policy does not allow jsDelivr, or does not allow inline scripts at all, cannot run the bookmarklet. On 30 September, 1 October and 4 October 2026:
 
 - Wikipedia allows it.
+- Wikidata allows it: its `script-src` lists `*.jsdelivr.net`, and its `default-src` lists `*.wikipedia.org` and the Wikimedia hosts.
 - arXiv allows it: it sends only `frame-ancestors 'none'`, with no script-src.
 - GitHub, MDN, Stack Overflow and YouTube do not allow inline scripts without a nonce or hash, so even the bookmarklet's own code is refused.
 - W3C Technical Reports allow it: they send only `frame-ancestors` and `upgrade-insecure-requests`, with no script-src.
@@ -21,7 +22,7 @@ This is also the limit of the approach. A site whose policy does not allow jsDel
 - EUR-Lex allows it: it sends only `frame-ancestors`. Its servers answer a plain `curl` with a bot challenge, so the header was read from a real browser session.
 - Hacker News allows inline scripts but limits loaded scripts to itself, Google reCAPTCHA and cdnjs, so the script from jsDelivr is refused. It is an example of a site that restricts scripts to its own domain and a few others. It has no demo here.
 
-Policies change, so check the real page before relying on a site. `tests/e2e/fixtures/known-sites/` keeps the policies Wikipedia, arXiv, W3C and EUR-Lex sent (rfc-editor.org sends none), and the tests apply them.
+Policies change, so check the real page before relying on a site. `tests/e2e/fixtures/known-sites/` keeps the policies Wikipedia, Wikidata, arXiv, W3C and EUR-Lex sent (rfc-editor.org sends none), and the tests apply them.
 
 ## What the bookmarklet does
 
@@ -34,7 +35,7 @@ The loader then:
 1. Bakes in, at build time, the exact version of `@agentlet/demos` and of `agentlet-core` (read from `node_modules/agentlet-core/package.json`).
 2. Loads `agentlet-core@<exact>/dist/agentlet-core.min.js`.
 3. Creates the core with `registryUrl` set to `@agentlet/demos@<exact>/dist/registry.js`, and a theme picked from `prefers-color-scheme`.
-4. Activates the one demo that matches the page, or leaves the launcher open when several match (Wikipedia has two) or none does.
+4. Activates the one demo that matches the page, or leaves the launcher open when several match (Wikipedia has three) or none does.
 
 Everything after the first request names an exact version. Mixing a newer loader with an older cached registry or bundle would break in ways that are hard to see, so the `@1` range is used once, for the loader, and never again. The registry works out its bundle URLs from its own address, so the same file works from jsDelivr and from the dev server.
 
@@ -66,20 +67,32 @@ One demo, `spec-checklist.ts`, covers three hosts under one manifest entry, "Sta
 
 Each row has a status (to review, compliant, partial, not compliant, not applicable) and a note. Both are saved in `localStorage` under a key made from the document URL without its hash, and stay in the browser. If the browser refuses to store them, the panel says so and keeps working. The list shows at most 200 rows at a time, with a counter. An export covers every row that matches the filters.
 
+## Copy a company as a record
+
+`company-record.ts` is the source side of a copy and paste between two web apps, built on `window.agentlet.records` from agentlet-core 2.3.0. It runs on Wikipedia articles and on Wikidata items (`www.wikidata.org/wiki/Q...`), which is why its manifest entry belongs to Wikipedia and has `alsoOn: ['wikidata']`: one pattern, listed under two sites.
+
+- On Wikipedia it reads the company infobox: the name from the caption, the website, the founding year, and the headquarters line. It splits that line on commas and takes the last part as the country, the one before as the city, and anything before that as the street. That is a heuristic and the panel says so. An article whose infobox has no headquarters, founding or industry row gets a message instead of a record.
+- On Wikidata it reads the statements the page shows: the label, the website (P856, the preferred one when there are several), the founding date (P571), the street address (P6375), the SIREN (P1616), the headquarters city (P159) and the country (P17).
+- It builds an `organization` record with `records.create()`, using the autocomplete vocabulary keys (`organization`, `url`, `street-address`, `postal-code`, `address-level2`, `country-name`), plus `siren` and `founded`, with `labels` for those two. Then it calls `records.copy()` from the click and shows the fields copied and the method the core returned, `clipboard-api` or `copy-event`.
+
+It makes at most two small requests to the Wikidata API, which both sites' policies allow because their `default-src` lists `www.wikidata.org`. On Wikipedia it asks for the SIREN of the linked item. On Wikidata it asks for the country of the headquarters city, because a company item can list several countries, and the one marked preferred is not always the right one. If a request fails, the record is built without that field. `annuaire-entreprises.data.gouv.fr` would be the natural source for a SIREN, but its policy does not allow jsDelivr, so a bookmarklet cannot run there.
+
+The target side is on this site: the `supplier-paste` agentlet of the [live demo](/docs/live-demo/#paste-a-company-as-a-supplier) and the supplier form in the home page sandbox.
+
 ## Add a site
 
-1. Add a `KnownSite` to `KNOWN_SITES` in `src/agentlets/known-sites/manifest.ts`: a label, where it runs, and an example link. Check the site's real policy first: if it does not allow scripts from jsDelivr, the bookmarklet cannot load there and a demo would never start.
+1. Add a `KnownSite` to `KNOWN_SITES` in `src/agentlets/known-sites/manifest.ts`: a label, where it runs, an example link, and a `pattern` that tells the launcher which site a page belongs to. Check the site's real policy first: if it does not allow scripts from jsDelivr, the bookmarklet cannot load there and a demo would never start.
 2. Write `src/agentlets/known-sites/<id>.ts`: a class extending `window.agentlet.Module`, with the site's URL regular expression in `patterns`, ending with the global assignment used by the other files. Use `KNOWN_SITE_STYLES` from `shared.ts` for the panel, and `backToLauncherHtml()` from `src/agentlets/shared.ts` for the way back to the list. Keep it read only, and clean up what it adds to the page in `cleanupModule()`.
-3. Add a `KnownSiteAgentlet` to `KNOWN_SITE_AGENTLETS` with the same pattern.
+3. Add a `KnownSiteAgentlet` to `KNOWN_SITE_AGENTLETS` with the same pattern. If the pattern covers more than one site, list the others in `alsoOn`.
 
 The build, the registry, the launcher and the known-sites page all read the manifest, so nothing else changes. Then add a fixture under `tests/e2e/fixtures/known-sites/` and a test in `tests/e2e/known-sites.spec.ts`.
 
 ## Tests
 
-The Playwright tests do not touch any real site. They serve committed fixtures as if they came from `en.wikipedia.org`, `arxiv.org`, `www.w3.org`, `www.rfc-editor.org` and `eur-lex.europa.eu`, send the policy header each site really sent, and answer the jsDelivr URLs from the locally built package and from `node_modules/agentlet-core`. A test also checks that after the loader, every request names an exact version and goes to jsDelivr only. `npm run test:e2e` builds the package first.
+The Playwright tests do not touch any real site. They serve committed fixtures as if they came from `en.wikipedia.org`, `www.wikidata.org`, `arxiv.org`, `www.w3.org`, `www.rfc-editor.org` and `eur-lex.europa.eu`, send the policy header each site really sent, and answer the jsDelivr URLs from the locally built package and from `node_modules/agentlet-core`. The Wikidata API calls of the company record demo are answered from three recorded responses. A test also checks that after the loader, every request names an exact version and goes to jsDelivr only. `npm run test:e2e` builds the package first.
 
 ## Publishing
 
-Push a tag named `demos-v<version>`, for example `demos-v1.1.0`. The `publish-demos` workflow builds the package, checks that the tag matches the version in `packages/agentlet-demos/package.json`, and runs `npm publish` with the `NPM_TOKEN` secret and npm provenance, which links each release to the commit and workflow run that built it. Bump the version by hand in that file before tagging. Publishing is never automatic on a merge.
+Push a tag named `demos-v<version>`, for example `demos-v1.2.0`. The `publish-demos` workflow builds the package, checks that the tag matches the version in `packages/agentlet-demos/package.json`, and runs `npm publish` with the `NPM_TOKEN` secret and npm provenance, which links each release to the commit and workflow run that built it. Bump the version by hand in that file before tagging. Publishing is never automatic on a merge.
 
 How fast a release reaches people: jsDelivr refreshes the `@1` range within 12 hours, or right away when you call its purge API (see [deploy.md](https://github.com/agentlet/agentlet-site/blob/main/docs/deploy.md) for the release steps). Browsers then pick up the new version on the first click of the next day, thanks to the daily parameter.

@@ -121,6 +121,17 @@ export const AGENTLET_MANIFEST: AgentletManifestEntry[] = [
 	},
 
 	{
+		id: 'supplier-paste',
+		file: 'supplier-paste',
+		className: 'SupplierPasteModule',
+		title: 'Paste a company as a supplier',
+		description: 'Pastes a copied company record into a supplier form, after a preview of how its fields map.',
+		audience: 'business',
+		isDemo: true,
+		lazy: true,
+	},
+
+	{
 		id: 'section-summary',
 		file: 'section-summary',
 		className: 'SectionSummaryModule',

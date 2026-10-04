@@ -26,7 +26,7 @@ Projects scaffolded before agentlet-core 2.2.0 use relative URLs resolved agains
 
 ## Choose the agentlet-core dependency
 
-By default, the scaffolded project's `package.json` depends on the published npm package, `"agentlet-core": "^2.2.0"`. Pass `--core=local`, or answer "Local checkout" in the interactive prompt, to depend on this checkout instead, `"file:../<folder>"`. Local checkout is for developing agentlet-core itself alongside a scaffolded agentlet.
+By default, the scaffolded project's `package.json` depends on the published npm package, `"agentlet-core": "^2.3.0"`. Pass `--core=local`, or answer "Local checkout" in the interactive prompt, to depend on this checkout instead, `"file:../<folder>"`. Local checkout is for developing agentlet-core itself alongside a scaffolded agentlet.
 
 ```bash
 npm run scaffold:agentlet -- --core=local

@@ -2,16 +2,16 @@
 import LandingLayout from '../../layouts/LandingLayout.astro';
 import Header from '../../components/landing/Header.astro';
 import Footer from '../../components/landing/Footer.astro';
-import { KNOWN_SITES, KNOWN_SITE_AGENTLETS } from '../../agentlets/known-sites/manifest';
+import { KNOWN_SITES, demosForSite } from '../../agentlets/known-sites/manifest';
 import { KNOWN_SITES_LOADER_URL, buildKnownSitesBookmarkletHref } from '../../scripts/known-sites-bookmarklet';
 
 const title = 'Try agentlet on well-known sites';
 const description =
-	'One bookmarklet that runs small agentlet demos on Wikipedia and other well-known sites. Read only, nothing leaves your browser.';
+	'One bookmarklet that runs small agentlet demos on Wikipedia and other well-known sites. Read only, with no backend.';
 
 const sites = KNOWN_SITES.map((site) => ({
 	...site,
-	demos: KNOWN_SITE_AGENTLETS.filter((entry) => entry.site === site.id),
+	demos: demosForSite(site),
 }));
 ---
 
@@ -76,8 +76,13 @@ const sites = KNOWN_SITES.map((site) => ({
 				<ul>
 					<li>They only read the page you are on. They never post, vote, reply or change anything on the site.</li>
 					<li>
-						There is no AI call and no backend. Nothing is sent anywhere. Excel files are built in
-						your browser.
+						There is no AI call and no backend. Excel files are built in your browser. Nothing is sent
+						anywhere, apart from the lookup described in the next point.
+					</li>
+					<li>
+						The company record demo writes to your clipboard when you click Copy. It also asks the
+						public Wikidata API for one or two facts about the company on the page, the SIREN or
+						the country of its headquarters. That request names the Wikidata item and nothing else.
 					</li>
 					<li>Closing the panel removes the marks and highlights the demos added to the page.</li>
 				</ul>
@@ -88,7 +93,7 @@ const sites = KNOWN_SITES.map((site) => ({
 					September 2026, the policies of GitHub, MDN, Stack Overflow and YouTube do not allow
 					scripts that a bookmarklet adds, so nothing starts there. Hacker News restricts scripts to
 					its own domain and a few others, which also blocks a script from jsDelivr, so it has no
-					demo. Wikipedia, arXiv, W3C, RFC Editor and EUR-Lex allow scripts from jsDelivr, which is why they work. The markup of arXiv, W3C, RFC Editor and EUR-Lex pages is read as it is today, and may change. These policies can change at any time.
+					demo. Wikipedia, Wikidata, arXiv, W3C, RFC Editor and EUR-Lex allow scripts from jsDelivr, which is why they work. The markup of arXiv, W3C, RFC Editor and EUR-Lex pages is read as it is today, and may change. These policies can change at any time.
 				</p>
 				<p>
 					Bare four-digit numbers are read as years only when a word or bracket before them says so,

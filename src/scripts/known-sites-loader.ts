@@ -124,7 +124,7 @@ async function start(state: LoaderState): Promise<void> {
 
 	await core.init();
 
-	// A single demo for this page opens directly. Several (Wikipedia has two)
+	// A single demo for this page opens directly. Several (Wikipedia has three)
 	// are listed by the launcher, which is already active: its pattern matches
 	// every page.
 	const demos = demosForUrl(window.location.href);

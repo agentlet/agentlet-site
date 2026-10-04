@@ -258,7 +258,7 @@ const STYLES = `
  * `color(srgb r g b / a)` value (CSS Color 4's `color()` function, not
  * `color-mix()` itself, which no longer appears once resolved). The
  * html2canvas build vendored inside agentlet-core.min.js (agentlet-core
- * 2.2.0, see ScreenCapture.ensureHTML2Canvas()) does not parse `color()`
+ * 2.3.0, see ScreenCapture.ensureHTML2Canvas()) does not parse `color()`
  * and throws `Attempting to parse an unsupported color function "color"`
  * while reading that single element's style, which aborts the *entire*
  * capture, not just that decoration, so `ScreenCapture.captureElement()`
