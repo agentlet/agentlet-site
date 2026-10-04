@@ -159,6 +159,7 @@ export default defineConfig({
               ],
             },
             { label: 'Tables and Excel', slug: 'docs/guides/tables-and-excel' },
+            { label: 'Move data between apps', slug: 'docs/guides/move-data-between-apps' },
             { label: 'AI', slug: 'docs/guides/ai' },
             { label: 'Authentication', slug: 'docs/guides/authentication' },
             { label: 'Environment variables', slug: 'docs/guides/environment-variables' },
