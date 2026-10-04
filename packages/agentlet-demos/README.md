@@ -5,7 +5,7 @@ Agentlet demos that run on well-known sites, loaded by one bookmarklet through
 [agentlet.io](https://agentlet.io), the site for the
 [agentlet](https://github.com/agentlet/agentlet-core) framework.
 
-Read only, no AI, no backend. Nothing leaves your browser.
+Read only, no AI, no backend. Nothing leaves your browser, except one demo's lookup of public facts on Wikidata (see the table).
 
 ## Use it
 
@@ -24,16 +24,19 @@ reaches a browser on its first click of the next day.
 
 | Site | Demos |
 | --- | --- |
-| Wikipedia (`*.wikipedia.org/wiki/...`) | Tables to spreadsheet, Date timeline |
+| Wikipedia (`*.wikipedia.org/wiki/...`) | Tables to spreadsheet, Date timeline, Copy a company as a record |
+| Wikidata (`www.wikidata.org/wiki/Q...`) | Copy a company as a record |
 | arXiv (`arxiv.org/list/...`, `/search/...`, `/abs/...`) | Papers to spreadsheet, and a citation line on abstract pages |
 | W3C Technical Reports (`www.w3.org/TR/...`), RFC Editor (`www.rfc-editor.org/rfc/rfc<number>.html`), EUR-Lex (`eur-lex.europa.eu/eli/...`, `/legal-content/...`) | Spec to checklist: requirements with a status and a note, exported to Excel |
+
+"Copy a company as a record" builds an `organization` record with `window.agentlet.records` (agentlet-core 2.3.0) from a company's infobox or Wikidata item, and copies it to the clipboard. A page that runs agentlet, such as the supplier form on <https://agentlet.io>, pastes it into a form. It asks the Wikidata API for the SIREN (on Wikipedia) or the country of the headquarters (on Wikidata). If that request fails, the record is built without the field.
 
 On any other page the bookmarklet opens a list of the supported sites.
 
 ## Limits
 
 A site's Content Security Policy decides whether a bookmarklet can run. On
-30 September 2026 Wikipedia and arXiv allowed it, and on 1 October 2026 so did W3C, RFC Editor and EUR-Lex. GitHub, MDN, Stack Overflow and
+30 September 2026 Wikipedia and arXiv allowed it, on 1 October 2026 so did W3C, RFC Editor and EUR-Lex, and on 4 October 2026 Wikidata. GitHub, MDN, Stack Overflow and
 YouTube did not allow scripts added by a bookmarklet at all, and Hacker News
 allowed inline scripts but not scripts from jsDelivr. See the
 [known-sites page](https://agentlet.io/try/known-sites/) for details.
