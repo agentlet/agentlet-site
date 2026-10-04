@@ -128,6 +128,127 @@ See [Form extraction](/docs/guides/forms-extraction/), [Form filling](/docs/guid
 
 See [Tables and Excel](/docs/guides/tables-and-excel/).
 
+## `window.agentlet.records`
+
+Structured copy and paste between web apps. Needs agentlet-core 2.3.0 or later. See [Move data between apps](/docs/guides/move-data-between-apps/) for the walkthrough.
+
+Types:
+
+- **`defineType`**
+  ```ts
+  (definition: RecordTypeDefinition) => void
+  ```
+  Throws an `Error` for an invalid definition: a name that is not lowercase letters, digits and hyphens, a built-in name, a missing `fields` array, a duplicate or invalid field key, or an unknown `kind`.
+
+- **`getType`**
+  ```ts
+  (name: string) => RecordTypeDefinition | null
+  ```
+
+- **`listTypes`**
+  ```ts
+  () => RecordTypeDefinition[]
+  ```
+  The built-in types `table`, `fields`, `contact`, `address` and `organization`, plus the ones added by `defineType()`.
+
+Building records on the source page:
+
+- **`create`**
+  ```ts
+  (type: string, fields: Record<string, RecordValue>, options?: RecordCreateOptions) => FieldsRecord
+  ```
+  Throws an `Error` for an invalid type, for the `table` type (use `fromTable()`), for a key that is not allowed, or for a value that is not a string, number, boolean or `null`.
+
+- **`fromForm`**
+  ```ts
+  (element: Element, options?: RecordFromFormOptions) => FieldsRecord
+  ```
+  Uses `forms.quickExport()`. Password, `one-time-code` and `cc-*` fields are never read. Options: `type` (default `'fields'`), `includeEmpty` (default `false`), `redact`. Throws a `TypeError` if `element` is not an `Element`.
+
+- **`fromTable`**
+  ```ts
+  (table: HTMLTableElement, options?: RecordFromTableOptions) => TableRecord
+  ```
+  Uses `tables.extract()`. `RecordFromTableOptions` is `TableExtractionOptions`. Throws a `TypeError` if `table` is not a table element.
+
+- **`fromElement`**
+  ```ts
+  (element: Element, options?: RecordFromElementOptions) => AgentletRecord | null
+  ```
+  A table gives a table record. A form, a `dl` or label and value pairs give a fields record. Returns `null` when nothing fits. Adds a `table` option, forwarded to `tables.extract()`. Throws a `TypeError` if `element` is not an `Element`.
+
+- **`pick`**
+  ```ts
+  (options?: RecordPickOptions) => Promise<AgentletRecord | null>
+  ```
+  Click-to-select with `ElementSelector`, then `fromElement()`. Resolves `null` on Escape or when nothing fits. Adds `message` and `selector` to the `fromElement()` options.
+
+Clipboard transport:
+
+- **`copy`**
+  ```ts
+  (record: AgentletRecord | AgentletRecord[], options?: RecordCopyOptions) => Promise<RecordCopyResult>
+  ```
+  Writes `text/html` with the record in `data-agentlet-record`, `text/plain` and, where accepted, the custom `web application/...` format. Call it from a click or key handler, with no `await` before it. `options.redact` drops more keys. Rejects with an `Error` for an empty list, an invalid record, records of different types in one list, a payload above 1 MB, or when the browser blocked both the copy event and the clipboard API (the message starts with `Copying was blocked by the browser`).
+
+- **`read`**
+  ```ts
+  () => Promise<AgentletRecord[] | null>
+  ```
+  `navigator.clipboard.read()`. Needs a user gesture. Resolves `null` when the clipboard holds no record. Rejects if clipboard reading is not available in the page.
+
+- **`fromPasteEvent`**
+  ```ts
+  (event: ClipboardEvent) => AgentletRecord[] | null
+  ```
+  Reads the records of a `paste` event, or `null`.
+
+- **`onPaste`**
+  ```ts
+  (handler: (records: AgentletRecord[], event: ClipboardEvent) => void, options: RecordOnPasteOptions) => () => void
+  ```
+  `options.scope` is required and `options.types` is optional. Throws a `TypeError` without `scope`. Returns an unsubscribe function. The handler runs, and `preventDefault()` is called, only for a paste inside `scope` that carries a record.
+
+- **`pasteFromClipboard`**
+  ```ts
+  (target: Element, options?: RecordPasteFromClipboardOptions) => Promise<RecordFillResult | null>
+  ```
+  `read()`, then `fill()` with the first record whose type is in `options.types`. Call it from a click. Resolves `null` when the clipboard holds no matching record. Throws a `TypeError` if `target` is not an `Element`.
+
+Mapping and fill on the target page:
+
+- **`match`**
+  ```ts
+  (record: AgentletRecord, target: Element, options?: RecordMatchOptions) => RecordFieldMapping
+  ```
+  Options: `minConfidence` (default `0.6`), `remember` (default `true`). Throws a `TypeError` if `target` is not an `Element`, and an `Error` for a `table` record.
+
+- **`fill`**
+  ```ts
+  (record: AgentletRecord, target: Element, options?: RecordFillOptions) => Promise<RecordFillResult>
+  ```
+  Match, then a preview dialog unless `options.preview === false`, then `forms.fill()`. Never submits the form. Options: `preview` (default `true`), `minConfidence` (default `0.6`), `remember` (default `true`), `fill` (forwarded to `forms.fill()`). Throws a `TypeError` if `target` is not an `Element`, and an `Error` for a `table` record, or when the preview is needed and `Dialog` is not available.
+
+- **`validate`**
+  ```ts
+  (value: unknown) => { valid: true; record: AgentletRecord } | { valid: false; errors: string[] }
+  ```
+  Checks any value against the envelope. Rejects an unknown major version, ignores unknown top-level keys and enforces the 1 MB limit.
+
+Main types:
+
+- **`AgentletRecord`**: `FieldsRecord | TableRecord`. Both have `agentlet: 'record'`, `version: 1`, optional `labels` and optional `source`. `FieldsRecord` has `type: string` and `fields: Record<string, RecordValue>`. `TableRecord` has `type: 'table'`, `columns: string[]` and `rows: RecordValue[][]`. Tell them apart with `'columns' in record`.
+- **`RecordValue`**: `string | number | boolean | null`.
+- **`RecordSource`**: `{ url, origin, title, copiedAt }`. Set by the API, and on a pasted record only what the copying page claimed.
+- **`RecordTypeDefinition`**: `{ name, label?, fields: RecordFieldDefinition[] }`. A `RecordFieldDefinition` is `{ key, label?, kind?, required?, synonyms? }`, with `kind` one of `'text' | 'number' | 'date' | 'boolean' | 'email' | 'tel' | 'url'`.
+- **`RecordCopyResult`**: `{ formats, customFormat, records, bytes, method }`, with `method` either `'clipboard-api'` or `'copy-event'`.
+- **`RecordFieldMapping`**: `{ target, entries, unmatchedKeys, unmatchedFields }`. Each entry is `{ key, selector, confidence, reason }`, with `reason` one of `'remembered' | 'autocomplete' | 'name' | 'label' | 'type' | 'manual'`.
+- **`RecordFillResult`**: `FormFillResult` plus `mapping` and `confirmed` (`false` if the user cancelled the preview).
+
+Events on `window.agentlet.eventBus`: `records:copied`, `records:pasted` and `records:filled`. The payload is a `RecordEventPayload`, `{ type, fieldCount, itemCount, sourceOrigin }`. It never carries field values.
+
+`window.agentlet.recordsManager` exposes the same methods plus `createProxy()` and `cleanup()`, which removes every `onPaste` listener.
+
 ## `window.agentlet.auth`
 
 - **`isEnabled`**
@@ -296,7 +417,7 @@ Passed to `new AgentletCore(config)`. Each option is optional; additional keys a
 
 ## `window.agentlet.eventBus`
 
-`emit(event, data?)`, `on(event, callback)`, `off(event, callback)`, `request(event, data?)` (calls only the first registered listener), `getEvents()`, `getListenerCount(event)`, `clear()`, `clearEvent(event)`. Event names are plain strings; common ones emitted by the framework include `module:registered`, `module:activated`, `module:deactivated`, `module:initialized`, `module:cleaned`, `url:changed`, `core:initialized`, `core:cleanup`, `ui:contentUpdated`, `ui:error`, `ui:stylesRegenerated`, `localStorage:changed`, and `theme:changed` (payload: `ThemeChangedEventPayload`, `{ theme, previousTheme }`, emitted by `agentlet.setTheme()`).
+`emit(event, data?)`, `on(event, callback)`, `off(event, callback)`, `request(event, data?)` (calls only the first registered listener), `getEvents()`, `getListenerCount(event)`, `clear()`, `clearEvent(event)`. Event names are plain strings; common ones emitted by the framework include `module:registered`, `module:activated`, `module:deactivated`, `module:initialized`, `module:cleaned`, `url:changed`, `core:initialized`, `core:cleanup`, `ui:contentUpdated`, `ui:error`, `ui:stylesRegenerated`, `localStorage:changed`, and `theme:changed` (payload: `ThemeChangedEventPayload`, `{ theme, previousTheme }`, emitted by `agentlet.setTheme()`), and, since agentlet-core 2.3.0, `records:copied`, `records:pasted` and `records:filled` (payload: `RecordEventPayload`).
 
 ## `window.agentlet.modules`
 
