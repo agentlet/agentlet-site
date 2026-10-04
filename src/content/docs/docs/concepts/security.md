@@ -27,9 +27,15 @@ Do not put a long-lived provider key in the browser on a page that loads third-p
 
 Agentlet sends no page data on its own and has no telemetry. A module sends what it passes to `window.agentlet.ai`: prompts, form structures, table data or screenshots of page elements. Review what your module captures before pointing it at pages with personal or customer data.
 
+Since agentlet-core 2.3.0, form extraction reports `type="password"` fields with a `null` value and without their `value` attribute, so a password does not reach a prompt by accident. Pass `includePasswordValues: true` to override this when the extraction stays on the page, see [Form extraction](/docs/guides/forms-extraction/#password-fields). Other fields, including hidden ones when `includeHidden` is set, are reported as they are.
+
 The only third-party request the core makes by itself is during PDF conversion, which downloads pdf.js character maps and standard fonts from cdnjs.cloudflare.com. The PDF content is not sent.
 
 The demos on this site do not call any AI provider. Their AI answers are recorded in advance, see [Live demo](/docs/live-demo/).
+
+## Authentication popup
+
+Since agentlet-core 2.3.0, the authentication manager only accepts messages from the login popup it opened, and checks their origin against `allowedOrigins` when that list is set. Set `allowedOrigins` to the origin of the page that posts the result back. A warning is logged when it is empty. See [Authentication](/docs/guides/authentication/#security-considerations).
 
 ## Content Security Policy (CSP)
 
