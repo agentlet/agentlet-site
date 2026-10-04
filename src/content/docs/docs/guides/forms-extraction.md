@@ -29,12 +29,17 @@ const options = {
     includeDisabled: false,  // Include disabled form fields
     includeReadOnly: true,   // Include read-only form fields (default true)
     includeBoundingBoxes: false, // Include element positioning
+    includePasswordValues: false, // Report password values (default false, see below)
 };
 
 const formData = window.agentlet.forms.extract(element, options);
 ```
 
 Extra keys are accepted and forwarded to the internal element extraction, but only the keys above are read by the current implementation.
+
+### Password fields
+
+Since agentlet-core 2.3.0, a `type="password"` field is reported with a `null` value, and its `value` attribute is left out of `attributes`, because an extraction is usually sent to an AI provider or logged. The field itself is still listed, with its selector, label and constraints, so it can be filled. Pass `includePasswordValues: true` to get the value back, and only when the extraction stays on the page. The option must be the boolean `true`: any other value keeps passwords redacted.
 
 ## Output structure
 
@@ -89,6 +94,7 @@ Each field, in `forms[].elements` or the top-level `elements` array, is a `FormE
 - Checkbox or radio: `{ checked: boolean, value: string }`
 - Select: `{ selectedValue: string, selectedOptions: Array<{ value, text }> }`
 - File input: `{ files: string[], accept: string }`
+- Password input: `null`, unless `includePasswordValues: true` is passed
 - Everything else (text, email, textarea, ...): a plain `string`, or `null`
 
 ### `options` by field type

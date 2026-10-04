@@ -41,6 +41,8 @@ const fields = window.agentlet.forms.quickExport(document.getElementById('my-for
 
 `quickExport` is `exportForAI` with the hidden, disabled, and bounding-box options fixed to `false`.
 
+Since agentlet-core 2.3.0, both functions report password fields with a `null` value, so a password cannot reach a prompt by accident. `quickExport` always redacts them. `exportForAI` forwards its options to [form extraction](/docs/guides/forms-extraction/#password-fields), so `includePasswordValues: true` turns redaction off there.
+
 ## `exportForAI(element, options)`
 
 A structured object grouped by form, useful for more advanced processing.

@@ -132,7 +132,9 @@ const googleConfig = {
 
 ## Security considerations
 
-- Always set `allowedOrigins` to the identity provider's origin, so messages from other windows are ignored.
+- Since agentlet-core 2.3.0, the manager only accepts messages posted by the login popup it opened (`event.source` must be that popup). Messages from any other window or frame on the page are ignored, even from an allowed origin. Earlier versions accepted a message from any window, and from any origin when `allowedOrigins` was empty.
+- Set `allowedOrigins` to the origin of the page that posts the result, usually your callback page or the identity provider. When the list is empty, a warning is logged in the console.
+- The message payload carries the token, so it is never logged, even in debug mode.
 - Validate tokens on your backend before trusting them.
 - Prefer HTTPS-only storage for tokens returned by `onSuccess`.
 
@@ -140,7 +142,7 @@ const googleConfig = {
 
 - **Popup blocked**: ensure popups are allowed for your domain.
 - **CORS issues**: configure proper CORS headers on your identity provider.
-- **Message not received**: check the `allowedOrigins` configuration.
+- **Message not received**: the result must be posted from the popup window itself, with `window.opener.postMessage(...)`, not from a frame inside it. Its origin must also be listed in `allowedOrigins` when that list is set.
 - **Token extraction failed**: verify the `tokenExtractor` function against the actual popup payload.
 
 Inspect the current auth configuration and state from the console:
