@@ -68,7 +68,7 @@ On the target, the order is: the custom format, then the HTML embedding, then no
 1. A `copy` event writes `text/html` and `text/plain`. It needs no clipboard permission, only a user gesture.
 2. `navigator.clipboard.write()` then writes the custom format, `text/html` and `text/plain`, as an enhancement. It retries without the custom format if the browser rejects it, as Firefox does.
 
-The copy event goes first because of WebKit. `document.execCommand('copy')` needs a live user gesture, and WebKit loses that gesture after any asynchronous clipboard call, even a rejected one. Running the copy event before any `await` works on Chromium, Firefox and WebKit. It also covers hosts that refuse the clipboard API: webviews, iframes without the `clipboard-write` permissions policy and locked-down browsers.
+The copy event goes first because of WebKit. `document.execCommand('copy')` needs a live user gesture, and WebKit loses that gesture after any asynchronous clipboard call, even a rejected one. Running the copy event before any `await` works on Chromium, Firefox and WebKit. Newer WebKit builds also return false from `execCommand('copy')` when nothing is selected, because WebKit enables the copy command only with a selection. So during the copy, the transport cancels `beforecopy` and selects a temporary off-screen element, then restores the page selection and focus. It also covers hosts that refuse the clipboard API: webviews, iframes without the `clipboard-write` permissions policy and locked-down browsers.
 
 The result tells you what happened. `method` is `'clipboard-api'` or `'copy-event'`, `customFormat` says whether the custom format was written, and `formats` lists the clipboard types.
 
@@ -258,7 +258,7 @@ Not matched in this version:
 
 ## Browser support
 
-The RFC measured clipboard behavior with Playwright 1.54.1 builds (Chromium, Firefox and WebKit, headless, macOS) on 2026-10-01. A real keyboard paste lands in a page listening to `paste`, and the page also calls `navigator.clipboard.read()` on a click.
+The paste and read columns below come from the RFC spike, run with Playwright 1.54.1 builds (Chromium, Firefox and WebKit, headless, macOS) on 2026-10-01. A real keyboard paste lands in a page listening to `paste`, and the page also calls `navigator.clipboard.read()` on a click.
 
 | Engine | Custom format | HTML embedding on `paste` | HTML embedding on `read()` |
 |---|---|---|---|
@@ -266,10 +266,13 @@ The RFC measured clipboard behavior with Playwright 1.54.1 builds (Chromium, Fir
 | Firefox | Rejected on write. `copy()` retries without it. | Works. | Works. |
 | WebKit | Written, but `getData()` returns an empty string on the `paste` event. | Works. | Not verified. Permission is denied in headless WebKit. |
 
+Copy is backed by a different run. In CI, with Playwright 1.63 on Linux, the records example spec passes on Chromium, Firefox and WebKit. That includes a test that copies with the clipboard write denied (the copy event fallback) and then pastes with the keyboard into the form.
+
 Read this as follows:
 
 - The HTML embedding works on Chromium, Firefox and WebKit. Smart paste through the `paste` event works on all three.
 - The custom format is only readable through `read()`, so in practice it is a Chromium extra.
+- Copy through the copy event is verified in CI on all three engines, including with the clipboard API write denied.
 - `pasteFromClipboard()` and `read()` on WebKit were not verified. Treat them as untested until they are run in a headed Safari.
 - Other applications may strip `data-agentlet-record`. They still get the table, the list and the plain text. This was not tested.
 
@@ -278,7 +281,7 @@ Read this as follows:
 - The clipboard holds one item. A list of records is one item, and all records in it must have the same type.
 - A record is limited to 1 MB serialized. `copy()` throws above that.
 - If a clipboard permission prompt is never answered, `copy()` keeps waiting. The copy event content is already on the clipboard, so the copy itself worked.
-- The copy fallback briefly selects an off-screen element. If the focus was in an input, it moves out for an instant and comes back, which fires `blur` and `focus` on it. The previous selection and focus are restored.
+- The copy event path briefly selects an off-screen element, because WebKit enables the copy command only with a selection. If the focus was in an input, it moves out for an instant and comes back, which fires `blur` and `focus` on it. The previous selection and focus are restored.
 - A successful `copy()` fires a `copy` event on the document in every browser, so page-level `copy` listeners run. The agentlet listener does not stop propagation.
 
 ## Errors

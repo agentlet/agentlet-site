@@ -189,7 +189,7 @@ Clipboard transport:
   ```ts
   (record: AgentletRecord | AgentletRecord[], options?: RecordCopyOptions) => Promise<RecordCopyResult>
   ```
-  Writes `text/html` with the record in `data-agentlet-record`, `text/plain` and, where accepted, the custom `web application/...` format. Call it from a click or key handler, with no `await` before it. `options.redact` drops more keys. Rejects with an `Error` for an empty list, an invalid record, records of different types in one list, a payload above 1 MB, or when the browser blocked both the copy event and the clipboard API (the message starts with `Copying was blocked by the browser`).
+  Writes `text/html` with the record in `data-agentlet-record`, `text/plain` and, where accepted, the custom `web application/...` format. Call it from a click or key handler, with no `await` before it. The copy event path briefly selects an off-screen element and cancels `beforecopy`, because WebKit enables the copy command only with a selection. The previous selection and focus are restored, and a focused input fires `blur` and `focus`. `options.redact` drops more keys. Rejects with an `Error` for an empty list, an invalid record, records of different types in one list, a payload above 1 MB, or when the browser blocked both the copy event and the clipboard API (the message starts with `Copying was blocked by the browser`).
 
 - **`read`**
   ```ts
