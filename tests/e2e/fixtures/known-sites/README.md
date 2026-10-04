@@ -89,3 +89,47 @@ sent on 2026-10-01. A plain `curl` gets an Amazon WAF challenge there (status
 202, no body), so the header was read from the real page in a Chromium
 session, after the challenge. It is only `frame-ancestors`, with no
 script-src.
+
+## wikipedia-company.html
+
+A trimmed copy of the English Wikipedia article "Danone": the company
+infobox (every row, with images and template styles removed), the first
+sentences of the lead, and the "Wikidata item" tool link, wrapped in a
+minimal page skeleton. It is served as `https://en.wikipedia.org/wiki/Danone`
+with the Wikipedia policy above. The infobox markup is the Parsoid output
+Wikipedia served on 2026-10-04.
+
+The article text is available under the Creative Commons
+Attribution-ShareAlike 4.0 License (CC BY-SA 4.0). Source:
+https://en.wikipedia.org/wiki/Danone (see the page history for the list of
+authors). This trimmed copy is shared under the same license.
+
+## wikidata-item.html, wikidata-csp.txt
+
+A trimmed copy of the Wikidata item Q329426 (Danone): the title and the
+statement groups for instance of (P31), country (P17), headquarters location
+(P159), inception (P571), official website (P856) and SIREN number (P1616),
+with references, qualifiers and edit controls removed. The values are
+unchanged, including the ones that make the data ambiguous (two countries
+listed, three websites, one of them preferred). It is served as
+`https://www.wikidata.org/wiki/Q329426`.
+
+Wikidata data is available under the Creative Commons CC0 1.0 Universal
+Public Domain Dedication. Source: https://www.wikidata.org/wiki/Q329426.
+
+`wikidata-csp.txt` is the `Content-Security-Policy` header www.wikidata.org
+sent for that page on 2026-10-04, fetched with
+`curl -s -L -D - -o /dev/null -A "Mozilla/5.0" https://www.wikidata.org/wiki/Q329426`.
+Its `default-src` lists `*.wikipedia.org`, `*.jsdelivr.net` and the Wikimedia
+hosts, and it has no `connect-src`, so `default-src` governs requests to
+`www.wikidata.org`.
+
+## wikidata-api-siren.json, wikidata-api-paris-country.json, wikidata-api-france-label.json
+
+Responses of the Wikidata API (CC0), recorded on 2026-10-04 and served by the
+tests in place of the network:
+
+- `action=wbgetclaims&entity=Q329426&property=P1616` (the SIREN of Danone),
+- `action=wbgetclaims&entity=Q90&property=P17` (the countries of Paris),
+- `action=wbgetentities&ids=Q142&props=labels&languages=en|en` (the label of
+  France).

@@ -37,12 +37,15 @@ export const WCAG_URL = 'https://www.w3.org/TR/WCAG22/';
 export const W3C_TR_URL = 'https://www.w3.org/TR/example-widget-protocol/';
 export const RFC_URL = 'https://www.rfc-editor.org/rfc/rfc9110.html';
 export const EURLEX_URL = 'https://eur-lex.europa.eu/eli/reg/2016/679/oj';
+export const WIKIPEDIA_COMPANY_URL = 'https://en.wikipedia.org/wiki/Danone';
+export const WIKIDATA_URL = 'https://www.wikidata.org/wiki/Q329426';
 export const OTHER_SITE_URL = 'https://example.com/';
 
 const WIKIPEDIA_CSP = readFileSync(join(FIXTURES, 'wikipedia-csp.txt'), 'utf8').trim();
 const ARXIV_CSP = readFileSync(join(FIXTURES, 'arxiv-csp.txt'), 'utf8').trim();
 const W3C_CSP = readFileSync(join(FIXTURES, 'w3c-csp.txt'), 'utf8').trim();
 const EURLEX_CSP = readFileSync(join(FIXTURES, 'eur-lex-csp.txt'), 'utf8').trim();
+const WIKIDATA_CSP = readFileSync(join(FIXTURES, 'wikidata-csp.txt'), 'utf8').trim();
 const WIKIPEDIA_HTML = readFileSync(join(FIXTURES, 'wikipedia-article.html'), 'utf8');
 
 export interface KnownSitesRun {
@@ -58,6 +61,8 @@ interface Options {
 	/** Content-Security-Policy header to send with it, if any. */
 	csp?: string;
 	url: string;
+	/** Answers a request before the defaults do, or returns undefined to let them run. */
+	respond?: (url: URL) => { body: string; type: string } | undefined;
 }
 
 function contentType(path: string): string {
@@ -98,6 +103,15 @@ export async function serveKnownSitesPage(page: Page, options: Options): Promise
 			return route.fulfill({ status: 200, body: options.html, headers });
 		}
 
+		const custom = options.respond?.(url);
+		if (custom) {
+			return route.fulfill({
+				status: 200,
+				body: custom.body,
+				headers: { 'content-type': custom.type, 'access-control-allow-origin': '*' },
+			});
+		}
+
 		if (url.host === 'cdn.jsdelivr.net') {
 			const demos = /^\/npm\/@agentlet\/demos@([^/]+)\/dist\/(.+)$/.exec(url.pathname);
 			if (demos) {
@@ -127,6 +141,45 @@ export async function serveKnownSitesPage(page: Page, options: Options): Promise
 
 export async function serveWikipedia(page: Page): Promise<KnownSitesRun> {
 	return serveKnownSitesPage(page, { html: WIKIPEDIA_HTML, csp: WIKIPEDIA_CSP, url: WIKIPEDIA_URL });
+}
+
+/**
+ * Wikidata's API, answered from three recorded responses (2026-10-04) for the
+ * Danone item: the SIREN claim of Q329426, the country claims of Q90 (Paris)
+ * and the English label of Q142 (France). Anything else is not answered.
+ */
+function wikidataApi(url: URL): { body: string; type: string } | undefined {
+	if (url.host !== 'www.wikidata.org' || url.pathname !== '/w/api.php') return undefined;
+	const params = url.searchParams;
+	const file =
+		params.get('action') === 'wbgetclaims' && params.get('entity') === 'Q329426' && params.get('property') === 'P1616'
+			? 'wikidata-api-siren.json'
+			: params.get('action') === 'wbgetclaims' && params.get('entity') === 'Q90' && params.get('property') === 'P17'
+				? 'wikidata-api-paris-country.json'
+				: params.get('action') === 'wbgetentities' && params.get('ids') === 'Q142'
+					? 'wikidata-api-france-label.json'
+					: null;
+	return file ? { body: readFileSync(join(FIXTURES, file), 'utf8'), type: 'application/json' } : undefined;
+}
+
+/** A trimmed English Wikipedia company article (Danone), served with Wikipedia's real policy. */
+export async function serveWikipediaCompany(page: Page): Promise<KnownSitesRun> {
+	return serveKnownSitesPage(page, {
+		html: readFileSync(join(FIXTURES, 'wikipedia-company.html'), 'utf8'),
+		csp: WIKIPEDIA_CSP,
+		url: WIKIPEDIA_COMPANY_URL,
+		respond: wikidataApi,
+	});
+}
+
+/** A trimmed Wikidata item page (Danone), served with Wikidata's real policy. */
+export async function serveWikidata(page: Page): Promise<KnownSitesRun> {
+	return serveKnownSitesPage(page, {
+		html: readFileSync(join(FIXTURES, 'wikidata-item.html'), 'utf8'),
+		csp: WIKIDATA_CSP,
+		url: WIKIDATA_URL,
+		respond: wikidataApi,
+	});
 }
 
 /** An arXiv fixture page, served with the policy arxiv.org really sent (frame-ancestors only). */

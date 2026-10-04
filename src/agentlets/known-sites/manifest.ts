@@ -33,6 +33,11 @@ export interface KnownSite {
 	exampleLabel: string;
 	/** More example links, for a site entry that covers several hosts. */
 	moreExamples?: { url: string; label: string }[];
+	/**
+	 * Regular expression source, tested against the full page URL. Tells the
+	 * launcher which site a page belongs to, for its "Demos for ..." heading.
+	 */
+	pattern: string;
 }
 
 export interface KnownSiteAgentlet {
@@ -40,6 +45,8 @@ export interface KnownSiteAgentlet {
 	id: string;
 	/** Id of the KnownSite this demo belongs to. */
 	site: string;
+	/** Other KnownSite ids this demo is also listed under, when its pattern covers more than one site. */
+	alsoOn?: string[];
 	/** Source file under src/agentlets/known-sites/, without its extension. */
 	file: string;
 	/** Global class name the built bundle attaches to the page (window[className]). */
@@ -57,6 +64,23 @@ export interface KnownSiteAgentlet {
 	pattern: string;
 }
 
+/** Any language edition's article pages, desktop or mobile host. */
+export const WIKIPEDIA_PATTERN = '^https?:\\/\\/[a-z0-9-]+(?:\\.m)?\\.wikipedia\\.org\\/wiki\\/';
+
+/** arXiv listing pages, search results, and abstract pages. */
+export const ARXIV_PATTERN = '^https?:\\/\\/(?:www\\.)?arxiv\\.org\\/(?:list|search|abs)\\/';
+
+/** W3C Technical Reports, RFC Editor RFC pages, and EUR-Lex ELI and legal-content pages. */
+export const SPEC_PATTERN =
+	'^https?:\\/\\/(?:www\\.w3\\.org\\/TR\\/|(?:www\\.)?rfc-editor\\.org\\/rfc\\/rfc\\d+\\.html|eur-lex\\.europa\\.eu\\/(?:eli|legal-content)\\/)';
+
+/** Wikidata item pages (`/wiki/Q42`). */
+export const WIKIDATA_PATTERN = '^https?:\\/\\/(?:www\\.)?wikidata\\.org\\/wiki\\/Q\\d+';
+
+/** Wikipedia articles and Wikidata items: where the company record demo runs. */
+export const COMPANY_RECORD_PATTERN =
+	'^https?:\\/\\/(?:[a-z0-9-]+(?:\\.m)?\\.wikipedia\\.org\\/wiki\\/|(?:www\\.)?wikidata\\.org\\/wiki\\/Q\\d+)';
+
 export const KNOWN_SITES: KnownSite[] = [
 	{
 		id: 'wikipedia',
@@ -64,6 +88,16 @@ export const KNOWN_SITES: KnownSite[] = [
 		where: 'Article pages on any language edition (*.wikipedia.org/wiki/...).',
 		exampleUrl: 'https://en.wikipedia.org/wiki/Apollo_11',
 		exampleLabel: 'Apollo 11 on English Wikipedia',
+		moreExamples: [{ url: 'https://en.wikipedia.org/wiki/Danone', label: 'Danone on English Wikipedia' }],
+		pattern: WIKIPEDIA_PATTERN,
+	},
+	{
+		id: 'wikidata',
+		label: 'Wikidata',
+		where: 'Item pages (www.wikidata.org/wiki/Q...). Only the company record demo runs here.',
+		exampleUrl: 'https://www.wikidata.org/wiki/Q329426',
+		exampleLabel: 'Danone on Wikidata',
+		pattern: WIKIDATA_PATTERN,
 	},
 	{
 		id: 'arxiv',
@@ -71,6 +105,7 @@ export const KNOWN_SITES: KnownSite[] = [
 		where: 'Listing and search pages (arxiv.org/list/..., arxiv.org/search/...), and abstract pages (arxiv.org/abs/...).',
 		exampleUrl: 'https://arxiv.org/list/cs.AI/recent',
 		exampleLabel: 'Recent papers in cs.AI on arXiv',
+		pattern: ARXIV_PATTERN,
 	},
 	{
 		id: 'standards',
@@ -83,6 +118,7 @@ export const KNOWN_SITES: KnownSite[] = [
 			{ url: 'https://www.rfc-editor.org/rfc/rfc9110.html', label: 'RFC 9110 (HTTP Semantics) on RFC Editor' },
 			{ url: 'https://eur-lex.europa.eu/eli/reg/2016/679/oj', label: 'The GDPR on EUR-Lex' },
 		],
+		pattern: SPEC_PATTERN,
 	},
 ];
 
@@ -98,16 +134,6 @@ export const KNOWN_SITES_LAUNCHER = {
 	title: 'Agentlet demos',
 	description: 'Lists the demos available on this site, or the supported sites.',
 };
-
-/** Any language edition's article pages, desktop or mobile host. */
-export const WIKIPEDIA_PATTERN = '^https?:\\/\\/[a-z0-9-]+(?:\\.m)?\\.wikipedia\\.org\\/wiki\\/';
-
-/** arXiv listing pages, search results, and abstract pages. */
-export const ARXIV_PATTERN = '^https?:\\/\\/(?:www\\.)?arxiv\\.org\\/(?:list|search|abs)\\/';
-
-/** W3C Technical Reports, RFC Editor RFC pages, and EUR-Lex ELI and legal-content pages. */
-export const SPEC_PATTERN =
-	'^https?:\\/\\/(?:www\\.w3\\.org\\/TR\\/|(?:www\\.)?rfc-editor\\.org\\/rfc\\/rfc\\d+\\.html|eur-lex\\.europa\\.eu\\/(?:eli|legal-content)\\/)';
 
 export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 	{
@@ -127,6 +153,17 @@ export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 		title: 'Date timeline',
 		description: 'Finds the dates in the article text and builds a chronological timeline that scrolls to each passage.',
 		pattern: WIKIPEDIA_PATTERN,
+	},
+	{
+		id: 'company-record',
+		site: 'wikipedia',
+		alsoOn: ['wikidata'],
+		file: 'company-record',
+		className: 'CompanyRecordModule',
+		title: 'Copy a company as a record',
+		description:
+			'Reads a company article or Wikidata item and copies it as a structured record, ready to paste into a supplier form on a page that runs agentlet.',
+		pattern: COMPANY_RECORD_PATTERN,
 	},
 	{
 		id: 'arxiv-papers',
@@ -149,8 +186,14 @@ export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 	},
 ];
 
-export function findKnownSite(id: string): KnownSite | undefined {
-	return KNOWN_SITES.find((site) => site.id === id);
+/** The site a page URL belongs to, for the launcher's heading. */
+export function siteForUrl(url: string): KnownSite | undefined {
+	return KNOWN_SITES.find((site) => new RegExp(site.pattern).test(url));
+}
+
+/** Demos listed under a site: its own, plus the ones that also run there. */
+export function demosForSite(site: KnownSite): KnownSiteAgentlet[] {
+	return KNOWN_SITE_AGENTLETS.filter((entry) => entry.site === site.id || entry.alsoOn?.includes(site.id));
 }
 
 /** Demos whose pattern matches the given URL, in manifest order. */

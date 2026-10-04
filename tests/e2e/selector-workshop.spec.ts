@@ -136,9 +136,10 @@ test.describe('Selector workshop agentlet on the home page', () => {
 
 		await expect(clearButton).toBeEnabled();
 
-		// The home page sandbox has exactly 5 <input> elements (vendor, date,
-		// amount, vatAmount, notes; currency/category are <select>).
-		await input.fill('input');
+		// The expense form has exactly 5 <input> elements (vendor, date,
+		// amount, vatAmount, notes; currency/category are <select>). The
+		// supplier form next to it has more, so the selector is scoped.
+		await input.fill('#expense-form input');
 		await expect(page.locator('[data-role="match-status"]')).toHaveText('5 elements match.');
 		await expect(page.locator('.agentlet-highlight-border')).toHaveCount(5);
 		await expect(errorEl).toBeHidden();

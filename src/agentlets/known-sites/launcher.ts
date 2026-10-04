@@ -1,5 +1,5 @@
 import { listenForShowLauncher, sourceLinkHtml } from '../shared';
-import { KNOWN_SITES, KNOWN_SITE_AGENTLETS, demosForUrl, findKnownSite, type KnownSiteAgentlet } from './manifest';
+import { KNOWN_SITES, demosForSite, demosForUrl, siteForUrl, type KnownSiteAgentlet } from './manifest';
 import { KNOWN_SITES_PAGE_URL, KNOWN_SITES_SOURCE_DIR, KNOWN_SITE_STYLES, escapeHtml } from './shared';
 
 /**
@@ -84,7 +84,7 @@ class KnownSitesLauncherModule extends window.agentlet.Module {
 	}
 
 	private _renderDemos(demos: KnownSiteAgentlet[]): string {
-		const site = findKnownSite(demos[0].site);
+		const site = siteForUrl(window.location.href);
 		const cards = demos
 			.map(
 				(entry) => `
@@ -103,7 +103,7 @@ class KnownSitesLauncherModule extends window.agentlet.Module {
 		return `
 			<div class="agentlet-panel-body">
 				<h3>${site ? `Demos for ${escapeHtml(site.label)}` : 'Demos for this page'}</h3>
-				<p class="ks-intro">Pick a demo. Each one only reads this page in your browser. Nothing is posted and nothing is sent anywhere.</p>
+				<p class="ks-intro">Pick a demo. Each one only reads this page in your browser. Nothing is posted.${demos.some((entry) => entry.id === 'company-record') ? ' The company record demo also asks the Wikidata API for a fact or two.' : ' Nothing is sent anywhere.'}</p>
 				<ul class="agentlet-demo-list">${cards}</ul>
 				${sourceLinkHtml(FILE)}
 			</div>
@@ -112,7 +112,7 @@ class KnownSitesLauncherModule extends window.agentlet.Module {
 
 	private _renderSupportedSites(): string {
 		const sites = KNOWN_SITES.map((site) => {
-			const demos = KNOWN_SITE_AGENTLETS.filter((entry) => entry.site === site.id);
+			const demos = demosForSite(site);
 			return `
 				<li class="kl-site">
 					<span class="kl-site-name">${escapeHtml(site.label)}</span>

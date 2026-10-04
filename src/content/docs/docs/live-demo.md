@@ -13,7 +13,7 @@ Clicking "Try it on this page" opens a launcher panel listing the demo agentlets
 
 ### Demo sandbox
 
-On the home page, right after the hero, a "Demo sandbox" section shows a fictitious receipt (a PDF, with a preview image) and a small expense report form. It is collapsed by default, kept visually separate from the rest of the page (its own border and background), and opens with a click or the keyboard, like any native disclosure widget. The form works by hand, with no agentlet: filling it in and pressing Submit shows an inline "Demo form. Nothing was sent." status instead of sending anything.
+On the home page, right after the hero, a "Demo sandbox" section shows a fictitious receipt (a PDF, with a preview image), a small expense report form and a supplier form. It is collapsed by default, kept visually separate from the rest of the page (its own border and background), and opens with a click or the keyboard, like any native disclosure widget. Both forms work by hand, with no agentlet: filling one in and pressing its button shows an inline "Demo form. Nothing was sent." status instead of sending anything.
 
 The sections below are listed in the same order the launcher itself lists them: business demos first, then developers, then IT and security.
 
@@ -28,6 +28,18 @@ Pick "Receipt to expense report" in the launcher to watch an agentlet do the sam
 Filling the form highlights the changed fields with `agentlet.utils.PageHighlighter`, and a "Start over" action clears both the form and the highlights. The agentlet never clicks Submit itself.
 
 Source: [`src/agentlets/expense-receipt.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/expense-receipt.ts).
+
+### Paste a company as a supplier
+
+This demo is the receiving end of a copy and paste between two web apps, built on `agentlet.records` (agentlet-core 2.3.0). The supplier form in the sandbox uses field names that differ from the record: a "Code postal" label, a country select whose values are codes, and ids such as `legalName` and `zip`, with no `autocomplete` attributes. The core matches the record to the form anyway and shows a preview first.
+
+1. **Copy a company.** On Wikipedia or Wikidata, use the [known-sites bookmarklet](/try/known-sites/) and its "Copy a company as a record" demo. Or press "Copy a sample company" in this panel, which creates an `organization` record locally with `records.create()` and copies it with `records.copy()`.
+2. **Paste it.** Click in the supplier form and press Ctrl+V (Cmd+V on a Mac). The demo listens with `records.onPaste()`, scoped to the form and to `organization` records, so a paste without a record, or outside the form, is never touched. The "Paste record" button calls `records.pasteFromClipboard()` instead, which reads the clipboard from the click, for pages that block paste events.
+3. **Check the preview and press Fill.** The core's preview shows each record field and the form field it maps to. Nothing is filled before you confirm, and the form is never submitted.
+
+Pasting the same copy into a spreadsheet or a text editor gives readable lines of field names and values, with no agentlet involved. The clipboard can be read by other applications, so a record never carries passwords.
+
+Source: [`src/agentlets/supplier-paste.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/supplier-paste.ts) and, for the copy side, [`src/agentlets/known-sites/company-record.ts`](https://github.com/agentlet/agentlet-site/blob/main/src/agentlets/known-sites/company-record.ts).
 
 ### Summarize and share a section
 
@@ -133,7 +145,7 @@ Nothing related to the demo is downloaded until you click the button, not even t
 - `agentlet-core`, the framework itself, from `/cdn/v1/agentlet-core.min.js`.
 - The demo registry, from `/cdn/v1/agentlets-registry.js`.
 - The launcher's own script and the documentation companion's, both loaded eagerly as part of the registry (the companion needs to already be registered for the core's own URL detection to activate it on a direct visit to `/docs/`, not only from the launcher).
-- Every other demo (receipt to expense report, summarize and share a section, compare and export, live white label, selector workshop, enterprise sign-in, and page audit) is marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and loads from `/cdn/v1/agentlets/<name>.js` only once you pick it in the launcher, via `moduleRegistry.loadModule()`.
+- Every other demo (receipt to expense report, paste a company as a supplier, summarize and share a section, compare and export, live white label, selector workshop, enterprise sign-in, and page audit) is marked lazy in the registry (see [Script injection and registry](/docs/guides/script-injection/#lazy-entries)) and loads from `/cdn/v1/agentlets/<name>.js` only once you pick it in the launcher, via `moduleRegistry.loadModule()`.
 
 Because this site does a full page load on every navigation, a tiny inline script on every page (not a separate request) checks whether you left the panel open on a previous page and, if so, loads the demo loader to reopen it. That check itself downloads nothing on its own: it only loads the demo loader if the panel was open, and loads a lazy demo's script again first if that is the one being restored.
 

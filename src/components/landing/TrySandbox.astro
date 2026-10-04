@@ -45,6 +45,21 @@ const CATEGORIES = [
 	{ value: 'other', label: 'Other' },
 ];
 
+// Options of the supplier form's country select. The values are ISO codes and
+// the visible text is the country name, so a pasted "France" has to match the
+// option text, not the value.
+const COUNTRIES = [
+	{ value: 'BE', label: 'Belgium' },
+	{ value: 'FR', label: 'France' },
+	{ value: 'DE', label: 'Germany' },
+	{ value: 'IT', label: 'Italy' },
+	{ value: 'NL', label: 'Netherlands' },
+	{ value: 'ES', label: 'Spain' },
+	{ value: 'CH', label: 'Switzerland' },
+	{ value: 'GB', label: 'United Kingdom' },
+	{ value: 'US', label: 'United States' },
+];
+
 // Unrelated to the receipt above: just enough sample history to make the
 // sandbox look like a real expense report screen.
 const RECENT_EXPENSES: Array<[string, string]> = [
@@ -58,7 +73,7 @@ const RECENT_EXPENSES: Array<[string, string]> = [
 	<div class="wrap">
 		<details class="sandbox-details" id="sandbox">
 			<summary class="sandbox-summary">
-				<span class="sandbox-label">Demo sandbox</span>: a sample receipt and an expense form
+				<span class="sandbox-label">Demo sandbox</span>: a sample receipt, an expense form and a supplier form
 			</summary>
 			<div class="sandbox-body">
 				<!--
@@ -71,9 +86,10 @@ const RECENT_EXPENSES: Array<[string, string]> = [
 				-->
 				<h2 class="sandbox-heading">Demo sandbox</h2>
 				<p class="section-intro">
-					A fictitious receipt and a small expense form, usable by hand, that send nothing. Open
-					the live demo above and pick "Receipt to expense report" to watch an agentlet read the
-					receipt and fill the form for you instead.
+					A fictitious receipt, a small expense form and a supplier form, usable by hand, that send
+					nothing. Open the live demo above and pick "Receipt to expense report" to watch an
+					agentlet read the receipt and fill the form for you instead. Pick "Paste a company as a
+					supplier" to paste a copied company into the supplier form.
 				</p>
 
 				<div class="sandbox-grid">
@@ -150,6 +166,57 @@ const RECENT_EXPENSES: Array<[string, string]> = [
 					</form>
 				</div>
 
+				<div class="sandbox-supplier">
+					<h3>New supplier</h3>
+					<!--
+						The supplier form that src/agentlets/supplier-paste.ts pastes a
+						company record into. The ids and names (legalName, registration,
+						zip...) and one French label ("Code postal") differ from the
+						record's keys on purpose, and no field has an autocomplete
+						attribute, so the matching the core does is visible. Every field
+						has a proper label, so the page audit finds nothing here.
+					-->
+					<form class="sandbox-form" id="supplier-form" data-supplier-form novalidate>
+						<div class="form-row">
+							<label for="supplier-legal-name">Supplier name</label>
+							<input type="text" id="supplier-legal-name" name="legalName" />
+						</div>
+						<div class="form-row">
+							<label for="supplier-registration">SIREN</label>
+							<input type="text" id="supplier-registration" name="registration" />
+						</div>
+						<div class="form-row">
+							<label for="supplier-line">Street</label>
+							<input type="text" id="supplier-line" name="addressLine" />
+						</div>
+						<div class="form-row">
+							<label for="supplier-zip">Code postal</label>
+							<input type="text" id="supplier-zip" name="zip" />
+						</div>
+						<div class="form-row">
+							<label for="supplier-town">City</label>
+							<input type="text" id="supplier-town" name="town" />
+						</div>
+						<div class="form-row">
+							<label for="supplier-nation">Country</label>
+							<select id="supplier-nation" name="nation">
+								<option value="" selected>Select a country</option>
+								{COUNTRIES.map((country) => <option value={country.value}>{country.label}</option>)}
+							</select>
+						</div>
+						<div class="form-row">
+							<label for="supplier-web">Website</label>
+							<input type="url" id="supplier-web" name="web" />
+						</div>
+						<div class="form-row">
+							<label for="supplier-contact">Contact email</label>
+							<input type="email" id="supplier-contact" name="contactEmail" />
+						</div>
+						<button type="submit" class="button button-primary button-sm">Save supplier</button>
+						<p class="form-status" data-supplier-status role="status" aria-live="polite">&nbsp;</p>
+					</form>
+				</div>
+
 				<div class="sandbox-recent">
 					<h3>Recent expenses</h3>
 					<!--
@@ -194,5 +261,14 @@ const RECENT_EXPENSES: Array<[string, string]> = [
 	form?.addEventListener('submit', (event) => {
 		event.preventDefault();
 		if (status) status.textContent = 'Demo form. Nothing was sent.';
+	});
+
+	// Same for the supplier form (src/agentlets/supplier-paste.ts fills it).
+	const supplierForm = document.getElementById('supplier-form');
+	const supplierStatus = document.querySelector('[data-supplier-status]');
+
+	supplierForm?.addEventListener('submit', (event) => {
+		event.preventDefault();
+		if (supplierStatus) supplierStatus.textContent = 'Demo form. Nothing was sent.';
 	});
 </script>
