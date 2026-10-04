@@ -7,7 +7,7 @@
  * Output:
  *   public/cdn/v1/agentlet-core.min.js   copied from node_modules/agentlet-core
  *   public/cdn/v1/pdf.worker.min.mjs     copied from node_modules/agentlet-core
- *                                          (agentlet-core 2.2.0 ships the
+ *                                          (agentlet-core 2.3.0 ships the
  *                                          matching pdf.js worker directly,
  *                                          see copyCoreAssets() below)
  *   public/cdn/v1/agentlets/<id>.js      one esbuild IIFE bundle per manifest entry
@@ -57,7 +57,7 @@ async function loadManifest() {
 
 /**
  * Both files come straight from the agentlet-core package, matched by
- * construction: agentlet-core 2.2.0 ships `dist/pdf.worker.min.mjs`
+ * construction: agentlet-core 2.3.0 ships `dist/pdf.worker.min.mjs`
  * alongside `dist/agentlet-core.min.js`, built from the exact pdfjs-dist
  * version it bundles, so there is no separate version to track or pin here.
  */

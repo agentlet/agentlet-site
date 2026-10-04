@@ -54,7 +54,7 @@ The readable source of that bookmarklet:
 
 Notes and limits:
 
-- `agentlet-core@2` follows the latest 2.x release. Pin an exact version such as `agentlet-core@2.2.0` if you want reproducible behaviour.
+- `agentlet-core@2` follows the latest 2.x release. Pin an exact version such as `agentlet-core@2.3.0` if you want reproducible behaviour.
 - The bookmarklet loads a script from a CDN, so it needs network access and does not work on pages whose Content Security Policy forbids that. For example, github.com refuses the script (`script-src`), and nothing appears. On such pages, embed the bundle in the app or use a browser extension. See [Deployment modes](/docs/concepts/deployment-modes/).
 - A bookmarklet runs only when you click it. It is not re-injected after a page reload.
 - In the browser global build, the class is `window.AgentletCore.default`, and `window.agentlet` exists once `init()` has resolved.
