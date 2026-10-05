@@ -84,9 +84,13 @@ AI credentials are read from environment variables managed by `window.agentlet.e
 
 ```javascript
 window.agentlet.env.OPENAI_API_KEY = 'sk-...';
-window.agentlet.env.OPENAI_MODEL = 'gpt-4o-mini';
+window.agentlet.env.OPENAI_MODEL = 'gpt-6-luna'; // Optional, this is the default
 window.agentlet.ai.refresh(); // Refresh after env changes
 ```
+
+`OPENAI_MODEL` is optional. The default model is `gpt-6-luna` from the next agentlet-core release after 2.3.0 (earlier releases default to `gpt-4o-mini`). Set `OPENAI_MODEL` to use another model, including an older one such as `gpt-4o-mini`.
+
+The provider adapts the request to the model. Classic models such as `gpt-4o-mini` receive `max_tokens` and `temperature`. The `gpt-5`, `gpt-6` and `o`-series models receive `max_completion_tokens` instead, and no `temperature` (they reject it while reasoning is on). `gpt-6-luna` and `gpt-6-sol` are sent `reasoning_effort: "none"` so the token budget goes to the answer, which also keeps `temperature` valid.
 
 ## Direct access to the manager
 
