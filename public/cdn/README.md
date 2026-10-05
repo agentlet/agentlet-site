@@ -20,6 +20,12 @@ hand; edit `src/agentlets/` and let the build regenerate this directory.
 - `pdf.worker.min.mjs`: copied from `node_modules/agentlet-core/dist/`, the
   matching pdf.js worker agentlet-core 2.3.0 ships alongside
   `agentlet-core.min.js`. No separate version to pin.
+- `agentlet-xlsx.min.js`, `agentlet-html2canvas.min.js`,
+  `agentlet-pdfjs.min.js`, `cmaps/` and `standard_fonts/`: copied from
+  `node_modules/agentlet-core/dist/`, only when the installed agentlet-core
+  loads those libraries on demand (the release after 2.3.0). The core
+  fetches them from the folder of its own script, so they have to sit next
+  to `agentlet-core.min.js`.
 - `agentlets/<name>.js`: one esbuild IIFE bundle per `src/agentlets/*.ts`
   module (except `manifest.ts` and `shared.ts`, which are bundled into each
   module rather than shipped on their own). Never bundles `agentlet-core`

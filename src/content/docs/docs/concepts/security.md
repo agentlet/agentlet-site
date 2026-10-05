@@ -29,7 +29,7 @@ Agentlet sends no page data on its own and has no telemetry. A module sends what
 
 Since agentlet-core 2.3.0, form extraction reports `type="password"` fields with a `null` value and without their `value` attribute, so a password does not reach a prompt by accident. Pass `includePasswordValues: true` to override this when the extraction stays on the page, see [Form extraction](/docs/guides/forms-extraction/#password-fields). Other fields, including hidden ones when `includeHidden` is set, are reported as they are.
 
-The only third-party request the core makes by itself is during PDF conversion, which downloads pdf.js character maps and standard fonts from cdnjs.cloudflare.com. The PDF content is not sent.
+Up to agentlet-core 2.3.0, the only third-party request the core makes by itself is during PDF conversion, which downloads pdf.js character maps and standard fonts from cdnjs.cloudflare.com. The PDF content is not sent. In the next release the core makes no third-party request by itself: it loads SheetJS, html2canvas and pdf.js on demand from the folder its own script was served from, and pdf.js reads its worker, character maps and standard fonts from that same folder (`pdf.worker.min.mjs`, `cmaps/` and `standard_fonts/` in `dist/`). Set `libraryBaseUrl` to serve them from your own origin, see [Install](/docs/getting-started/install/#where-the-files-are-loaded-from).
 
 The demos on this site do not call any AI provider. Their AI answers are recorded in advance, see [Live demo](/docs/live-demo/).
 
@@ -40,6 +40,8 @@ Since agentlet-core 2.3.0, the authentication manager only accepts messages from
 ## Content Security Policy (CSP)
 
 CSP headers restrict which domains can serve content within a page. Typically, this includes the domain hosting the web app, its APIs, and associated CDNs. In corporate environments, a common pattern is to deploy your AI API within an existing trusted domain and serve the agentlet, as minified JavaScript, from your corporate CDN. The bookmarklet can then inject code into the page, because it is hosted on a domain the CSP allows, and the agentlet can call internal APIs.
+
+In the next release, the core also loads SheetJS, html2canvas and pdf.js from the folder its own script was served from, so a `script-src` that allows the core script allows them too. The pdf.js worker is a module worker: when the policy sets `worker-src`, allow the same origin there as well.
 
 A page with a strict policy blocks a bookmarklet loaded from any other origin. Use the extension or native integration modes there, see [Deployment modes](/docs/concepts/deployment-modes/). The agentlet panel writes markup with `innerHTML`, so it does not run on pages that enforce Trusted Types.
 

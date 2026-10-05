@@ -15,7 +15,8 @@
  * loads registries and modules with `crossOrigin = 'anonymous'` from the host
  * site's origin, and `Cache-Control: no-store`):
  *   /loader.js, /registry.js, /agentlets/<id>.js   packages/agentlet-demos/dist/
- *   /cdn/v1/agentlet-core.min.js, /cdn/v1/pdf.worker.min.mjs
+ *   /cdn/v1/agentlet-core.min.js, /cdn/v1/pdf.worker.min.mjs, the on-demand
+ *   library chunks (agentlet-xlsx.min.js, ...), /cdn/v1/cmaps/ and /cdn/v1/standard_fonts/
  *                                                   node_modules/agentlet-core/dist/
  *                                                   (the loader reads the core from
  *                                                   `/cdn/v1/` of its own origin when it
@@ -37,7 +38,15 @@ const ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
 const DEMOS_DIST = join(ROOT, 'packages/agentlet-demos/dist');
 const CORE_DIST = join(ROOT, 'node_modules/agentlet-core/dist');
 const CORE_PREFIX = '/cdn/v1/';
-const CORE_FILES = new Set(['agentlet-core.min.js', 'pdf.worker.min.mjs']);
+const CORE_FILES = new Set([
+	'agentlet-core.min.js',
+	'pdf.worker.min.mjs',
+	// Loaded on demand by agentlet-core releases after 2.3.0, next to the core script.
+	'agentlet-xlsx.min.js',
+	'agentlet-html2canvas.min.js',
+	'agentlet-pdfjs.min.js',
+]);
+const CORE_DIRS = ['cmaps/', 'standard_fonts/'];
 const TYPES = {
 	'.js': 'application/javascript; charset=utf-8',
 	'.mjs': 'application/javascript; charset=utf-8',
@@ -46,7 +55,12 @@ const TYPES = {
 function resolveFile(pathname) {
 	if (pathname.startsWith(CORE_PREFIX)) {
 		const name = pathname.slice(CORE_PREFIX.length);
-		return CORE_FILES.has(name) ? join(CORE_DIST, name) : null;
+		if (CORE_FILES.has(name)) return join(CORE_DIST, name);
+		if (CORE_DIRS.some((dir) => name.startsWith(dir))) {
+			const file = normalize(join(CORE_DIST, name));
+			return file.startsWith(CORE_DIST + '/') ? file : null;
+		}
+		return null;
 	}
 	const file = normalize(join(DEMOS_DIST, pathname));
 	return file.startsWith(DEMOS_DIST + '/') ? file : null;
