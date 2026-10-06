@@ -60,6 +60,16 @@ Notes and limits:
 - In the browser global build, the class is `window.AgentletCore.default`, and `window.agentlet` exists once `init()` has resolved.
 - Pass a `filename` to `tables.extractAndDownload()`, as above.
 
+## Limit a module to one site
+
+The examples above use `patterns: '*'`, so the module is active on every page. To run it only on one site, give the host and set `matchMode: 'host'` (agentlet-core 2.4.0 or later):
+
+```javascript
+super({ name: 'page-summary', patterns: 'example.com', matchMode: 'host' });
+```
+
+This matches `example.com` and its subdomains, such as `app.example.com`, and nothing else. Without `matchMode: 'host'`, a string pattern matches any URL that contains it, including `https://evil.test/?q=example.com`. See [matching URLs](/docs/reference/public-api/#matching-urls-with-matchmode) for ports, paths and the other forms.
+
 ## From npm, in your own page
 
 ```bash

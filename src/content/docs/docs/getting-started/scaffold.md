@@ -18,6 +18,10 @@ npm run scaffold:agentlet
 
 The minimal template provides a short starting point with basic structure and `agentlet.Dialog` API usage, while the full template includes comprehensive examples of all framework features.
 
+## URL patterns in the generated module
+
+The generated module declares `patterns: ['localhost', '127.0.0.1', 'file://']` with `matchMode: 'host'`, so it matches those hosts and file pages and not a page that only mentions them in its URL. `matchMode` is available since agentlet-core 2.4.0. An older core ignores it and matches by substring, which also matches these three patterns. Replace the patterns with the host of the site you target. See [matching URLs](/docs/reference/public-api/#matching-urls-with-matchmode).
+
 ## Run it on any page
 
 The scaffolded `src/index.js` resolves the registry (`agentlets-registry.js`) and the PDF.js worker against the URL the core bundle itself was loaded from, not against the host page. The bookmarklet served by `npm start` on `http://localhost:8080` therefore works on any origin, not only on the dev server page. The registry loads `module-bundle.js` and registers the module class its entry names, so `src/index.js` does not depend on the agentlet's name.

@@ -315,7 +315,7 @@ The raw class is exposed as `window.agentlet.ElementSelectorClass` for standalon
 
 ### ScreenCapture (`utils.ScreenCapture`)
 
-Built on html2canvas. `isScreenCaptureAvailable()`, `ensureHTML2Canvas()`, `capturePage(options?)`, `captureElement(element, options?)`, `captureBySelector(selector, options?)`, `captureViewport(options?)`, `captureRegion(region, options?)` all resolve to an `HTMLCanvasElement`. `captureAsDataURL(target?, options?)` and `captureAsBlob(target?, options?)` return a data URL or a `Blob`. `downloadCapture(target?, options?)` triggers a file download; `copyToClipboard(target?, options?)` copies the capture. `interactiveCapture(options?)` lets the user click-select an element to capture, using `ElementSelector` and `MessageBubble`. Utilities: `canvasToDataURL`, `canvasToBlob`, `isCapturingInProgress()`, `getImageDimensions(dataURL)`, `displayImageInConsole(dataURL, captureType?)`, `createPreview(dataURL, options?)`.
+Built on html2canvas, which since 2.4.0 is loaded the first time a capture needs it. `isScreenCaptureAvailable()` is then true when html2canvas is loaded or can be loaded., `ensureHTML2Canvas()`, `capturePage(options?)`, `captureElement(element, options?)`, `captureBySelector(selector, options?)`, `captureViewport(options?)`, `captureRegion(region, options?)` all resolve to an `HTMLCanvasElement`. `captureAsDataURL(target?, options?)` and `captureAsBlob(target?, options?)` return a data URL or a `Blob`. `downloadCapture(target?, options?)` triggers a file download; `copyToClipboard(target?, options?)` copies the capture. `interactiveCapture(options?)` lets the user click-select an element to capture, using `ElementSelector` and `MessageBubble`. Utilities: `canvasToDataURL`, `canvasToBlob`, `isCapturingInProgress()`, `getImageDimensions(dataURL)`, `displayImageInConsole(dataURL, captureType?)`, `createPreview(dataURL, options?)`.
 
 ### ScriptInjector (`utils.ScriptInjector`)
 
@@ -323,7 +323,7 @@ Built on html2canvas. `isScreenCaptureAvailable()`, `ensureHTML2Canvas()`, `capt
 
 ### PDFProcessor (`utils.PDFProcessor`)
 
-`isPDFJSAvailable()`, `ensurePDFJS()`, `loadPDFJS()`, `convertPDFToImages(pdfData, options?)` (array of base64 data URL images), `fileToArrayBuffer(file)`, `convertFileInputToImages(fileInput, options?)`, `convertPDFFromURL(pdfUrl, options?)`, `displayPDFImagesInConsole(images, pdfName?)`, `createPDFPreviews(images, options?)`, `getCapabilities()` (`PDFCapabilities`: `pdfJSAvailable`, `supportedFormats`, `outputFormats`, `maxRecommendedFileSize`, `maxRecommendedPages`, `features`).
+Since 2.4.0, pdf.js is loaded the first time a conversion needs it, and `isPDFJSAvailable()` is true when it is loaded or can be loaded. `isPDFJSAvailable()`, `ensurePDFJS()`, `loadPDFJS()`, `convertPDFToImages(pdfData, options?)` (array of base64 data URL images), `fileToArrayBuffer(file)`, `convertFileInputToImages(fileInput, options?)`, `convertPDFFromURL(pdfUrl, options?)`, `displayPDFImagesInConsole(images, pdfName?)`, `createPDFPreviews(images, options?)`, `getCapabilities()` (`PDFCapabilities`: `pdfJSAvailable`, `supportedFormats`, `outputFormats`, `maxRecommendedFileSize`, `maxRecommendedPages`, `features`).
 
 `PDFConversionOptions`: `scale` (default `1.5`), `format`, `quality`, `maxPages`.
 
@@ -360,7 +360,7 @@ All three are runtime `Proxy` objects that also allow arbitrary property access 
 ```typescript
 class MyAgentlet extends window.agentlet.Module {
     constructor() {
-        super({ name: 'my-agentlet', version: '1.0.0', patterns: ['example.com'] });
+        super({ name: 'my-agentlet', version: '1.0.0', patterns: ['example.com'], matchMode: 'host' });
     }
 
     async initModule() { /* one-time setup, called once by init() */ }
@@ -373,9 +373,38 @@ class MyAgentlet extends window.agentlet.Module {
 }
 ```
 
-`ModuleConfig`: `name`, `version?`, `description?`, `patterns: ModulePatternMatcher | ModulePatternMatcher[]`, `eventBus?`. A `ModulePatternMatcher` is a plain string, matched as a substring, or `{ type: 'includes' | 'exact' | 'regex', value: string }`. As a string, `'*'` alone matches any non-empty URL, and a string containing `*` elsewhere is a simple, unanchored glob where `*` matches any run of characters, for example `'localhost:*/admin'`.
+`ModuleConfig`: `name`, `version?`, `description?`, `patterns: ModulePatternMatcher | ModulePatternMatcher[]`, `matchMode?: ModuleMatchMode` (since 2.4.0), `eventBus?`. A `ModulePatternMatcher` is a plain string or `{ type: 'includes' | 'exact' | 'regex', value: string }`. As a string, `'*'` alone matches any non-empty URL. Any other plain string is matched according to `matchMode`, described below. Object patterns are not affected by `matchMode`.
 
-Instance state: `name`, `version`, `description`, `patterns`, `isActive`, `eventBus?`, `mounted` (true between a successful `mount()` and the matching `unmount()`), `mountedContainer`, `performanceMetrics`, `isInitialized?`.
+### Matching URLs with `matchMode`
+
+`matchMode` is available since agentlet-core 2.4.0. It controls how plain string patterns are matched:
+
+- `'substring'` (the default in 2.x): the pattern matches any URL that contains it. A string containing `*` elsewhere is a simple, unanchored glob where `*` matches any run of characters, for example `'localhost:*/admin'`. With this mode, `'example.com'` also matches `https://evil.test/?q=example.com` and `https://example.com.evil.test/`.
+- `'host'` (recommended): the pattern is compared with the host of the page URL. `'example.com'` matches `example.com` and any subdomain such as `app.example.com`. It does not match `example.com.evil.test`, `notexample.com` or a URL that only mentions the name in its query string.
+
+Host patterns have the form `[scheme://]host[:port][/path-prefix]`:
+
+| Pattern | Matches | Does not match |
+|---|---|---|
+| `'example.com'` | `https://example.com/`, `https://app.example.com/x` | `https://example.com.evil.test/`, `https://notexample.com/` |
+| `'localhost:3000'` | `http://localhost:3000/` | `http://localhost:3001/` |
+| `'example.com/app'` | `https://example.com/app/users` | `https://example.com/apple` |
+| `'https://example.com'` | `https://example.com/` | `http://example.com/` |
+| `'file://'` | any `file:` URL | any other scheme |
+
+Matching is case-insensitive, and internationalized domain names match in their Unicode or punycode form. The port is ignored unless the pattern names one. A path prefix matches whole segments. Other uses of `*` are not supported in host mode: only `'*'` alone is a wildcard. To match a fragment of the URL in a host-mode module, add an object pattern such as `{ type: 'includes', value: '/internal/' }`.
+
+```javascript
+super({
+    name: 'my-agentlet',
+    patterns: ['example.com', 'localhost:3000', { type: 'includes', value: '/internal/' }],
+    matchMode: 'host'
+});
+```
+
+Host matching becomes the default in agentlet-core 3.0. Set `matchMode: 'host'` now, or `matchMode: 'substring'` to keep the current behaviour after 3.0. A `matchMode` value other than `'substring'` or `'host'` is ignored and the module uses substring matching. With `debugMode` on, a host-looking string pattern used in substring mode logs a one-time warning that points to this option.
+
+Instance state: `name`, `version`, `description`, `patterns`, `matchMode`, `isActive`, `eventBus?`, `mounted` (true between a successful `mount()` and the matching `unmount()`), `mountedContainer`, `performanceMetrics`, `isInitialized?`.
 
 Outer lifecycle entry points, called by the framework: `init()`, `activate(context?)`, `cleanup(context?)`. Override the matching inner hooks instead: `initModule()`, `activateModule(context?)`, `cleanupModule(context?)`. See [Mount API](/docs/guides/mount-api/) for `mount(container, context)` and `unmount(container)`, including the `ModuleMountContext` and `ModuleMountTrigger` shapes.
 
@@ -403,7 +432,11 @@ Passed to `new AgentletCore(config)`. Each option is optional; additional keys a
 - **`env`**: `Record<string, string>`. Loaded at startup, merged over any existing values.
 - **`theme`**: `string | Partial<AgentletTheme>`
 - **`skipRegistryModuleRegistration`**: `boolean`
-- **`pdfWorkerUrl`**: `string`. URL of the `pdf.worker.min.mjs` file matching the bundled `pdfjs-dist` version. Always applied when set, in every build (not gated on whether `window.pdfjsLib` looks already configured). Without it, the worker resolves relative to the registry URL when `registryUrl` is set (including a relative one, resolved against the page), or otherwise to `'./pdf.worker.min.mjs'` relative to the page. There is no automatic third-party (CDN) fallback: if no worker is reachable, PDF conversion fails with an error naming this option and `configurePDFWorker()`. The npm package ships the matching worker at `dist/pdf.worker.min.mjs`, next to `dist/agentlet-core.min.js`.
+- **`pdfWorkerUrl`**: `string`. URL of the `pdf.worker.min.mjs` file matching the bundled `pdfjs-dist` version. Always applied when set, in every build (not gated on whether `window.pdfjsLib` looks already configured). Since 2.4.0, without it the worker is looked up in the library folder: `libraryBaseUrl`, else the folder the core script was loaded from, else the folder of `registryUrl` (including a relative one, resolved against the page), else `'./pdf.worker.min.mjs'` relative to the page. Up to 2.3.0, without it the worker resolves relative to the registry URL when `registryUrl` is set, or otherwise to `'./pdf.worker.min.mjs'` relative to the page. There is no automatic third-party (CDN) fallback: if no worker is reachable, PDF conversion fails with an error naming this option and `configurePDFWorker()`. The npm package ships the matching worker at `dist/pdf.worker.min.mjs`, next to `dist/agentlet-core.min.js`.
+- **`libraryBaseUrl`**: `string`. Since 2.4.0. Folder URL (absolute, or relative to the page) that serves the files the core loads on demand: `agentlet-xlsx.min.js`, `agentlet-html2canvas.min.js`, `agentlet-pdfjs.min.js` (script builds only), `pdf.worker.min.mjs`, `cmaps/` and `standard_fonts/`. Defaults to the folder the core script was loaded from, so a host that serves the files of `dist/` together needs no setting. Set it when the core is evaluated without a script URL (a `fetch()` plus `eval()` loader), is bundled into the host's own script, or the files are served elsewhere. See [Install](/docs/getting-started/install/#where-the-files-are-loaded-from).
+- **`libraryUrls`**: `{ xlsx?: string; html2canvas?: string; pdfjs?: string }`. Since 2.4.0. URL of a single chunk file, overriding `libraryBaseUrl` for that library. Script builds only.
+- **`pdfCMapUrl`**, **`pdfStandardFontsUrl`**: `string`. Since 2.4.0. URL of the folder with the pdf.js character maps (default `cmaps/` in the library folder) and standard fonts (default `standard_fonts/`). Up to 2.3.0 the core fetched both from cdnjs.cloudflare.com.
+- **`preloadLibraries`**: `Array<'xlsx' | 'html2canvas' | 'pdfjs'>`. Since 2.4.0. Load these libraries while `init()` runs instead of on first use, so `window.XLSX`, `window.html2canvas` and `window.pdfjsLib` exist once `init()` resolves. Default: none, except in `agentlet-core.full.min.js`, which inlines all three and registers them.
 
 ## `window.agentlet.ui`
 
