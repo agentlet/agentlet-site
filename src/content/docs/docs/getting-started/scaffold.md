@@ -20,7 +20,7 @@ The minimal template provides a short starting point with basic structure and `a
 
 ## URL patterns in the generated module
 
-The generated module declares `patterns: ['localhost', '127.0.0.1', 'file://']` with `matchMode: 'host'`, so it matches those hosts and file pages and not a page that only mentions them in its URL. `matchMode` is available in the next release of agentlet-core. An older core ignores it and matches by substring, which also matches these three patterns. Replace the patterns with the host of the site you target. See [matching URLs](/docs/reference/public-api/#matching-urls-with-matchmode).
+The generated module declares `patterns: ['localhost', '127.0.0.1', 'file://']` with `matchMode: 'host'`, so it matches those hosts and file pages and not a page that only mentions them in its URL. `matchMode` is available since agentlet-core 2.4.0. An older core ignores it and matches by substring, which also matches these three patterns. Replace the patterns with the host of the site you target. See [matching URLs](/docs/reference/public-api/#matching-urls-with-matchmode).
 
 ## Run it on any page
 

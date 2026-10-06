@@ -373,11 +373,11 @@ class MyAgentlet extends window.agentlet.Module {
 }
 ```
 
-`ModuleConfig`: `name`, `version?`, `description?`, `patterns: ModulePatternMatcher | ModulePatternMatcher[]`, `matchMode?: ModuleMatchMode` (in the next release), `eventBus?`. A `ModulePatternMatcher` is a plain string or `{ type: 'includes' | 'exact' | 'regex', value: string }`. As a string, `'*'` alone matches any non-empty URL. Any other plain string is matched according to `matchMode`, described below. Object patterns are not affected by `matchMode`.
+`ModuleConfig`: `name`, `version?`, `description?`, `patterns: ModulePatternMatcher | ModulePatternMatcher[]`, `matchMode?: ModuleMatchMode` (since 2.4.0), `eventBus?`. A `ModulePatternMatcher` is a plain string or `{ type: 'includes' | 'exact' | 'regex', value: string }`. As a string, `'*'` alone matches any non-empty URL. Any other plain string is matched according to `matchMode`, described below. Object patterns are not affected by `matchMode`.
 
 ### Matching URLs with `matchMode`
 
-`matchMode` is available in the next release of agentlet-core. It controls how plain string patterns are matched:
+`matchMode` is available since agentlet-core 2.4.0. It controls how plain string patterns are matched:
 
 - `'substring'` (the default in 2.x): the pattern matches any URL that contains it. A string containing `*` elsewhere is a simple, unanchored glob where `*` matches any run of characters, for example `'localhost:*/admin'`. With this mode, `'example.com'` also matches `https://evil.test/?q=example.com` and `https://example.com.evil.test/`.
 - `'host'` (recommended): the pattern is compared with the host of the page URL. `'example.com'` matches `example.com` and any subdomain such as `app.example.com`. It does not match `example.com.evil.test`, `notexample.com` or a URL that only mentions the name in its query string.

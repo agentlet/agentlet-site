@@ -62,7 +62,7 @@ Notes and limits:
 
 ## Limit a module to one site
 
-The examples above use `patterns: '*'`, so the module is active on every page. To run it only on one site, give the host and set `matchMode: 'host'` (in the next release of agentlet-core):
+The examples above use `patterns: '*'`, so the module is active on every page. To run it only on one site, give the host and set `matchMode: 'host'` (agentlet-core 2.4.0 or later):
 
 ```javascript
 super({ name: 'page-summary', patterns: 'example.com', matchMode: 'host' });
