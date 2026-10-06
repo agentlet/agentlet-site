@@ -13,8 +13,8 @@
  *   public/cdn/v1/agentlet-{xlsx,html2canvas,pdfjs}.min.js, cmaps/, standard_fonts/
  *                                        copied from node_modules/agentlet-core
  *                                          when the installed core loads its
- *                                          libraries on demand (the release after
- *                                          2.3.0), see copyCoreAssets() below
+ *                                          libraries on demand (2.4.0 or later), see
+ *                                          copyCoreAssets() below
  *   public/cdn/v1/agentlets/<id>.js      one esbuild IIFE bundle per manifest entry
  *   public/cdn/v1/agentlets-registry.js  generated registry, agentlet-core's
  *                                          script-injection format

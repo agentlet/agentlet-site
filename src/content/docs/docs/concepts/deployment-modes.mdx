@@ -35,7 +35,7 @@ Agentlet offers three deployment approaches: bookmarklets for instant deployment
     directly by the host website, for example via a `<script>` tag in the
     page template.
 
-    - No user installation: the host application serves the bundle itself. In the next release, it serves the files of `dist/` together: the core loads SheetJS, html2canvas and pdf.js on demand from the folder of its own script, see [Install](/docs/getting-started/install/#where-the-files-are-loaded-from).
+    - No user installation: the host application serves the bundle itself. Since agentlet-core 2.4.0, it serves the files of `dist/` together: the core loads SheetJS, html2canvas and pdf.js on demand from the folder of its own script, see [Install](/docs/getting-started/install/#where-the-files-are-loaded-from).
     - Useful where backend deployments are slow but frontend asset updates
       are simple.
     - Best for: graduating a proven bookmarklet-based feature into a

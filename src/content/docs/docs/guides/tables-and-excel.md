@@ -114,7 +114,7 @@ const result = await window.agentlet.tables.extractAndDownload(tableElement, {
 
 ## Checking availability
 
-Excel export depends on the SheetJS library. In the next release SheetJS is not part of the core bundle: it is loaded the first time an export needs it (see [Install](/docs/getting-started/install/#size)). `isExcelExportAvailable()` is true when it is loaded or can be loaded:
+Excel export depends on the SheetJS library. Since agentlet-core 2.4.0, SheetJS is not part of the core bundle: it is loaded the first time an export needs it (see [Install](/docs/getting-started/install/#size)). `isExcelExportAvailable()` is true when it is loaded or can be loaded:
 
 ```javascript
 if (window.agentlet.tables.extractor.isExcelExportAvailable()) {

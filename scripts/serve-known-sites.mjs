@@ -41,7 +41,7 @@ const CORE_PREFIX = '/cdn/v1/';
 const CORE_FILES = new Set([
 	'agentlet-core.min.js',
 	'pdf.worker.min.mjs',
-	// Loaded on demand by agentlet-core releases after 2.3.0, next to the core script.
+	// Loaded on demand by agentlet-core 2.4.0 and later, next to the core script.
 	'agentlet-xlsx.min.js',
 	'agentlet-html2canvas.min.js',
 	'agentlet-pdfjs.min.js',
