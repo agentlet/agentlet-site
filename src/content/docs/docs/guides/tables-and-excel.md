@@ -114,12 +114,26 @@ const result = await window.agentlet.tables.extractAndDownload(tableElement, {
 
 ## Checking availability
 
-Excel export depends on the SheetJS library being loadable at runtime:
+Excel export depends on the SheetJS library. Since agentlet-core 2.4.0, SheetJS is not part of the core bundle: it is loaded the first time an export needs it (see [Install](/docs/getting-started/install/#size)). `isExcelExportAvailable()` is true when it is loaded or can be loaded:
 
 ```javascript
 if (window.agentlet.tables.extractor.isExcelExportAvailable()) {
     // Safe to call download() / extractAndDownload()
 }
+```
+
+`download()` and `extractAndDownload()` load SheetJS themselves. If the file cannot be loaded they resolve with `{ success: false, error }`, where `error` names the URL and the option to change (`libraryBaseUrl`).
+
+## Load SheetJS ahead of time
+
+To load SheetJS before the first export, for example so that `window.XLSX` exists or to call the synchronous `createExcelWorkbook()` on the extractor, either await `ensureXLSX()` or list `xlsx` in `preloadLibraries`:
+
+```javascript
+await window.agentlet.tables.extractor.ensureXLSX(); // resolves false when it cannot be loaded
+
+// or, at startup
+const core = new window.AgentletCore.default({ preloadLibraries: ['xlsx'] });
+await core.init(); // window.XLSX is defined once this resolves
 ```
 
 ## Direct access to the extractor
