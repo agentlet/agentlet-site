@@ -360,7 +360,7 @@ All three are runtime `Proxy` objects that also allow arbitrary property access 
 ```typescript
 class MyAgentlet extends window.agentlet.Module {
     constructor() {
-        super({ name: 'my-agentlet', version: '1.0.0', patterns: ['example.com'] });
+        super({ name: 'my-agentlet', version: '1.0.0', patterns: ['example.com'], matchMode: 'host' });
     }
 
     async initModule() { /* one-time setup, called once by init() */ }
@@ -373,9 +373,38 @@ class MyAgentlet extends window.agentlet.Module {
 }
 ```
 
-`ModuleConfig`: `name`, `version?`, `description?`, `patterns: ModulePatternMatcher | ModulePatternMatcher[]`, `eventBus?`. A `ModulePatternMatcher` is a plain string, matched as a substring, or `{ type: 'includes' | 'exact' | 'regex', value: string }`. As a string, `'*'` alone matches any non-empty URL, and a string containing `*` elsewhere is a simple, unanchored glob where `*` matches any run of characters, for example `'localhost:*/admin'`.
+`ModuleConfig`: `name`, `version?`, `description?`, `patterns: ModulePatternMatcher | ModulePatternMatcher[]`, `matchMode?: ModuleMatchMode` (since 2.4.0), `eventBus?`. A `ModulePatternMatcher` is a plain string or `{ type: 'includes' | 'exact' | 'regex', value: string }`. As a string, `'*'` alone matches any non-empty URL. Any other plain string is matched according to `matchMode`, described below. Object patterns are not affected by `matchMode`.
 
-Instance state: `name`, `version`, `description`, `patterns`, `isActive`, `eventBus?`, `mounted` (true between a successful `mount()` and the matching `unmount()`), `mountedContainer`, `performanceMetrics`, `isInitialized?`.
+### Matching URLs with `matchMode`
+
+`matchMode` is available since agentlet-core 2.4.0. It controls how plain string patterns are matched:
+
+- `'substring'` (the default in 2.x): the pattern matches any URL that contains it. A string containing `*` elsewhere is a simple, unanchored glob where `*` matches any run of characters, for example `'localhost:*/admin'`. With this mode, `'example.com'` also matches `https://evil.test/?q=example.com` and `https://example.com.evil.test/`.
+- `'host'` (recommended): the pattern is compared with the host of the page URL. `'example.com'` matches `example.com` and any subdomain such as `app.example.com`. It does not match `example.com.evil.test`, `notexample.com` or a URL that only mentions the name in its query string.
+
+Host patterns have the form `[scheme://]host[:port][/path-prefix]`:
+
+| Pattern | Matches | Does not match |
+|---|---|---|
+| `'example.com'` | `https://example.com/`, `https://app.example.com/x` | `https://example.com.evil.test/`, `https://notexample.com/` |
+| `'localhost:3000'` | `http://localhost:3000/` | `http://localhost:3001/` |
+| `'example.com/app'` | `https://example.com/app/users` | `https://example.com/apple` |
+| `'https://example.com'` | `https://example.com/` | `http://example.com/` |
+| `'file://'` | any `file:` URL | any other scheme |
+
+Matching is case-insensitive, and internationalized domain names match in their Unicode or punycode form. The port is ignored unless the pattern names one. A path prefix matches whole segments. Other uses of `*` are not supported in host mode: only `'*'` alone is a wildcard. To match a fragment of the URL in a host-mode module, add an object pattern such as `{ type: 'includes', value: '/internal/' }`.
+
+```javascript
+super({
+    name: 'my-agentlet',
+    patterns: ['example.com', 'localhost:3000', { type: 'includes', value: '/internal/' }],
+    matchMode: 'host'
+});
+```
+
+Host matching becomes the default in agentlet-core 3.0. Set `matchMode: 'host'` now, or `matchMode: 'substring'` to keep the current behaviour after 3.0. A `matchMode` value other than `'substring'` or `'host'` is ignored and the module uses substring matching. With `debugMode` on, a host-looking string pattern used in substring mode logs a one-time warning that points to this option.
+
+Instance state: `name`, `version`, `description`, `patterns`, `matchMode`, `isActive`, `eventBus?`, `mounted` (true between a successful `mount()` and the matching `unmount()`), `mountedContainer`, `performanceMetrics`, `isInitialized?`.
 
 Outer lifecycle entry points, called by the framework: `init()`, `activate(context?)`, `cleanup(context?)`. Override the matching inner hooks instead: `initModule()`, `activateModule(context?)`, `cleanupModule(context?)`. See [Mount API](/docs/guides/mount-api/) for `mount(container, context)` and `unmount(container)`, including the `ModuleMountContext` and `ModuleMountTrigger` shapes.
 

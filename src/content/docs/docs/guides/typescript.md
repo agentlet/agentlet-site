@@ -42,7 +42,7 @@ class MyAgentlet extends window.agentlet.Module {
     }
 }
 
-window.agentlet.modules.register(new MyAgentlet({ name: 'my-agentlet', patterns: ['example.com'] }));
+window.agentlet.modules.register(new MyAgentlet({ name: 'my-agentlet', patterns: ['example.com'], matchMode: 'host' }));
 ```
 
 Editors such as VS Code pick this up automatically and show autocompletion and type errors on `window.agentlet.*`, with no build step required.
