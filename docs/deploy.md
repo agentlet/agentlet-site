@@ -289,21 +289,30 @@ is unchanged and does not build or publish it.
 One-time setup, done by a human with access to the npm account and the GitHub
 repository:
 
-1. On npmjs.com, create an automation token that can publish
-   `@agentlet/demos` (a granular token limited to that package is best).
-2. In the GitHub repository settings, add it as the Actions secret
-   `NPM_TOKEN`.
+1. On npmjs.com, open the `@agentlet/demos` package, Settings, Trusted
+   Publisher, GitHub Actions, and enter: organization `agentlet`, repository
+   `agentlet-site`, workflow filename `publish-demos.yml`, no environment.
+   Leave "Allow npm publish" and "Allow npm dist-tag" unchecked, so the
+   workflow can only stage a version. No token or GitHub secret is needed.
+2. npm marks the trusted publisher as pending until its first use, within a
+   deadline shown on npmjs.com: publish a release before it.
 
 To release:
 
 1. Change `version` in `packages/agentlet-demos/package.json` and merge it.
 2. Push a tag named `demos-v<version>` (for example `demos-v1.0.1`) on that
    commit.
+3. Approve the staged version with 2FA: on npmjs.com (package
+   `@agentlet/demos`, Staged Packages tab), or with `npm login` then
+   `npm stage approve <stage-id>`. The stage id is in the workflow's job
+   summary. Only then is the version public.
 
 The `publish-demos` workflow (`.github/workflows/publish-demos.yml`) builds the
 package, fails if the tag does not match the version in `package.json`, and
-publishes with npm provenance, which links each release to the commit and
-workflow run that built it. The bookmarklet uses the `@1` range, so a 1.x
+stages it on npm through trusted publishing (OIDC), with npm provenance, which
+links each release to the commit and workflow run that built it. The workflow
+holds no npm token, and nothing becomes public without a maintainer's 2FA
+approval. The bookmarklet uses the `@1` range, so a 1.x
 release reaches existing bookmarks. A breaking change needs a new major
 version, a new bookmarklet URL, and a new bookmarklet on the site.
 

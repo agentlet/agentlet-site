@@ -62,8 +62,9 @@ npm run build:known-sites   # writes packages/agentlet-demos/dist/
 ```
 
 Pushing a tag named `demos-v<version>` runs the `publish-demos` workflow, which
-checks that the tag matches the `version` in this `package.json` and publishes
-with npm provenance. See the
+checks that the tag matches the `version` in this `package.json` and stages it
+on npm through trusted publishing, with npm provenance. A maintainer approves
+each staged version with 2FA before it becomes public. See the
 [documentation](https://agentlet.io/docs/guides/known-sites/) for how it works and
 how to add a site.
 

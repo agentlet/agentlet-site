@@ -93,6 +93,6 @@ The Playwright tests do not touch any real site. They serve committed fixtures a
 
 ## Publishing
 
-Push a tag named `demos-v<version>`, for example `demos-v1.2.0`. The `publish-demos` workflow builds the package, checks that the tag matches the version in `packages/agentlet-demos/package.json`, and runs `npm publish` with the `NPM_TOKEN` secret and npm provenance, which links each release to the commit and workflow run that built it. Bump the version by hand in that file before tagging. Publishing is never automatic on a merge.
+Push a tag named `demos-v<version>`, for example `demos-v1.2.0`. The `publish-demos` workflow builds the package, checks that the tag matches the version in `packages/agentlet-demos/package.json`, and stages it on npm through trusted publishing (OIDC), with no stored token and with npm provenance, which links each release to the commit and workflow run that built it. A maintainer then approves the staged version with 2FA before it becomes public. Bump the version by hand in that file before tagging. Publishing is never automatic on a merge.
 
 How fast a release reaches people: jsDelivr refreshes the `@1` range within 12 hours, or right away when you call its purge API (see [deploy.md](https://github.com/agentlet/agentlet-site/blob/main/docs/deploy.md) for the release steps). Browsers then pick up the new version on the first click of the next day, thanks to the daily parameter.
