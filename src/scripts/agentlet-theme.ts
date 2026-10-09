@@ -51,7 +51,10 @@ export const LIGHT_THEME: Partial<AgentletTheme> = {
 
 export const DARK_THEME: Partial<AgentletTheme> = {
 	primaryColor: '#f4a261',
-	secondaryColor: '#e6edf2',
+	// agentlet-core paints the panel's collapse handle with secondaryColor
+	// and a white arrow, so it has to be a dark colour here: the content
+	// surface, like the light theme uses the dark navy.
+	secondaryColor: '#16293a',
 	backgroundColor: '#0b1a26',
 	contentBackground: '#16293a',
 	textColor: '#e6edf2',

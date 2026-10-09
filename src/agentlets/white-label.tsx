@@ -82,7 +82,7 @@ const COMPANIES: CompanyDefinition[] = [
 			},
 			dark: {
 				primaryColor: '#d97706',
-				secondaryColor: '#e5e7eb',
+				secondaryColor: '#1f2937',
 				backgroundColor: '#111827',
 				contentBackground: '#1f2937',
 				textColor: '#e5e7eb',
@@ -120,7 +120,7 @@ const COMPANIES: CompanyDefinition[] = [
 			},
 			dark: {
 				primaryColor: '#2dd4bf',
-				secondaryColor: '#ccfbf1',
+				secondaryColor: '#0b3b38',
 				backgroundColor: '#042f2e',
 				contentBackground: '#0b3b38',
 				textColor: '#ccfbf1',
@@ -158,7 +158,7 @@ const COMPANIES: CompanyDefinition[] = [
 			},
 			dark: {
 				primaryColor: '#ca8a04',
-				secondaryColor: '#e2e8f0',
+				secondaryColor: '#1e293b',
 				backgroundColor: '#0f172a',
 				contentBackground: '#1e293b',
 				textColor: '#e2e8f0',
@@ -204,7 +204,7 @@ const AGENTLET_BRAND_THEME: Record<SiteMode, Partial<AgentletTheme>> = {
 	},
 	dark: {
 		primaryColor: '#f4a261',
-		secondaryColor: '#e6edf2',
+		secondaryColor: '#16293a',
 		backgroundColor: '#0b1a26',
 		contentBackground: '#16293a',
 		textColor: '#e6edf2',
