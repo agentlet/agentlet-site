@@ -57,6 +57,21 @@ It is a separate server on purpose. The Astro dev server refuses cross-origin su
 
 After editing an agentlet, run `npm run build:known-sites`, reload the host page, and click the bookmarklet again. A recent Chrome can ask whether the site may connect to devices on the local network the first time a public page loads from localhost. Allow it for this test.
 
+## Date timeline
+
+`wikipedia-timeline.ts` finds the dates in an article's text, wraps each in a `<mark>`, and lists them in time order in the panel. Clicking an entry scrolls to the passage and highlights it with `PageHighlighter`. The marks are the only change to the page, and they are removed when the agentlet is closed. It reads the article body only: not tables, the infobox, references, navigation boxes or headings, and nothing after the first end-matter heading (references, notes, external links). It recognises full dates, a month and year, and bare years from 1000 to 2099 that come after a hint word such as "in" or an opening parenthesis, in English, French, German, Spanish and Italian. It marks at most 600 dates.
+
+The panel button "Open timeline view" shows the same dates in agentlet-core's fullscreen dialog (`window.agentlet.utils.Dialog`). The code is in `timeline-view.ts`. Everything in it is derived from the dates the demo already found: there is no AI and no rule for a particular article, and nothing is sent anywhere.
+
+- **Axis.** The scale fits the span of the dates found, with a minimum of one week. Ticks are picked from one list of calendar steps (1, 2, 7 and 14 days; 1, 2, 3 and 6 months; 1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500 and 1000 years): the finest step that leaves about 64 pixels per year label, 92 per month label and 112 per day label. A history article gets centuries or decades, an event article gets years, months or days. A single date gets a week of day ticks, and dates in one year get month ticks. Month names follow the page language.
+- **Density strip.** Bars count mentions per bucket. Buckets come from the same list of steps, the finest one that leaves at least 14 pixels per bucket, and the axis starts and ends on bucket edges. A mention counts in the bucket that holds the middle of its period. Clicking a bar filters the list below to that bucket, clicking it again or "Show all" clears the filter.
+- **Points.** Mentions of the same date collapse into one point with a count. A point is filled for a full date. A month and year or a bare year is hollow, with a line that spans its month or year when the scale is fine enough to show it. Points that would overlap are stacked in up to ten rows.
+- **Sections.** A mention belongs to the nearest preceding level-2 heading of the article (a date before the first one belongs to the lead). The nine sections with the most mentions get a colour, in page order; the rest share one grey. Colours are chosen for both colour schemes.
+- **Tooltip and navigation.** Hovering or focusing a point shows the sentence around the date. Clicking it, or pressing Enter, closes the dialog and goes to the passage like a panel entry. The points and the bars are each a single tab stop, with the arrow keys, Home and End to move inside. The list below the axis is plain buttons and works without the chart.
+- **Export.** "Export to Excel" writes every mention with `window.agentlet.tables.download()`: date (ISO, or year-month, or year), precision, section and sentence, named after the article.
+
+agentlet-core's dialog cancels every Enter key press at the document, which stops a focused button from being activated by Enter. The view activates buttons on keydown before that happens.
+
 ## Spec to checklist
 
 One demo, `spec-checklist.ts`, covers three hosts under one manifest entry, "Standards and regulations (W3C, RFC Editor, EUR-Lex)". The readers are in `spec-extract.ts`:

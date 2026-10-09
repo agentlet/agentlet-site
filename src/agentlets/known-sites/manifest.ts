@@ -151,7 +151,7 @@ export const KNOWN_SITE_AGENTLETS: KnownSiteAgentlet[] = [
 		file: 'wikipedia-timeline',
 		className: 'WikipediaTimelineModule',
 		title: 'Date timeline',
-		description: 'Finds the dates in the article text and builds a chronological timeline that scrolls to each passage.',
+		description: 'Finds the dates in the article text and builds a chronological timeline, as a list and as a visual view, that scrolls to each passage.',
 		pattern: WIKIPEDIA_PATTERN,
 	},
 	{
