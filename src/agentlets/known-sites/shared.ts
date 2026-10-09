@@ -24,10 +24,13 @@ export const KNOWN_SITES_PAGE_URL = 'https://agentlet.io/try/known-sites/';
  * tokens on the panel body itself, for both colour schemes, makes every rule
  * that reads them follow `prefers-color-scheme`, the same signal the loader
  * uses to pick the core's own theme (src/scripts/known-sites-loader.ts).
+ * A dialog is mounted next to the panel, not inside it, so a dialog that
+ * wants the same tokens gives its root the `ks-dialog` class.
  * Values mirror LIGHT_THEME and DARK_THEME in src/scripts/agentlet-theme.ts.
  */
 const TOKEN_STYLES = `
-.agentlet-panel-body {
+.agentlet-panel-body,
+.ks-dialog {
 	--color-text: #3d4f5e;
 	--color-heading: #0f3350;
 	--color-text-muted: #5b6b78;
@@ -42,7 +45,8 @@ const TOKEN_STYLES = `
 }
 
 @media (prefers-color-scheme: dark) {
-	.agentlet-panel-body {
+	.agentlet-panel-body,
+	.ks-dialog {
 		--color-text: #e6edf2;
 		--color-heading: #ffffff;
 		--color-text-muted: #a9b9c6;

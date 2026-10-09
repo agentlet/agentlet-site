@@ -144,6 +144,29 @@ export async function serveWikipedia(page: Page): Promise<KnownSitesRun> {
 }
 
 /**
+ * A synthetic Wikipedia article around `body`, served with Wikipedia's real
+ * policy, for tests that need a particular set of dates, headings or language
+ * (the fixture above is one real article). Level-2 headings use the current
+ * Parsoid markup, `<div class="mw-heading mw-heading2"><h2 id="...">`.
+ */
+export async function serveWikipediaArticle(
+	page: Page,
+	body: string,
+	options: { lang?: string; title?: string; url?: string } = {},
+): Promise<KnownSitesRun> {
+	const { lang = 'en', title = 'Test article', url = WIKIPEDIA_URL } = options;
+	const html = `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><title>${title}</title></head><body>
+<h1 id="firstHeading" class="firstHeading"><span class="mw-page-title-main">${title}</span></h1>
+<div id="mw-content-text"><div class="mw-parser-output">${body}</div></div></body></html>`;
+	return serveKnownSitesPage(page, { html, csp: WIKIPEDIA_CSP, url });
+}
+
+/** A level-2 heading in the current Wikipedia markup. */
+export function heading2(name: string): string {
+	return `<div class="mw-heading mw-heading2"><h2 id="${name.replace(/\s+/g, '_')}">${name}</h2></div>`;
+}
+
+/**
  * Wikidata's API, answered from three recorded responses (2026-10-04) for the
  * Danone item: the SIREN claim of Q329426, the country claims of Q90 (Paris)
  * and the English label of Q142 (France). Anything else is not answered.
