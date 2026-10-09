@@ -673,6 +673,117 @@ ${heading2('References')}<p>Not read, in 1850.</p>`,
 	});
 });
 
+/** One sentence per year, each with a bare year the date finder accepts ("noted in 1950"). */
+function yearSentences(years: number[]): string {
+	return `<p>${years.map((year) => `Something was noted in ${year}.`).join(' ')}</p>`;
+}
+
+function range(from: number, to: number, step = 1): number[] {
+	const years: number[] = [];
+	for (let year = from; year <= to; year += step) years.push(year);
+	return years;
+}
+
+test.describe('Wikipedia: timeline view, main period', () => {
+	test('an isolated date at the start is left off the axis and the toggle brings it back', async ({ page }) => {
+		await serveWikipediaArticle(page, yearSentences([1202, ...range(1950, 1979)]));
+		await page.goto(WIKIPEDIA_URL);
+		await openTimelineView(page);
+		const note = page.locator('.tl-range');
+		await expect(note).toBeVisible();
+		await expect(note).toContainText('1 date outside the main period (1202).');
+
+		// The axis covers the main period only, and the 1202 point is not drawn.
+		let years = (await tickLabels(page)).map(Number);
+		expect(years[0]).toBeGreaterThanOrEqual(1945);
+		expect(years[years.length - 1]).toBeLessThanOrEqual(1985);
+		await expect(page.locator('.tl-point')).toHaveCount(30);
+		await expect(page.locator('.tl-point[aria-label^="1202"]')).toHaveCount(0);
+		// Everything else still counts it: the list, the summary, the legend.
+		await expect(page.locator('.tl-item')).toHaveCount(31);
+		await expect(page.locator('.tl-summary')).toContainText('31 mentions of 31 dates, from 1202 to 1979');
+		await expect(page.locator('.tl-legend')).toContainText('Introduction');
+		await expect(page.locator('.tl-legend .tl-legend-count')).toHaveText('31');
+		const bars = page.locator('.tl-bar');
+		const counted = await bars.evaluateAll((nodes) =>
+			nodes.reduce((sum, node) => sum + Number(/(\d+) mention/.exec(node.getAttribute('aria-label') ?? '')?.[1]), 0),
+		);
+		expect(counted).toBe(30);
+
+		// The toggle works from the keyboard and keeps the focus.
+		const toggle = page.getByRole('button', { name: 'Show full range' });
+		await toggle.focus();
+		await page.keyboard.press('Enter');
+		await expect(page.getByRole('button', { name: 'Show main period' })).toBeFocused();
+		await expect(note).toContainText('Showing the full range, including 1 date far from the rest (1202).');
+		years = (await tickLabels(page)).map(Number);
+		expect(years[0]).toBeLessThanOrEqual(1250);
+		await expect(page.locator('.tl-point')).toHaveCount(31);
+		await expect(page.locator('.tl-point[aria-label^="1202"]')).toHaveCount(1);
+
+		// And back.
+		await page.getByRole('button', { name: 'Show main period' }).click();
+		await expect(note).toContainText('1 date outside the main period (1202).');
+		await expect(page.locator('.tl-point')).toHaveCount(30);
+		years = (await tickLabels(page)).map(Number);
+		expect(years[0]).toBeGreaterThanOrEqual(1945);
+
+		// The export still has the date.
+		const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Export to Excel' }).click()]);
+		const rows = await sheetRows(download);
+		expect(rows).toHaveLength(32);
+		expect(rows[1][0]).toBe('1202');
+	});
+
+	test('an isolated date at the end is left off too', async ({ page }) => {
+		await serveWikipediaArticle(page, yearSentences([...range(1950, 1979), 2091]));
+		await page.goto(WIKIPEDIA_URL);
+		await openTimelineView(page);
+		await expect(page.locator('.tl-range')).toContainText('1 date outside the main period (2091).');
+		const years = (await tickLabels(page)).map(Number);
+		expect(years[years.length - 1]).toBeLessThanOrEqual(1985);
+		await expect(page.locator('.tl-point')).toHaveCount(30);
+		await page.getByRole('button', { name: 'Show full range' }).click();
+		const wide = (await tickLabels(page)).map(Number);
+		expect(wide[wide.length - 1]).toBeGreaterThanOrEqual(2050);
+		await expect(page.locator('.tl-point')).toHaveCount(31);
+	});
+
+	test('names several outside dates and keeps the filter list in step with the toggle', async ({ page }) => {
+		// 42 dates, so up to two may be left out: one at each end.
+		await serveWikipediaArticle(page, yearSentences([1105, ...range(1950, 1989), 2098]));
+		await page.goto(WIKIPEDIA_URL);
+		await openTimelineView(page);
+		await expect(page.locator('.tl-range')).toContainText('2 dates outside the main period (1105, 2098).');
+		await page.locator('.tl-bar').first().click();
+		const filtered = await page.locator('.tl-item').count();
+		expect(filtered).toBeLessThan(42);
+		await page.getByRole('button', { name: 'Show full range' }).click();
+		// The buckets changed, so the filter is gone and the whole list is back.
+		await expect(page.locator('.tl-item')).toHaveCount(42);
+	});
+
+	test('does not trim dates that are spread over the whole span, as in a history article', async ({ page }) => {
+		// A first date a few centuries before the rest, then dates every 20 years: the shape of History of Paris.
+		// (The first one is a full date: a bare year below 1000 is not read as a year.)
+		await serveWikipediaArticle(page, `<p>The abbey was consecrated on 24 February 775.</p>${yearSentences(range(1100, 2020, 20))}`);
+		await page.goto(WIKIPEDIA_URL);
+		await openTimelineView(page);
+		await expect(page.locator('.tl-range')).toBeHidden();
+		await expect(page.locator('.tl-point')).toHaveCount(48);
+		const years = (await tickLabels(page)).map(Number);
+		expect(years[0]).toBeLessThanOrEqual(800);
+	});
+
+	test('never trims an article with few dates', async ({ page }) => {
+		await serveWikipediaArticle(page, yearSentences([1202, ...range(1950, 1960)]));
+		await page.goto(WIKIPEDIA_URL);
+		await openTimelineView(page);
+		await expect(page.locator('.tl-range')).toBeHidden();
+		await expect(page.locator('.tl-point')).toHaveCount(12);
+	});
+});
+
 test.describe('arXiv: papers to spreadsheet', () => {
 	test('listing: previews the papers, exports the ticked ones, and opens without the launcher', async ({ page }) => {
 		const run = await serveArxiv(page, 'list');

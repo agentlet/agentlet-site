@@ -20,6 +20,12 @@ import { exportTable, slugify, toTableData } from './table-export';
  *   Colour is the article section of the first mention. A full date is a
  *   filled point; a month and year, or a bare year, is a hollow point with a
  *   line that spans its period when the scale is fine enough to show it.
+ * - Main period: one stray date (a count that reads as a year, a date in a
+ *   quote) would squeeze every real date into a corner of the axis. By
+ *   default the axis leaves out isolated dates at either end, see
+ *   `mainRange()`. They stay in the list, the counts, the legend and the
+ *   export, and a note under the chart names them and offers "Show full
+ *   range".
  * - Keyboard: the points and the bars are each one tab stop (roving
  *   tabindex, arrow keys, Home and End). The list below is plain buttons.
  *
@@ -195,6 +201,56 @@ function bucketOf(edges: number[], value: number): number {
 	return low;
 }
 
+/** At most this share of the mentions can be left out of the axis, over both ends together. */
+const MAX_TRIM_SHARE = 0.05;
+/** A cluster at one end is left out only if it has at most this many mentions. */
+const MAX_TRIM_GROUP = 3;
+/** The gap to the rest must be at least a year, so a few days of difference never counts. */
+const MIN_OUTLIER_GAP = 365.25;
+
+/** The value at a fraction of the way through sorted values `from` to `to`. */
+function quantile(sorted: number[], from: number, to: number, fraction: number): number {
+	return sorted[from + Math.round((to - from) * fraction)];
+}
+
+/**
+ * The part of the sorted midpoints that forms the main period, as first and
+ * last index. Isolated mentions at either end are left out: the earliest (or
+ * latest) one to three mentions, when the gap between them and the next date
+ * is larger than both a year and the spread of the dates that remain
+ * (their 5th to 95th percentile range). That compares a stray date with the
+ * article's own scale, so a decade of event dates with a mention of an old
+ * year is trimmed, and a history article whose first date stands a few
+ * centuries before the rest is not. Over both ends together, no more than 5%
+ * of the mentions can be left out, so an article with fewer than 20 dates is
+ * never trimmed.
+ */
+function mainRange(mids: number[]): { first: number; last: number } {
+	let first = 0;
+	let last = mids.length - 1;
+	let budget = Math.floor(mids.length * MAX_TRIM_SHARE);
+	let changed = true;
+	while (changed && budget > 0) {
+		changed = false;
+		for (const side of ['start', 'end'] as const) {
+			for (let count = 1; count <= Math.min(MAX_TRIM_GROUP, budget); count += 1) {
+				const from = side === 'start' ? first + count : first;
+				const to = side === 'start' ? last : last - count;
+				const gap = side === 'start' ? mids[from] - mids[from - 1] : mids[to + 1] - mids[to];
+				const spread = quantile(mids, from, to, 0.95) - quantile(mids, from, to, 0.05);
+				if (gap > Math.max(spread, MIN_OUTLIER_GAP)) {
+					first = from;
+					last = to;
+					budget -= count;
+					changed = true;
+					break;
+				}
+			}
+		}
+	}
+	return { first, last };
+}
+
 /** "Mentions per year", "per 5 years", "per month", "per 2 weeks". */
 function stepName(step: Step): string {
 	if (step.unit === 'day' && step.n === 7) return 'week';
@@ -312,6 +368,13 @@ class TimelineView<T extends ViewEntry> {
 	private readonly _list = html('ol', 'tl-list');
 	private _svg: SVGSVGElement | null = null;
 	private _focusedPoint = -1;
+	/** Midpoints of the main period. Mentions outside it are left off the axis unless the full range is shown. */
+	private readonly _mainMin: number;
+	private readonly _mainMax: number;
+	private _fullRange = false;
+	private readonly _rangeNote = html('p', 'tl-range');
+	private readonly _rangeText = html('span');
+	private readonly _rangeToggle = html('button', 'tl-link');
 
 	constructor(private readonly _options: TimelineViewOptions<T>) {
 		this._mentions = _options.entries
@@ -342,6 +405,11 @@ class TimelineView<T extends ViewEntry> {
 				element: null,
 			};
 		}).sort((a, b) => a.mid - b.mid || a.first.entry.index - b.first.entry.index);
+
+		const mids = this._mentions.map((mention) => mention.mid).sort((a, b) => a - b);
+		const main = mainRange(mids);
+		this._mainMin = mids[main.first];
+		this._mainMax = mids[main.last];
 
 		this._intl = (options) => {
 			try {
@@ -453,9 +521,18 @@ class TimelineView<T extends ViewEntry> {
 		const chartHead = html('div', 'tl-chart-head');
 		chartHead.append(this._caption, this._buildPrecisionLegend());
 		this._host.append(chartHead);
+		this._rangeToggle.type = 'button';
+		this._rangeToggle.dataset.action = 'toggle-range';
+		this._rangeToggle.addEventListener('click', () => {
+			this._fullRange = !this._fullRange;
+			this._updateRangeNote();
+			this._renderChart(this._width || 320);
+		});
+		this._rangeNote.append(this._rangeText, ' ', this._rangeToggle);
+		this._updateRangeNote();
 		this._tooltip.setAttribute('role', 'tooltip');
 		this._tooltip.hidden = true;
-		this._host.append(this._tooltip);
+		this._host.append(this._tooltip, this._rangeNote);
 
 		const listHead = html('div', 'tl-list-head');
 		const listTitle = html('h3', 'tl-list-title', 'Mentions');
@@ -541,8 +618,9 @@ class TimelineView<T extends ViewEntry> {
 
 		// Domain: the span of the periods found, at least a week, snapped to
 		// the bucket grid so that no bar is cut and no space is wasted.
-		let lo = Math.min(...this._mentions.map((m) => m.start));
-		let hi = Math.max(...this._mentions.map((m) => m.end));
+		const shown = this._mentions.filter((m) => this._onAxis(m.mid));
+		let lo = Math.min(...shown.map((m) => m.start));
+		let hi = Math.max(...shown.map((m) => m.end));
 		if (hi - lo < 7) {
 			const centre = (lo + hi) / 2;
 			lo = Math.floor(centre - 3.5);
@@ -560,7 +638,7 @@ class TimelineView<T extends ViewEntry> {
 
 		// Buckets and their counts.
 		this._buckets = edges.slice(0, -1).map((start, i) => ({ start, end: edges[i + 1], count: 0, element: null }));
-		for (const mention of this._mentions) this._buckets[bucketOf(edges, mention.mid)].count += 1;
+		for (const mention of shown) this._buckets[bucketOf(edges, mention.mid)].count += 1;
 		const maxCount = Math.max(1, ...this._buckets.map((bucket) => bucket.count));
 
 		// Ticks.
@@ -569,7 +647,9 @@ class TimelineView<T extends ViewEntry> {
 
 		// Lanes for the points: the lowest lane whose last point ends before this one starts.
 		const laneEnds: number[] = [];
-		const placed = this._points.map((point) => {
+		const onAxis = this._points.filter((point) => this._onAxis(point.mid));
+		for (const point of this._points) point.element = null;
+		const placed = onAxis.map((point) => {
 			const radius = point.mentions.length > 1 ? DOT_RADIUS_GROUP : DOT_RADIUS;
 			const centre = x(point.mid);
 			const periodWidth = x(point.end) - x(point.start);
@@ -657,13 +737,14 @@ class TimelineView<T extends ViewEntry> {
 		// Points, in time order so that the DOM order is the keyboard order.
 		const pointsGroup = svg('g', { role: 'group', 'aria-label': 'Dates in time order. Arrow keys move between points, Enter shows the passage.' }, 'tl-points');
 		const elements: SVGGElement[] = [];
-		const wanted = this._focusedPoint >= 0 ? this._focusedPoint : 0;
-		placed.forEach(({ point, lane, centre, radius, periodWidth }, i) => {
+		const remembered = this._points[this._focusedPoint];
+		const wanted = remembered && this._onAxis(remembered.mid) ? remembered : onAxis[0];
+		placed.forEach(({ point, lane, centre, radius, periodWidth }) => {
 			const entry = point.first.entry;
 			const cy = round(axisY - 10 - LANE_HEIGHT / 2 - lane * LANE_HEIGHT + 2);
 			const cx = round(centre);
-			const group = svg('g', { role: 'button', tabindex: i === wanted ? 0 : -1, 'data-roving': '' }, `tl-point tl-s${point.slot} tl-${entry.precision}`);
-			group.dataset.point = String(i);
+			const group = svg('g', { role: 'button', tabindex: point === wanted ? 0 : -1, 'data-roving': '' }, `tl-point tl-s${point.slot} tl-${entry.precision}`);
+			group.dataset.point = String(this._points.indexOf(point));
 			const count = point.mentions.length;
 			group.setAttribute(
 				'aria-label',
@@ -705,14 +786,34 @@ class TimelineView<T extends ViewEntry> {
 		chart.append(pointsGroup);
 
 		// Keep the active filter if its bucket still exists at this scale.
+		let filterCleared = false;
 		if (this._active && !this._buckets.some((bucket) => bucket.start === this._active?.start && bucket.end === this._active?.end)) {
 			this._active = null;
+			filterCleared = true;
 		}
 		this._svg?.remove();
 		this._svg = chart;
-		this._host.append(chart);
+		this._host.insertBefore(chart, this._rangeNote);
 		this._caption.textContent = `Mentions per ${stepName(bucketStep)}`;
-		this._applyFilter(false);
+		this._applyFilter(filterCleared);
+	}
+
+	/** Whether a midpoint is inside the domain being shown. */
+	private _onAxis(mid: number): boolean {
+		return this._fullRange || (mid >= this._mainMin && mid <= this._mainMax);
+	}
+
+	/** The note under the chart: which dates the main period leaves out, and the toggle for them. */
+	private _updateRangeNote(): void {
+		const outside = this._points.filter((point) => point.mid < this._mainMin || point.mid > this._mainMax);
+		this._rangeNote.hidden = outside.length === 0;
+		if (outside.length === 0) return;
+		const names = outside.slice(0, 4).map((point) => point.first.entry.label);
+		const list = outside.length > 4 ? `${names.join(', ')}, and ${outside.length - 4} more` : names.join(', ');
+		this._rangeText.textContent = this._fullRange
+			? `Showing the full range, including ${plural(outside.length, 'date', 'dates')} far from the rest (${list}).`
+			: `${plural(outside.length, 'date', 'dates')} outside the main period (${list}).`;
+		this._rangeToggle.textContent = this._fullRange ? 'Show main period' : 'Show full range';
 	}
 
 	/** Position of a point element among the points, in the order they were drawn. */
@@ -1064,6 +1165,38 @@ export const TIMELINE_VIEW_STYLES = `
 	margin: 0;
 	font-size: 0.8rem;
 	color: var(--color-text-muted);
+}
+
+.tl-range {
+	margin: 6px 0 0;
+	padding-left: 24px;
+	font-size: 0.85rem;
+	color: var(--color-text-muted);
+}
+
+.tl-range[hidden] {
+	display: none;
+}
+
+.tl-link {
+	appearance: none;
+	background: none;
+	border: none;
+	padding: 0;
+	font: inherit;
+	font-weight: 600;
+	color: var(--color-heading);
+	text-decoration: underline;
+	text-decoration-color: var(--color-accent);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 3px;
+	cursor: pointer;
+}
+
+.tl-link:focus-visible {
+	outline: 2px solid var(--color-accent);
+	outline-offset: 2px;
+	border-radius: 2px;
 }
 
 .tl-svg {
