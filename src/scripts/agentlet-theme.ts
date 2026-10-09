@@ -61,6 +61,10 @@ export const DARK_THEME: Partial<AgentletTheme> = {
 	borderColor: '#24394d',
 	headerBackground: '#f4a261',
 	headerTextColor: '#0f3350',
+	// A fullscreen dialog's footer would otherwise keep agentlet-core's light
+	// default, a pale bar under a dark dialog. The content surface matches
+	// the dialog's body.
+	footerBackground: '#16293a',
 	// See the comment on LIGHT_THEME's own headerBackground/headerTextColor
 	// above: the dialog-specific colours are inherited from these, no need
 	// to repeat them here either.

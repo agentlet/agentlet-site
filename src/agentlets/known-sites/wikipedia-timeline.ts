@@ -2,12 +2,23 @@ import type { PageHighlighterHighlightControl } from 'agentlet-core';
 import { backToLauncherHtml, sourceLinkHtml, wireBackToLauncher } from '../shared';
 import { WIKIPEDIA_PATTERN } from './manifest';
 import { KNOWN_SITES_SOURCE_DIR, KNOWN_SITE_STYLES, addPageStyle, escapeHtml, squash } from './shared';
+import { TIMELINE_VIEW_STYLES, closeTimelineView, openTimelineView } from './timeline-view';
 
 /**
  * "Date timeline" for Wikipedia articles: finds dates in the article text,
  * marks them on the page, and lists them in chronological order in the panel.
  * Clicking an entry scrolls to the passage and highlights it with
  * agentlet-core's PageHighlighter.
+ *
+ * "Open timeline view" shows the same dates in a fullscreen dialog
+ * (./timeline-view.ts): an axis that fits the span of the dates found, a
+ * density strip you can click to filter the list, points coloured by the
+ * article section they sit in (the nearest preceding level-2 heading), full
+ * dates drawn filled and month or year dates hollow, the sentence in a
+ * tooltip, and an Excel export of the same rows. Choosing a point closes the
+ * dialog and scrolls to the passage like a panel entry does. Everything is
+ * derived from the dates already found: no AI, no rule for a particular
+ * article.
  *
  * Read only and local. The only change to the page is a `<mark>` element
  * around each date it found, removed again when the agentlet is closed.
@@ -21,6 +32,9 @@ import { KNOWN_SITES_SOURCE_DIR, KNOWN_SITE_STYLES, addPageStyle, escapeHtml, sq
  *   unit or a percent sign. Some counts will still read as years.
  * - Only the article body is read: not tables, the infobox, references,
  *   navigation boxes or headings.
+ * - Sections: a date before the first level-2 heading belongs to the lead
+ *   ("Introduction" in the page language); articles without level-2 headings
+ *   have a single section.
  */
 const FILE = `${KNOWN_SITES_SOURCE_DIR}/wikipedia-timeline`;
 const MARK_CLASS = 'agentlet-date-mark';
@@ -197,6 +211,8 @@ interface TimelineEntry {
 	key: number;
 	before: string;
 	after: string;
+	/** Name of the article section the date sits in: the nearest preceding level-2 heading. */
+	section: string;
 }
 
 function contentRoot(): Element {
@@ -285,8 +301,69 @@ function markNode(node: Text, matches: RawMatch[], entries: TimelineEntry[]): vo
 			key: item.year * 10000 + item.month * 100 + item.day,
 			before: beforeText,
 			after: afterText,
+			section: '',
 		});
 	}
+}
+
+/** Containers whose headings are not the article's own sections (the contents box, boxes and tables). */
+const NOT_SECTION_SELECTOR = '.toc, #toc, .vector-toc, .navbox, .infobox, .sidebar, .metadata, table';
+
+/** What the lead section is called, by page language. */
+const LEAD_NAMES: Record<string, string> = {
+	en: 'Introduction',
+	fr: 'Introduction',
+	de: 'Einleitung',
+	es: 'Introducci\u00f3n',
+	it: 'Introduzione',
+};
+
+function leadName(): string {
+	const lang = (document.documentElement.lang || 'en').toLowerCase().split('-')[0];
+	return LEAD_NAMES[lang] ?? LEAD_NAMES.en;
+}
+
+interface Heading {
+	element: Element;
+	name: string;
+}
+
+/** The level-2 headings of the article, in page order, with the edit links left out of their names. */
+function sectionHeadings(root: Element): Heading[] {
+	const headings: Heading[] = [];
+	for (const element of Array.from(root.querySelectorAll('h2'))) {
+		if (element.closest(NOT_SECTION_SELECTOR)) continue;
+		const copy = element.cloneNode(true) as Element;
+		copy.querySelectorAll('.mw-editsection, .mw-editsection-bracket').forEach((node) => node.remove());
+		const name = squash(copy.textContent ?? '');
+		if (name) headings.push({ element, name });
+	}
+	return headings;
+}
+
+/** Sets the section of every entry from the nearest level-2 heading before its mark. `entries` must be in page order. */
+function assignSections(entries: TimelineEntry[], root: Element): void {
+	const headings = sectionHeadings(root);
+	const lead = leadName();
+	for (const entry of entries) {
+		// Last heading that comes before the mark: binary search, headings are in page order.
+		let low = 0;
+		let high = headings.length;
+		while (low < high) {
+			const mid = (low + high) >> 1;
+			if (headings[mid].element.compareDocumentPosition(entry.mark) & Node.DOCUMENT_POSITION_FOLLOWING) low = mid + 1;
+			else high = mid;
+		}
+		entry.section = low > 0 ? headings[low - 1].name : lead;
+	}
+}
+
+/** The article's title, for the title of the timeline view and the name of its Excel file. */
+function articleTitle(): string {
+	const heading = document.querySelector('#firstHeading');
+	const fromHeading = squash(heading?.textContent ?? '');
+	if (fromHeading) return fromHeading;
+	return squash(document.title.replace(/\s+[-\u2013\u2014|].*$/, '')) || 'Article';
 }
 
 const PAGE_STYLES = `
@@ -364,11 +441,12 @@ class WikipediaTimelineModule extends window.agentlet.Module {
 	private _fullDatesOnly = false;
 	private _highlight: PageHighlighterHighlightControl | null = null;
 	private _removePageStyle: (() => void) | null = null;
+	private _container: HTMLElement | null = null;
 
 	constructor() {
 		super({
 			name: 'wikipedia-timeline',
-			description: 'Finds the dates in the article text and builds a chronological timeline that scrolls to each passage.',
+			description: 'Finds the dates in the article text and builds a chronological timeline, as a list and as a visual view, that scrolls to each passage.',
 			patterns: [{ type: 'regex', value: WIKIPEDIA_PATTERN }],
 		});
 	}
@@ -378,7 +456,7 @@ class WikipediaTimelineModule extends window.agentlet.Module {
 	}
 
 	async mount(container: HTMLElement): Promise<void> {
-		this.injectStyles(KNOWN_SITE_STYLES + STYLES);
+		this.injectStyles(KNOWN_SITE_STYLES + STYLES + TIMELINE_VIEW_STYLES);
 		// The page is scanned once per activation: mount() also runs on
 		// every URL change (a citation link changes the hash), and marking the
 		// text a second time would double-wrap it.
@@ -387,6 +465,7 @@ class WikipediaTimelineModule extends window.agentlet.Module {
 	}
 
 	async cleanupModule(): Promise<void> {
+		closeTimelineView();
 		this._clearHighlight();
 		this._unmarkAll();
 		this._removePageStyle?.();
@@ -414,12 +493,13 @@ class WikipediaTimelineModule extends window.agentlet.Module {
 		// markNode() pushes the entries of one text node from its end
 		// backwards. Number them in page order first, then sort into
 		// chronological order, keeping page order for equal dates.
-		entries
+		const inPageOrder = entries
 			.slice()
-			.sort((a, b) => (a.mark.compareDocumentPosition(b.mark) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
-			.forEach((entry, index) => {
-				entry.index = index;
-			});
+			.sort((a, b) => (a.mark.compareDocumentPosition(b.mark) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+		inPageOrder.forEach((entry, index) => {
+			entry.index = index;
+		});
+		assignSections(inPageOrder, contentRoot());
 		this._entries = entries.sort((a, b) => a.key - b.key || a.index - b.index);
 		this._scanned = true;
 	}
@@ -448,6 +528,7 @@ class WikipediaTimelineModule extends window.agentlet.Module {
 	}
 
 	private _renderInto(container: HTMLElement): void {
+		this._container = container;
 		container.innerHTML = this._render();
 		this._wire(container);
 	}
@@ -492,6 +573,9 @@ class WikipediaTimelineModule extends window.agentlet.Module {
 					<li><strong>${fullDates}</strong> full dates</li>
 				</ul>
 				${this._truncated ? `<p class="ks-note">Long article: only the first ${MAX_ENTRIES} dates are marked.</p>` : ''}
+				<div class="ks-actions">
+					<button type="button" class="agentlet-try-button" data-action="open-view">Open timeline view</button>
+				</div>
 				<label class="dt-filter">
 					<input type="checkbox" data-action="full-only" ${this._fullDatesOnly ? 'checked' : ''} />
 					Full dates only (hide bare years and month and year)
@@ -508,6 +592,7 @@ class WikipediaTimelineModule extends window.agentlet.Module {
 			this._fullDatesOnly = (event.target as HTMLInputElement).checked;
 			this._renderInto(container);
 		});
+		container.querySelector<HTMLButtonElement>('[data-action="open-view"]')?.addEventListener('click', () => this._openView());
 		container.querySelectorAll<HTMLButtonElement>('.dt-entry').forEach((button) => {
 			button.addEventListener('click', () => {
 				const entry = this._entries[Number(button.dataset.entry)];
@@ -515,6 +600,16 @@ class WikipediaTimelineModule extends window.agentlet.Module {
 			});
 		});
 		wireBackToLauncher(container);
+	}
+
+	private _openView(): void {
+		openTimelineView({
+			entries: this._entries,
+			title: articleTitle(),
+			locale: document.documentElement.lang || 'en',
+			onSelect: (entry) => this._goTo(entry),
+			onDismiss: () => this._container?.querySelector<HTMLElement>('[data-action="open-view"]')?.focus(),
+		});
 	}
 
 	private _goTo(entry: TimelineEntry): void {
