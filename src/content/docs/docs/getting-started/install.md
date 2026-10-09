@@ -9,7 +9,7 @@ Install agentlet-core from npm:
 npm install agentlet-core
 ```
 
-This installs version 2.4.0, see it on [npm](https://www.npmjs.com/package/agentlet-core). The package ships `dist/agentlet-core.js` (IIFE global, also used by `require`), `dist/agentlet-core.min.js`, `dist/agentlet-core.esm.js`, `dist/agentlet-core.d.ts`, `dist/pdf.worker.min.mjs` (the matching pdf.js worker, see [Public API](/docs/reference/public-api/#agentletcoreconfig)), the files the core loads on demand, `dist/agentlet-core.full.min.js` and the pdf.js character maps and fonts, all listed under [Size](#size). For a working page in two minutes, see the [Quick start](/docs/getting-started/quick-start/). The sizes are under [Size](#size).
+This installs version 2.5.0, see it on [npm](https://www.npmjs.com/package/agentlet-core). The package ships `dist/agentlet-core.js` (IIFE global, also used by `require`), `dist/agentlet-core.min.js`, `dist/agentlet-core.esm.js`, `dist/agentlet-core.d.ts`, `dist/pdf.worker.min.mjs` (the matching pdf.js worker, see [Public API](/docs/reference/public-api/#agentletcoreconfig)), the files the core loads on demand, `dist/agentlet-core.full.min.js` and the pdf.js character maps and fonts, all listed under [Size](#size). For a working page in two minutes, see the [Quick start](/docs/getting-started/quick-start/). The sizes are under [Size](#size).
 
 ## Works under Node
 

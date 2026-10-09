@@ -543,16 +543,15 @@ class TimelineView<T extends ViewEntry> {
 
 		this.root.append(header, this._buildLegend(), this._host, listWrap);
 
-		// agentlet-core's dialog cancels every Enter key press at the document
-		// (to activate its own primary button), which also stops a focused
-		// button from being activated by Enter. Activate on keydown here, before
-		// it gets that far. Space is left to the browser on native buttons.
+		// The points and bars are SVG elements with role="button", which the
+		// browser never activates from the keyboard: activate them on Enter and
+		// Space here. Native buttons are left to the browser (agentlet-core
+		// 2.5.0 and later no longer cancels Enter on a focused button).
 		this.root.addEventListener('keydown', (event) => {
 			const key = event.key;
 			const target = (event.target as Element).closest('button, [role="button"]');
 			if (!target || (key !== 'Enter' && key !== ' ')) return;
-			const native = target instanceof HTMLButtonElement;
-			if (native && key === ' ') return;
+			if (target instanceof HTMLButtonElement) return;
 			event.preventDefault();
 			target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 		});

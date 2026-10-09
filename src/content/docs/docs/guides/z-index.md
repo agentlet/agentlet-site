@@ -11,9 +11,9 @@ By default, the panel, dialogs, and toasts live inside an open shadow root rathe
 
 ## Constants
 
-`window.agentlet.utils.zIndex.constants` (base `100000` by default) exposes one property per layer, from lowest to highest: `BASE`, `INPUT`, `BUTTON`, `BACKDROP`, `SELECTION_BACKDROP`, `HIGHLIGHT_BACKDROP`, `MODAL_BACKDROP`, `HOVER_HIGHLIGHT`, `ELEMENT_HIGHLIGHT`, `SELECTION_HIGHLIGHT`, `ACTIVE_SELECTION`, `TOOLTIP`, `MESSAGE_BUBBLE`, `NOTIFICATION`, `PANEL`, `PANEL_CONTENT`, `PANEL_HEADER`, `DIALOG`, `DIALOG_OVERLAY`, `INFO_DIALOG`, `INPUT_DIALOG`, `PROGRESS_DIALOG`, `FULLSCREEN_DIALOG`, `LOADING_OVERLAY`, `ERROR_OVERLAY`, `IMAGE_OVERLAY`, and `CRITICAL_OVERLAY`, always the top-most layer.
+`window.agentlet.utils.zIndex.constants` (base `100000` by default) exposes one property per layer, from lowest to highest: `BASE`, `INPUT`, `BUTTON`, `BACKDROP`, `SELECTION_BACKDROP`, `HIGHLIGHT_BACKDROP`, `MODAL_BACKDROP`, `HOVER_HIGHLIGHT`, `ELEMENT_HIGHLIGHT`, `SELECTION_HIGHLIGHT`, `ACTIVE_SELECTION`, `TOOLTIP`, `MESSAGE_BUBBLE`, `NOTIFICATION`, `PANEL`, `PANEL_CONTENT`, `PANEL_HEADER`, `PANEL_TOGGLE`, `DIALOG`, `DIALOG_OVERLAY`, `INFO_DIALOG`, `INPUT_DIALOG`, `PROGRESS_DIALOG`, `FULLSCREEN_DIALOG`, `LOADING_OVERLAY`, `ERROR_OVERLAY`, `IMAGE_OVERLAY`, and `CRITICAL_OVERLAY`, always the top-most layer.
 
-`MODAL_BACKDROP` and `DIALOG_OVERLAY` are intentionally the same value.
+`MODAL_BACKDROP` and `DIALOG_OVERLAY` are intentionally the same value. `PANEL_TOGGLE`, added in 2.5.0, is the panel's collapse handle: above the panel, below every dialog and overlay. Up to 2.4.0 the handle used `CRITICAL_OVERLAY` and showed above dialogs.
 
 ```javascript
 const Z = window.agentlet.utils.zIndex.constants;
