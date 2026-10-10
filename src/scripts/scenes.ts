@@ -15,7 +15,7 @@
 // timer (StoryController below), so it listens for that event itself.
 
 /** True while the site-wide "Pause animations" toggle is pressed. */
-function isAnimationsPaused(): boolean {
+export function isAnimationsPaused(): boolean {
 	return document.documentElement.dataset.animations === 'paused';
 }
 
@@ -258,7 +258,7 @@ class StoryController {
 }
 
 /** Roving tabindex + arrow key / Home / End navigation for an ARIA tablist. */
-function initRovingTabs(tabs: HTMLButtonElement[], onActivate: (index: number) => void): void {
+export function initRovingTabs(tabs: HTMLButtonElement[], onActivate: (index: number) => void): void {
 	tabs.forEach((tab, i) => {
 		tab.addEventListener('keydown', (event) => {
 			let next = -1;

@@ -79,7 +79,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'agentlet',
-      description: 'A side panel for web apps you cannot change: read and fill forms, export tables to Excel, capture the page and call an AI model.',
+      description: 'Augment the web apps you cannot change with a side panel: read and fill forms, export tables to Excel, capture the page and call an AI model.',
       logo: {
         light: './src/assets/brand/agentlet-lockup-light.svg',
         dark: './src/assets/brand/agentlet-lockup-dark.svg',
