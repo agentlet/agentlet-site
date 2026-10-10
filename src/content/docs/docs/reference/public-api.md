@@ -446,6 +446,8 @@ Passed to `new AgentletCore(config)`. Each option is optional; additional keys a
 
 `theme` is the current `AgentletTheme` snapshot. `window.agentlet.themeManager.getTheme()` returns it fresh; `updateTheme(newThemeConfig)` merges and returns the updated theme; `processThemeConfig(themeConfig)` normalizes a theme config without applying it. See [Shadow DOM](/docs/guides/shadow-dom/#theming-through-css-custom-properties) for the `--agentlet-*` custom property bridge.
 
+The panel's collapse handle is filled with the theme's `secondaryColor`. Since 2.5.0, its arrow uses `toggleTextColor`. When that key is unset, the core picks near-black (`#111111`) or white, whichever contrasts more with `secondaryColor` (hex and `rgb()` values; anything else falls back to white). Up to 2.4.0 the arrow was always white.
+
 **`window.agentlet.setTheme(newThemeConfig)`** merges `newThemeConfig` into the theme defaults, re-injects the panel's CSS, updates `window.agentlet.theme`, and emits `theme:changed` on `window.agentlet.eventBus` with a `ThemeChangedEventPayload` (`{ theme, previousTheme }`). It returns the fully merged `AgentletTheme` now in effect. This is the entry point a theme change goes through; calling `themeManager.updateTheme()` alone does not re-inject styles or notify anything. See [Mount API](/docs/guides/mount-api/#reacting-to-a-theme-change) for subscribing to the change from a mounted module.
 
 ## `window.agentlet.eventBus`
