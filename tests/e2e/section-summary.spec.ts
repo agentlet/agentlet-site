@@ -82,7 +82,7 @@ test.describe('Summarize and share a section agentlet', () => {
 		await openSectionSummary(page);
 
 		await page.getByRole('button', { name: 'Pick a section' }).click();
-		await page.getByRole('heading', { name: 'A side panel for web apps you cannot change.' }).click();
+		await page.getByRole('heading', { name: 'Augment the web apps you cannot change.' }).click();
 
 		const dialog = page.locator('.agentlet-fullscreen-dialog');
 		await expect(dialog).toBeVisible();

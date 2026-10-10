@@ -23,6 +23,40 @@ const steps = [
 		duration: 6000,
 	},
 ];
+
+// The headline is one string on purpose: it is also the title and the
+// social titles in src/pages/index.astro, kept in sync by hand.
+const HEADLINE = 'Augment the web apps you cannot change.';
+
+// One message per audience, in tab order. The first one (Business) is
+// the server-rendered default. Every message is in the HTML (the
+// inactive ones stacked invisibly in the same grid cell as the active
+// one, so the block never changes height); the
+// client script src/scripts/hero-audience.ts selects, rotates and
+// cross-fades them. Without JavaScript the tabs are hidden and the four
+// messages are shown one after the other, each led by its audience name.
+const audiences = [
+	{
+		id: 'business',
+		label: 'Business',
+		text: 'Add a side panel with Excel export, form filling and AI to the internal apps your team already uses, without waiting for the vendor or a project.',
+	},
+	{
+		id: 'developers',
+		label: 'Developers',
+		text: 'A small TypeScript framework for page-specific tools: module lifecycle, side panel, forms, tables, screenshots and AI helpers. Ship it as a bookmarklet, an extension or a script tag.',
+	},
+	{
+		id: 'it-security',
+		label: 'IT and security',
+		text: "Runs inside the page with the user's own session and permissions. No backend change, no telemetry, and nothing leaves the page unless your agentlet sends it.",
+	},
+	{
+		id: 'ai-builders',
+		label: 'AI builders',
+		text: "Hand a model the page's forms and tables as clean data, then fill the answer back in. Keep your provider key on your server behind a proxy.",
+	},
+];
 ---
 
 <section class="hero">
@@ -30,12 +64,62 @@ const steps = [
 		<div class="hero-surface">
 			<div class="hero-copy">
 				<span class="eyebrow">Open source, MIT</span>
-				<h1>A side panel for web apps you cannot change.</h1>
-				<p>
-					agentlet injects a side panel into a web app, by bookmarklet, browser extension, or
-					from the app itself. The panel reads and fills forms, exports tables to Excel,
-					captures parts of the page and calls an AI model.
-				</p>
+				<h1>{HEADLINE}</h1>
+				<div class="hero-audience" data-hero-audience>
+					<div class="hero-audience-tabs" role="tablist" aria-label="What agentlet offers, by audience">
+						{
+							audiences.map((audience, i) => (
+								<button
+									type="button"
+									role="tab"
+									class="hero-audience-tab"
+									id={`hero-audience-tab-${audience.id}`}
+									aria-controls="hero-audience-panel"
+									aria-selected={i === 0 ? 'true' : 'false'}
+									tabindex={i === 0 ? 0 : -1}
+									data-audience={audience.id}
+								>
+									<span class="hero-audience-tab-label">{audience.label}</span>
+									<span class="hero-audience-progress" aria-hidden="true" />
+								</button>
+							))
+						}
+					</div>
+					<div
+						class="hero-audience-panel"
+						role="tabpanel"
+						id="hero-audience-panel"
+						aria-labelledby={`hero-audience-tab-${audiences[0].id}`}
+						tabindex="0"
+					>
+						{
+							audiences.map((audience, i) => (
+								<p class={`hero-audience-message${i === 0 ? ' is-active' : ''}`} data-audience={audience.id}>
+									<strong class="hero-audience-message-label">{audience.label}.</strong>
+									<span class="hero-audience-message-text">{audience.text}</span>
+								</p>
+							))
+						}
+					</div>
+					<noscript>
+						<style>
+							.hero-audience-tabs {
+								display: none !important;
+							}
+							.hero-audience-panel {
+								gap: 0.75rem;
+							}
+							.hero-audience-message {
+								grid-area: auto !important;
+								opacity: 1 !important;
+								visibility: visible !important;
+							}
+							.hero-audience-message-label {
+								display: inline !important;
+							}
+						</style>
+					</noscript>
+				</div>
 				<div class="hero-actions">
 					<a class="button button-primary" href="/docs/getting-started/quick-start/">Get started</a>
 					<a class="button button-secondary" href="https://github.com/agentlet/agentlet-core">
@@ -108,6 +192,10 @@ const steps = [
 		</div>
 	</div>
 </section>
+
+<script>
+	import '../../scripts/hero-audience.ts';
+</script>
 
 <script>
 	// The hero button is the only thing on the home page that can start

@@ -447,6 +447,115 @@ section.alt {
 	margin: 0;
 }
 
+/* Audience tabs under the headline (Hero.astro, src/scripts/hero-audience.ts).
+   One tabpanel; its four messages share a single grid cell, so the block is
+   always as tall as the tallest message and switching never shifts the page.
+   The inactive messages are invisible (and so out of the accessibility
+   tree) but stay in the HTML. Without JS the first message is shown as is;
+   the <noscript> style in Hero.astro hides the tabs and stacks all four. */
+
+.hero-audience {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	width: 100%;
+	max-width: 40rem;
+}
+
+.hero-audience-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+.hero-audience-tab {
+	position: relative;
+	overflow: hidden;
+	padding: 0.45rem 0.8rem;
+	border: 1px solid transparent;
+	border-radius: var(--radius-button);
+	background: none;
+	color: var(--color-text-muted);
+	font-size: 0.875rem;
+	font-weight: 500;
+	line-height: 1.3;
+	cursor: pointer;
+}
+
+.hero-audience-tab:hover {
+	color: var(--color-heading);
+	border-color: var(--color-surface-border);
+}
+
+.hero-audience-tab[aria-selected='true'] {
+	background: var(--color-bg);
+	border-color: var(--color-surface-border);
+	color: var(--color-heading);
+}
+
+.hero-audience-tab:focus-visible,
+.hero-audience-panel:focus-visible {
+	outline: 2px solid var(--color-focus);
+	outline-offset: 2px;
+}
+
+/* A quiet line along the bottom edge of the selected tab that fills over
+   the interval; hidden once the visitor has taken over the rotation. */
+.hero-audience-progress {
+	position: absolute;
+	inset: auto 0 0 0;
+	height: 2px;
+	background: var(--color-accent);
+	transform: scaleX(0);
+	transform-origin: left;
+	transition-property: transform;
+	transition-timing-function: linear;
+}
+
+.hero-audience-tab:not([aria-selected='true']) .hero-audience-progress,
+.hero-audience[data-rotating='false'] .hero-audience-progress {
+	display: none;
+}
+
+.hero-audience-panel {
+	display: grid;
+}
+
+.hero-audience-message {
+	grid-area: 1 / 1;
+	opacity: 0;
+	visibility: hidden;
+	transition:
+		opacity 0.25s ease,
+		visibility 0s linear 0.25s;
+}
+
+.hero-audience-message.is-active {
+	opacity: 1;
+	visibility: visible;
+	transition:
+		opacity 0.35s ease 0.15s,
+		visibility 0s;
+}
+
+/* The audience name only shows when the tabs are hidden (no JS). */
+.hero-audience-message-label {
+	display: none;
+	color: var(--color-heading);
+}
+
+/* Pause animations: switch without the cross-fade. */
+:root[data-animations='paused'] .hero-audience-message,
+:root[data-animations='paused'] .hero-audience-message.is-active {
+	transition: none;
+}
+
+@media (max-width: 767px) {
+	.hero-audience-tab {
+		min-height: 2.5rem;
+	}
+}
+
 .hero-actions {
 	display: flex;
 	flex-wrap: wrap;
@@ -1270,6 +1379,13 @@ figure.demo-figure figcaption {
 	background: var(--color-primary-bg);
 	color: var(--color-primary-text);
 	vertical-align: middle;
+	margin-right: 0.25rem;
+}
+
+/* The sandbox sits close under the hero: the hero's own bottom padding
+   (3rem) is the whole gap, so the generic section top padding is dropped. */
+.sandbox-zone {
+	padding-top: 0;
 }
 
 .sandbox-body {
