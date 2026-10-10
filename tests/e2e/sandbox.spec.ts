@@ -19,7 +19,9 @@ test.describe('Demo sandbox', () => {
 
 		// The summary itself carries the "Demo sandbox" label and is visible
 		// (and readable) even while collapsed; the content it discloses is not.
-		await expect(page.getByText('Demo sandbox: a sample receipt, an expense form and a supplier form')).toBeVisible();
+		await expect(page.locator('.sandbox-summary')).toHaveText(
+			'Demo sandbox a sample receipt, an expense form and a supplier form',
+		);
 		await expect(page.locator('#expense-form')).toBeHidden();
 		await expect(page.locator('[data-demo-defect="table-headers"]')).toBeHidden();
 	});

@@ -11,14 +11,14 @@ const HEADLINE = 'Augment the web apps you cannot change.';
 
 const AUDIENCES = [
 	{
+		id: 'business',
+		tab: 'Business',
+		text: 'Add a side panel with Excel export, form filling and AI to the internal apps your team already uses, without waiting for the vendor or a project.',
+	},
+	{
 		id: 'developers',
 		tab: 'Developers',
 		text: 'A small TypeScript framework for page-specific tools: module lifecycle, side panel, forms, tables, screenshots and AI helpers. Ship it as a bookmarklet, an extension or a script tag.',
-	},
-	{
-		id: 'business',
-		tab: 'Business',
-		text: 'Add Excel export, form filling and AI to the internal apps your team already uses, without waiting for the vendor or a project.',
 	},
 	{
 		id: 'it-security',
@@ -89,16 +89,16 @@ test.describe('Hero audience tabs', () => {
 		expect(html).not.toContain('A side panel for web apps you cannot change');
 	});
 
-	test('the default tab is Developers and its text mentions the side panel', async ({ page }) => {
+	test('the default tab is Business, first in the tab order', async ({ page }) => {
 		await page.goto('/');
 		const hero = page.locator('.hero');
 		await expect(hero.getByRole('tab')).toHaveText(AUDIENCES.map((audience) => audience.tab));
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 		await expect(hero.getByRole('tabpanel')).toContainText('side panel');
 		// Only the selected tab is in the tab order (roving tabindex).
-		await expect(tab(page, 'developers')).toHaveAttribute('tabindex', '0');
-		await expect(tab(page, 'business')).toHaveAttribute('tabindex', '-1');
-		await expect(tab(page, 'developers')).toHaveAttribute('aria-controls', 'hero-audience-panel');
+		await expect(tab(page, 'business')).toHaveAttribute('tabindex', '0');
+		await expect(tab(page, 'developers')).toHaveAttribute('tabindex', '-1');
+		await expect(tab(page, 'business')).toHaveAttribute('aria-controls', 'hero-audience-panel');
 	});
 
 	test('does not use aria-live on the rotating text', async ({ page }) => {
@@ -130,19 +130,19 @@ test.describe('Hero audience tabs', () => {
 		await expectActive(page, 'it-security');
 		await expect(page.locator('[data-hero-audience]')).toHaveAttribute('data-rotating', 'false');
 
-		await tab(page, 'business').click();
-		await expectActive(page, 'business');
+		await tab(page, 'developers').click();
+		await expectActive(page, 'developers');
 		await page.clock.runFor(ROTATE_MS * 3);
-		await expectActive(page, 'business');
+		await expectActive(page, 'developers');
 	});
 
 	test('arrow keys, Home and End move between tabs', async ({ page }) => {
 		await page.goto('/');
-		await tab(page, 'developers').focus();
+		await tab(page, 'business').focus();
 
 		await page.keyboard.press('ArrowRight');
-		await expectActive(page, 'business');
-		await expect(tab(page, 'business')).toBeFocused();
+		await expectActive(page, 'developers');
+		await expect(tab(page, 'developers')).toBeFocused();
 
 		await page.keyboard.press('ArrowRight');
 		await expectActive(page, 'it-security');
@@ -152,37 +152,37 @@ test.describe('Hero audience tabs', () => {
 		await expect(tab(page, 'ai-builders')).toBeFocused();
 
 		await page.keyboard.press('ArrowRight');
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 
 		await page.keyboard.press('ArrowLeft');
 		await expectActive(page, 'ai-builders');
 
 		await page.keyboard.press('Home');
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 	});
 
 	test('keyboard focus inside the tablist stops the rotation', async ({ page }) => {
 		await openWithClock(page);
-		await tab(page, 'developers').focus();
+		await tab(page, 'business').focus();
 		await page.clock.runFor(ROTATE_MS * 3);
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 	});
 
 	test('rotates to the next tab every 8 seconds and wraps around', async ({ page }) => {
 		await openWithClock(page);
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 
 		await page.clock.runFor(ROTATE_MS - 3000);
-		await expectActive(page, 'developers');
-		await page.clock.runFor(ROTATE_MS);
 		await expectActive(page, 'business');
+		await page.clock.runFor(ROTATE_MS);
+		await expectActive(page, 'developers');
 
 		await page.clock.runFor(ROTATE_MS);
 		await expectActive(page, 'it-security');
 		await page.clock.runFor(ROTATE_MS);
 		await expectActive(page, 'ai-builders');
 		await page.clock.runFor(ROTATE_MS);
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 		await expect(page.locator('[data-hero-audience]')).toHaveAttribute('data-rotating', 'true');
 	});
 
@@ -190,11 +190,11 @@ test.describe('Hero audience tabs', () => {
 		await openWithClock(page);
 		await page.locator('.hero-copy h1').hover();
 		await page.clock.runFor(ROTATE_MS * 3);
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 
 		await page.mouse.move(2, 2);
 		await page.clock.runFor(ROTATE_MS);
-		await expectActive(page, 'business');
+		await expectActive(page, 'developers');
 	});
 
 	test('holds still while the page is hidden, then resumes', async ({ page }) => {
@@ -207,11 +207,11 @@ test.describe('Hero audience tabs', () => {
 
 		await setVisibility('hidden');
 		await page.clock.runFor(ROTATE_MS * 3);
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 
 		await setVisibility('visible');
 		await page.clock.runFor(ROTATE_MS);
-		await expectActive(page, 'business');
+		await expectActive(page, 'developers');
 	});
 
 	test('the Pause animations toggle stops the rotation and releasing it resumes', async ({ page }) => {
@@ -221,29 +221,29 @@ test.describe('Hero audience tabs', () => {
 		await toggle.click();
 		await expect(toggle).toHaveAttribute('aria-pressed', 'true');
 		await page.clock.runFor(ROTATE_MS * 3);
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 
 		await toggle.click();
 		await expect(toggle).toHaveAttribute('aria-pressed', 'false');
 		await page.clock.runFor(ROTATE_MS);
-		await expectActive(page, 'business');
+		await expectActive(page, 'developers');
 	});
 
 	test('starting with animations paused never rotates', async ({ page }) => {
 		await page.addInitScript(() => localStorage.setItem('agentlet-animations', 'paused'));
 		await openWithClock(page);
 		await page.clock.runFor(ROTATE_MS * 3);
-		await expectActive(page, 'developers');
+		await expectActive(page, 'business');
 	});
 
 	test('releasing the pause toggle does not restart a rotation the visitor stopped', async ({ page }) => {
 		await openWithClock(page);
-		await tab(page, 'business').click();
+		await tab(page, 'developers').click();
 		const toggle = page.locator('#animations-toggle');
 		await toggle.click();
 		await toggle.click();
 		await page.clock.runFor(ROTATE_MS * 3);
-		await expectActive(page, 'business');
+		await expectActive(page, 'developers');
 	});
 
 	test('switching tabs does not change the height of the copy block', async ({ page }) => {

@@ -28,23 +28,23 @@ const steps = [
 // social titles in src/pages/index.astro, kept in sync by hand.
 const HEADLINE = 'Augment the web apps you cannot change.';
 
-// One message per audience, in tab order. The first one is the
-// server-rendered default and must mention the side panel. Every message
-// is in the HTML (the inactive ones stacked invisibly in the same grid
-// cell as the active one, so the block never changes height); the
+// One message per audience, in tab order. The first one (Business) is
+// the server-rendered default. Every message is in the HTML (the
+// inactive ones stacked invisibly in the same grid cell as the active
+// one, so the block never changes height); the
 // client script src/scripts/hero-audience.ts selects, rotates and
 // cross-fades them. Without JavaScript the tabs are hidden and the four
 // messages are shown one after the other, each led by its audience name.
 const audiences = [
 	{
+		id: 'business',
+		label: 'Business',
+		text: 'Add a side panel with Excel export, form filling and AI to the internal apps your team already uses, without waiting for the vendor or a project.',
+	},
+	{
 		id: 'developers',
 		label: 'Developers',
 		text: 'A small TypeScript framework for page-specific tools: module lifecycle, side panel, forms, tables, screenshots and AI helpers. Ship it as a bookmarklet, an extension or a script tag.',
-	},
-	{
-		id: 'business',
-		label: 'Business',
-		text: 'Add Excel export, form filling and AI to the internal apps your team already uses, without waiting for the vendor or a project.',
 	},
 	{
 		id: 'it-security',

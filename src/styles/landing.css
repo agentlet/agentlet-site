@@ -1379,6 +1379,13 @@ figure.demo-figure figcaption {
 	background: var(--color-primary-bg);
 	color: var(--color-primary-text);
 	vertical-align: middle;
+	margin-right: 0.25rem;
+}
+
+/* The sandbox sits close under the hero: the hero's own bottom padding
+   (3rem) is the whole gap, so the generic section top padding is dropped. */
+.sandbox-zone {
+	padding-top: 0;
 }
 
 .sandbox-body {
