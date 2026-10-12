@@ -9,14 +9,14 @@ const demos = [
 	{
 		video: '/img/demo-part1',
 		still: '/img/demo-part1-still.png',
-		alt: 'A recurring business task being processed manually, field by field, in a web application',
+		alt: 'An expense reviewer opening a hotel receipt, scrolling through it to check the total and dates, then ticking the checklist and approving the claim by hand',
 		caption: 'Manual processing of a recurring task',
 	},
 	{
 		video: '/img/demo-part2',
 		still: '/img/demo-part2-still.png',
-		alt: 'The same application, augmented with an agentlet side panel that automates the task',
-		caption: 'The same application, augmented with an agentlet',
+		alt: 'The same expense app with an agentlet side panel that reads every receipt with AI, flags the one that does not match and pre-checks the others for the reviewer to approve',
+		caption: 'The same application, augmented with an agentlet (AI answers replayed for the recording)',
 	},
 ];
 ---
@@ -40,8 +40,8 @@ const demos = [
 								playsinline
 								preload="metadata"
 								poster={demo.still}
-								width="600"
-								height="390"
+								width="1280"
+								height="720"
 								aria-label={demo.alt}
 							>
 								<source src={`${demo.video}.webm`} type="video/webm" />
@@ -50,8 +50,8 @@ const demos = [
 							<img
 								class="demo-media-still"
 								src={demo.still}
-								width="600"
-								height="390"
+								width="1280"
+								height="720"
 								loading="lazy"
 								decoding="async"
 								alt={demo.alt}

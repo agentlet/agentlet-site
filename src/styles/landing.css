@@ -885,7 +885,7 @@ figure.demo-figure video {
    when the swap happens. */
 .demo-media {
 	position: relative;
-	aspect-ratio: 600 / 390;
+	aspect-ratio: 16 / 9;
 }
 
 .demo-media img,
