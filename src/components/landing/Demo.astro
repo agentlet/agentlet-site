@@ -4,7 +4,9 @@
 // (public/img/*-still.png, the video's first frame, also used as its
 // poster). The site-wide "Pause animations" toggle pauses the videos and
 // swaps to the still (see the script below, src/styles/landing.css and
-// AnimationsToggle.astro).
+// AnimationsToggle.astro). While paused, a play control over the still
+// (.demo-play) says so and resumes animations site-wide through the same
+// state and event as the header toggle (src/scripts/animations.ts).
 const demos = [
 	{
 		video: '/img/demo-part1',
@@ -38,6 +40,7 @@ const demos = [
 								loop
 								muted
 								playsinline
+								tabindex="-1"
 								preload="metadata"
 								poster={demo.still}
 								width="1280"
@@ -56,6 +59,14 @@ const demos = [
 								decoding="async"
 								alt={demo.alt}
 							/>
+							<button type="button" class="demo-play">
+								<span class="demo-play-icon" aria-hidden="true">
+									<svg viewBox="0 0 24 24">
+										<path d="M7 5v14l12-7z" />
+									</svg>
+								</span>
+								<span class="demo-play-label">Play animations</span>
+							</button>
 						</div>
 						<figcaption>{demo.caption}</figcaption>
 					</figure>
@@ -66,15 +77,21 @@ const demos = [
 </section>
 
 <script>
-	// Keep the videos in step with the "Pause animations" toggle: the head
-	// script in LandingLayout.astro sets html[data-animations] before first
-	// paint, and AnimationsToggle.astro dispatches this event on every
-	// change. While paused the video is also hidden by CSS, which shows the
-	// still frame in its place.
+	// Keep the videos in step with the animations state: the head script in
+	// LandingLayout.astro sets html[data-animations] before first paint, and
+	// src/scripts/animations.ts dispatches this event on every change, from
+	// the header toggle or the play control below. While paused the video is
+	// also hidden by CSS, which shows the still frame in its place.
+	import {
+		ANIMATIONS_CHANGE_EVENT,
+		isAnimationsPaused,
+		setAnimationsPaused,
+	} from '../../scripts/animations.ts';
+
 	const videos = document.querySelectorAll<HTMLVideoElement>('.demo-media-video');
 
 	function syncVideos(): void {
-		const paused = document.documentElement.dataset.animations === 'paused';
+		const paused = isAnimationsPaused();
 		for (const video of videos) {
 			if (paused) {
 				video.pause();
@@ -86,5 +103,14 @@ const demos = [
 	}
 
 	syncVideos();
-	document.addEventListener('agentlet:animations-change', syncVideos);
+	document.addEventListener(ANIMATIONS_CHANGE_EVENT, syncVideos);
+
+	for (const button of document.querySelectorAll<HTMLButtonElement>('.demo-play')) {
+		button.addEventListener('click', () => {
+			setAnimationsPaused(false);
+			// The button disappears as animations resume; move focus to the
+			// video beside it so keyboard and screen reader users keep their place.
+			button.parentElement?.querySelector<HTMLVideoElement>('.demo-media-video')?.focus({ preventScroll: true });
+		});
+	}
 </script>

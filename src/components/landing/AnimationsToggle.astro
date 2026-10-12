@@ -1,24 +1,26 @@
 ---
-// Site-wide "Pause animations" toggle (WCAG 2.2.2). It is a genuine
-// toggle button: the accessible name never changes, only aria-pressed
-// does, so the pressed state is the only thing announced. Pressing it
-// pauses every scene's JS timers and CSS animations (see
-// src/scripts/scenes.ts and the html[data-animations="paused"] rule in
-// src/styles/scenes.css) and pauses the two demo videos, swapping them
-// for a still frame (see src/components/landing/Demo.astro). The choice persists in
-// localStorage and is applied before first paint, the same way
-// ThemeToggle's theme choice is (see the inline script in
-// src/layouts/LandingLayout.astro).
+// Site-wide pause/play control for animations (WCAG 2.2.2). It is a
+// plain action button, like a media player's play/pause button: its
+// visible label and its accessible name both say what pressing it does
+// ("Pause" / "Play", spoken as "Pause animations" / "Play animations"),
+// so it carries no aria-pressed (a pressed state plus a changing name
+// would be announced twice). Pausing stops every scene's JS timers and
+// CSS animations (see src/scripts/scenes.ts and the
+// html[data-animations="paused"] rule in src/styles/scenes.css) and the
+// two demo videos, which are swapped for a still frame with a play
+// control over it (see src/components/landing/Demo.astro). The choice
+// persists in localStorage and is applied before first paint, the same
+// way ThemeToggle's theme choice is (see the inline script in
+// src/layouts/LandingLayout.astro). The state and the persistence live
+// in src/scripts/animations.ts, shared with the demo videos' play
+// control.
+//
+// Both labels are in the markup and CSS shows the one that matches
+// html[data-animations], so the right one is visible on first paint.
+// Only the tooltip needs script to follow the state.
 ---
 
-<button
-	type="button"
-	class="theme-toggle animations-toggle"
-	id="animations-toggle"
-	aria-pressed="false"
-	aria-label="Pause animations"
-	title="Pause animations"
->
+<button type="button" class="theme-toggle animations-toggle" id="animations-toggle" title="Pause animations">
 	<svg class="icon-pause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 		<rect x="6" y="5" width="4" height="14" rx="1"></rect>
 		<rect x="14" y="5" width="4" height="14" rx="1"></rect>
@@ -26,34 +28,27 @@
 	<svg class="icon-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 		<path d="M7 5v14l12-7z"></path>
 	</svg>
+	<span class="animations-toggle-label label-pause">Pause<span class="animations-toggle-extra"> animations</span></span>
+	<span class="animations-toggle-label label-play">Play<span class="animations-toggle-extra"> animations</span></span>
 </button>
 
 <script>
-	const storageKey = 'agentlet-animations';
+	import {
+		ANIMATIONS_CHANGE_EVENT,
+		isAnimationsPaused,
+		setAnimationsPaused,
+	} from '../../scripts/animations.ts';
+
 	const toggle = document.getElementById('animations-toggle');
 
-	function isPaused(): boolean {
-		return document.documentElement.dataset.animations === 'paused';
+	function syncTitle(): void {
+		toggle?.setAttribute('title', isAnimationsPaused() ? 'Play animations' : 'Pause animations');
 	}
 
-	function applyState(paused: boolean): void {
-		document.documentElement.dataset.animations = paused ? 'paused' : 'playing';
-		toggle?.setAttribute('aria-pressed', String(paused));
-		document.dispatchEvent(new CustomEvent('agentlet:animations-change', { detail: { paused } }));
-	}
+	// Follow every change, whichever control made it, and whatever the
+	// inline head script already applied before this script ran.
+	syncTitle();
+	document.addEventListener(ANIMATIONS_CHANGE_EVENT, syncTitle);
 
-	// Sync this button to whatever the inline head script (or a previous
-	// page view) already applied, in case it differs from the "playing"
-	// default baked into the markup above.
-	toggle?.setAttribute('aria-pressed', String(isPaused()));
-
-	toggle?.addEventListener('click', () => {
-		const next = !isPaused();
-		applyState(next);
-		try {
-			localStorage.setItem(storageKey, next ? 'paused' : 'playing');
-		} catch {
-			// localStorage may be unavailable (private browsing, blocked storage).
-		}
-	});
+	toggle?.addEventListener('click', () => setAnimationsPaused(!isAnimationsPaused()));
 </script>

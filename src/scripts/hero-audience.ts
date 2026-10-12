@@ -17,7 +17,8 @@
 // prefers-reduced-motion, by product decision; the toggle is the way to
 // stop the motion.
 
-import { initRovingTabs, isAnimationsPaused } from './scenes.ts';
+import { isAnimationsPaused } from './animations.ts';
+import { initRovingTabs } from './scenes.ts';
 
 const ROTATE_MS = 8000;
 

@@ -5,7 +5,7 @@
 // animation logic lives here, no library, kept deliberately small.
 //
 // The site-wide "Pause animations" toggle (src/components/landing/
-// AnimationsToggle.astro) sets html[data-animations="paused"|"playing"]
+// AnimationsToggle.astro, via src/scripts/animations.ts) sets html[data-animations="paused"|"playing"]
 // and dispatches "agentlet:animations-change" on document. Every scene
 // without its own timer (capability explorer, deployment modes) is
 // paused purely by CSS (see the html[data-animations="paused"] rule in
@@ -13,11 +13,10 @@
 // tab switch calling restartScene, cannot un-pause it while that
 // attribute is set. The hero story is the one scene with a JS-driven
 // timer (StoryController below), so it listens for that event itself.
+// The state and the event come from src/scripts/animations.ts, which
+// the demo videos' play control uses too.
 
-/** True while the site-wide "Pause animations" toggle is pressed. */
-export function isAnimationsPaused(): boolean {
-	return document.documentElement.dataset.animations === 'paused';
-}
+import { isAnimationsPaused } from './animations.ts';
 
 /** Force a CSS animation to restart from 0% on its next running frame. */
 function restartScene(scene: Element | null): void {
