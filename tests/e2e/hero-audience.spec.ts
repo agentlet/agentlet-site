@@ -219,12 +219,25 @@ test.describe('Hero audience tabs', () => {
 		const toggle = page.locator('#animations-toggle');
 
 		await toggle.click();
-		await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+		await expect(toggle).toHaveAccessibleName('Play animations');
 		await page.clock.runFor(ROTATE_MS * 3);
 		await expectActive(page, 'business');
 
 		await toggle.click();
-		await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+		await expect(toggle).toHaveAccessibleName('Pause animations');
+		await page.clock.runFor(ROTATE_MS);
+		await expectActive(page, 'developers');
+	});
+
+	test('the play control over the demo videos also resumes the rotation', async ({ page }) => {
+		await page.addInitScript(() => localStorage.setItem('agentlet-animations', 'paused'));
+		await openWithClock(page);
+		await page.clock.runFor(ROTATE_MS * 3);
+		await expectActive(page, 'business');
+
+		await page.locator('.demo-play').first().scrollIntoViewIfNeeded();
+		await page.locator('.demo-play').first().click();
+		await expect(page.locator('#animations-toggle')).toHaveAccessibleName('Pause animations');
 		await page.clock.runFor(ROTATE_MS);
 		await expectActive(page, 'developers');
 	});
