@@ -98,7 +98,7 @@ test.describe('Paused state: play control over the demo videos and the header la
 		await expect(media).toHaveCount(2);
 		for (const item of await media.all()) {
 			await item.scrollIntoViewIfNeeded();
-			const play = item.getByRole('button', { name: 'Animations paused, play' });
+			const play = item.getByRole('button', { name: 'Play animations' });
 			await expect(play).toBeVisible();
 			await expect(item.locator('.demo-media-still')).toBeVisible();
 
