@@ -67,12 +67,12 @@ jobs:
 
       - name: Build the shipped-inventory SBOM
         id: sbom
-        uses: agentlet/.github/actions/sbom-from-esbuild@13f8b012ab7b0e07229389ac7538bdab38cdb4e6 # dependency-scan-v1
+        uses: agentlet/.github/actions/sbom-from-esbuild@c7c279fa36c15345418b5d67a2e5faefeaa57363 # dependency-scan-v1.1
         with:
           metafiles: ${{ steps.metafiles.outputs.list }}
 
       - name: Scan dependencies
-        uses: agentlet/.github/actions/dependency-scan@13f8b012ab7b0e07229389ac7538bdab38cdb4e6 # dependency-scan-v1
+        uses: agentlet/.github/actions/dependency-scan@c7c279fa36c15345418b5d67a2e5faefeaa57363 # dependency-scan-v1.1
         with:
           blocking-sbom: ${{ steps.sbom.outputs.sbom-path }}
           lockfile: package-lock.json
