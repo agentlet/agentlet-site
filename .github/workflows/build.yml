@@ -6,8 +6,7 @@ on:
 
 jobs:
   build:
-    # Playwright 1.55.1 does not support ubuntu-26.04, the current ubuntu-latest.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
